@@ -61,6 +61,7 @@ INSERT INTO sessions (ward, room_number, initials, datetime, carenotes_completed
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS patient_id INT NULL AFTER id;
 ALTER TABLE sessions ADD FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL;
 -- Activity Logs table
+-- Create activity_logs
 CREATE TABLE IF NOT EXISTS activity_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,

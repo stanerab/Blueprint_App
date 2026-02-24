@@ -107,8 +107,11 @@ $router->add('POST', '/patients/store', 'PatientController@store');
 $router->add('POST', '/patients/discharge', 'PatientController@discharge');
 $router->add('GET', '/patients/view/{id}', 'PatientController@view');
 $router->add('POST', '/patients/update-room', 'PatientController@updateRoom');
-$router->add('POST', '/patients/restore', 'PatientController@restore'); // ADD THIS LINE
-
+$router->add('POST', '/patients/restore', 'PatientController@restore'); 
+$router->add('POST', '/sessions/update', 'SessionController@update');
+// Activity routes
+$router->add('GET', '/activities', 'ActivityController@index');
+$router->add('GET', '/activities/ward/{ward}', 'ActivityController@byWard');
 // ========== NOW DISPATCH THE REQUEST ==========
 $url = isset($_GET['url']) ? $_GET['url'] : '';
 $router->dispatch($url);

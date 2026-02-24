@@ -172,10 +172,17 @@ class Patient
     {
         $db = Database::getInstance();
         
+        // Debug log
+        error_log("========== DISCHARGE METHOD CALLED ==========");
+        error_log("Patient ID: " . $id);
+        error_log("core10_discharge value: " . ($data['core10_discharge'] ?? 0));
+        error_log("POST data: " . print_r($data, true));
+        
         // Format discharge notes nicely
         $dischargeDate = date('Y-m-d H:i:s');
+        $coreValue = isset($data['core10_discharge']) ? 1 : 0;
         $dischargeNote = "\n\n=== DISCHARGE NOTES [" . $dischargeDate . "] ===\n";
-        $dischargeNote .= "CORE-10 completed at discharge: " . (($data['core10_discharge'] ?? 0) ? 'Yes' : 'No') . "\n";
+        $dischargeNote .= "CORE-10 completed at discharge: " . ($coreValue ? 'Yes' : 'No') . "\n";
         $dischargeNote .= "Notes: " . ($data['notes'] ?? 'No additional notes') . "\n";
         $dischargeNote .= "=====================================\n";
         
@@ -187,11 +194,19 @@ class Patient
             WHERE id = ?
         ");
         
-        return $stmt->execute([
-            $data['core10_discharge'] ?? 0,
+        $result = $stmt->execute([
+            $coreValue,
             $dischargeNote,
             $id
         ]);
+        
+        if ($result) {
+            error_log("Discharge successful for patient ID: " . $id . ", core10_discharge set to: " . $coreValue);
+        } else {
+            error_log("Discharge FAILED for patient ID: " . $id);
+        }
+        
+        return $result;
     }
     
     /**
@@ -262,23 +277,24 @@ class Patient
     }
     
     /**
- * Get active patients by ward ordered by room number
- * @param string $ward
- * @return array
- */
-public static function getActiveByWardOrderedByRoom($ward)
-{
-    $db = Database::getInstance();
-    $stmt = $db->prepare("
-        SELECT * FROM patients 
-        WHERE ward = ? 
-        AND discharge_date IS NULL 
-        AND is_archived = 0 
-        ORDER BY CAST(room_number AS UNSIGNED) ASC
-    ");
-    $stmt->execute([$ward]);
-    return $stmt->fetchAll(PDO::FETCH_OBJ);
-}
+     * Get active patients by ward ordered by room number
+     * @param string $ward
+     * @return array
+     */
+    public static function getActiveByWardOrderedByRoom($ward)
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("
+            SELECT * FROM patients 
+            WHERE ward = ? 
+            AND discharge_date IS NULL 
+            AND is_archived = 0 
+            ORDER BY CAST(room_number AS UNSIGNED) ASC
+        ");
+        $stmt->execute([$ward]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+    
     /**
      * Check if room is available in ward
      * @param string $ward

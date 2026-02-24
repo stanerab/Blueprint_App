@@ -137,31 +137,31 @@ class Session
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
     
-    /**
-     * Get sessions by patient ID
-     * @param int $patientId
-     * @param int|null $limit Optional limit
-     * @return array
-     */
-    public static function getByPatient($patientId, $limit = null)
-    {
-        $db = Database::getInstance();
-        $query = "
-            SELECT s.*, u.username as created_by_username 
-            FROM sessions s 
-            LEFT JOIN users u ON s.created_by = u.id 
-            WHERE s.patient_id = ? AND s.is_archived = 0 
-            ORDER BY s.datetime DESC
-        ";
-        
-        if ($limit) {
-            $query .= " LIMIT " . intval($limit);
-        }
-        
-        $stmt = $db->prepare($query);
-        $stmt->execute([$patientId]);
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+/**
+ * Get sessions by patient ID
+ * @param int $patientId
+ * @param int|null $limit Optional limit
+ * @return array
+ */
+public static function getByPatient($patientId, $limit = null)
+{
+    $db = Database::getInstance();
+    $query = "
+        SELECT s.*, u.username as created_by_username 
+        FROM sessions s 
+        LEFT JOIN users u ON s.created_by = u.id 
+        WHERE s.patient_id = ? AND s.is_archived = 0 
+        ORDER BY s.datetime DESC
+    ";
+    
+    if ($limit) {
+        $query .= " LIMIT " . intval($limit);
     }
+    
+    $stmt = $db->prepare($query);
+    $stmt->execute([$patientId]);
+    return $stmt->fetchAll(PDO::FETCH_OBJ);
+}
     
     /**
      * Get recent sessions across all wards
@@ -225,7 +225,52 @@ public static function getArchivedByWard($ward)
         $stmt->execute([$ward]);
         return $stmt->fetchColumn();
     }
+/**
+ * Update an existing session
+ * @param int $id
+ * @param array $data
+ * @return bool
+ */
+public static function update($id, $data)
+{
+    $db = Database::getInstance();
     
+    // Explicitly check for checkbox values
+    $carenotes = isset($data['carenotes']) ? 1 : 0;
+    $tracker = isset($data['tracker']) ? 1 : 0;
+    $tasks = isset($data['tasks']) ? 1 : 0;
+    
+    error_log("Updating session ID: $id");
+    error_log("CareNotes: $carenotes, Tracker: $tracker, Tasks: $tasks");
+    error_log("Datetime: " . ($data['datetime'] ?? 'not set'));
+    
+    $stmt = $db->prepare("
+        UPDATE sessions 
+        SET datetime = ?,
+            carenotes_completed = ?,
+            tracker_completed = ?,
+            tasks_completed = ?,
+            notes = ?
+        WHERE id = ?
+    ");
+    
+    $result = $stmt->execute([
+        $data['datetime'],
+        $carenotes,
+        $tracker,
+        $tasks,
+        $data['notes'] ?? '',
+        $id
+    ]);
+    
+    if ($result) {
+        error_log("Session updated successfully");
+    } else {
+        error_log("Failed to update session");
+    }
+    
+    return $result;
+}
     /**
      * Get session statistics
      * @param string|null $ward Optional ward filter

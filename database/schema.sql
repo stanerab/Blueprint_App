@@ -60,3 +60,20 @@ INSERT INTO sessions (ward, room_number, initials, datetime, carenotes_completed
 -- Add patient_id to sessions table if not exists
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS patient_id INT NULL AFTER id;
 ALTER TABLE sessions ADD FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL;
+-- Activity Logs table
+CREATE TABLE IF NOT EXISTS activity_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    user_name VARCHAR(100),
+    action_type ENUM('patient_admitted', 'patient_discharged', 'patient_archived', 'patient_restored', 'session_created', 'session_updated', 'session_archived', 'session_deleted', 'room_changed') NOT NULL,
+    description TEXT NOT NULL,
+    patient_id INT NULL,
+    session_id INT NULL,
+    ward VARCHAR(50) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (created_at DESC),
+    INDEX (user_id),
+    INDEX (patient_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL
+);

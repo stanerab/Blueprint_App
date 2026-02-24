@@ -1,6 +1,6 @@
 <?php $title = $ward . ' Ward - Clinical Console'; ?>
 
-<!-- Success/Error Messages - Modern styling -->
+<!-- Success/Error Messages -->
 <?php if (isset($_SESSION['success'])): ?>
     <div class="alert alert-success animate-slide">
         <div class="alert-icon">
@@ -29,7 +29,7 @@
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 
-<!-- Header with Title and Actions - Modern design -->
+<!-- Header -->
 <div class="page-header">
     <div>
         <h1 class="page-title"><?= e($ward) ?> Ward</h1>
@@ -51,12 +51,10 @@
     </div>
 </div>
 
-<!-- ===============================
-WARD OVERVIEW - Modern Stats Cards
-=================================-->
+<!-- Ward Overview -->
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #2563eb, #3b82f6);">
+        <div class="stat-icon hope">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
@@ -69,7 +67,7 @@ WARD OVERVIEW - Modern Stats Cards
     </div>
     
     <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">
+        <div class="stat-icon beds">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <rect x="2" y="7" width="20" height="14" rx="2"/>
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
@@ -83,7 +81,7 @@ WARD OVERVIEW - Modern Stats Cards
     </div>
     
     <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+        <div class="stat-icon sessions">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 6v6l4 2"/>
@@ -96,7 +94,7 @@ WARD OVERVIEW - Modern Stats Cards
     </div>
     
     <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+        <div class="stat-icon discharged">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <path d="M18 4v16M8 4v16M4 8h16M4 16h16"/>
             </svg>
@@ -109,9 +107,7 @@ WARD OVERVIEW - Modern Stats Cards
     </div>
 </div>
 
-<!-- ===============================
-PATIENT LIST - Modern Card Design
-=================================-->
+<!-- Patient List -->
 <div class="patients-header">
     <h2 class="section-title">Active Patients</h2>
     <div class="search-filters">
@@ -187,22 +183,22 @@ PATIENT LIST - Modern Card Design
                         <span>View</span>
                     </button>
                     
-                    <div class="action-dropdown">
-                        <button class="btn-icon btn-more">
+                    <div class="dropdown-container">
+                        <button class="btn-icon dropdown-toggle" onclick="toggleDropdown(this)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="1"/>
                                 <circle cx="12" cy="5" r="1"/>
                                 <circle cx="12" cy="19" r="1"/>
                             </svg>
                         </button>
-                        <div class="dropdown-menu">
+                        <div class="dropdown-menu-custom">
                             <button onclick="openDischargeModal(<?= $p->id ?>, '<?= e($p->initials) ?>', <?= $p->room_number ?>, '<?= date('d/m/Y', strtotime($p->admission_date)) ?>', <?= $p->core10_admission ? 'true' : 'false' ?>)" class="dropdown-item">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M18 4v16M8 4v16M4 8h16M4 16h16"/>
                                 </svg>
                                 Discharge
                             </button>
-                            <form method="POST" action="<?= url('patients/archive') ?>" class="inline-form">
+                            <form method="POST" action="<?= url('patients/archive') ?>" class="dropdown-form">
                                 <input type="hidden" name="id" value="<?= $p->id ?>">
                                 <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                                 <input type="hidden" name="ward" value="<?= $ward ?>">
@@ -214,7 +210,7 @@ PATIENT LIST - Modern Card Design
                                     Archive
                                 </button>
                             </form>
-                            <form method="POST" action="<?= url('patients/delete') ?>" class="inline-form">
+                            <form method="POST" action="<?= url('patients/delete') ?>" class="dropdown-form">
                                 <input type="hidden" name="id" value="<?= $p->id ?>">
                                 <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                                 <button type="submit" class="dropdown-item text-danger" onclick="return confirm('⚠️ Permanently delete?')">
@@ -267,16 +263,13 @@ PATIENT LIST - Modern Card Design
     </div>
 <?php endif; ?>
 
-<!-- ===============================
-QUICK LINKS SECTION - Modern Cards
-=================================-->
+<!-- Quick Links -->
 <div class="quick-links-section">
     <h2 class="section-title">Patient Records</h2>
     
     <div class="quick-links-grid">
-        <!-- Archived Patients Card -->
         <a href="<?= url('wards/' . strtolower($ward) . '/archived-patients') ?>" class="quick-link-card">
-            <div class="quick-link-icon" style="background: linear-gradient(135deg, #f97316, #fb923c);">
+            <div class="quick-link-icon archived-patients">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <rect x="2" y="6" width="20" height="16" rx="2"/>
                     <path d="M8 10h8M8 14h4"/>
@@ -290,9 +283,8 @@ QUICK LINKS SECTION - Modern Cards
             <div class="quick-link-arrow">→</div>
         </a>
         
-        <!-- Archived Sessions Card -->
         <a href="<?= url('wards/' . strtolower($ward) . '/archived-sessions') ?>" class="quick-link-card">
-            <div class="quick-link-icon" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+            <div class="quick-link-icon archived-sessions">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M12 6v6l4 2"/>
@@ -306,9 +298,8 @@ QUICK LINKS SECTION - Modern Cards
             <div class="quick-link-arrow">→</div>
         </a>
         
-        <!-- Discharged Patients Card -->
         <a href="<?= url('wards/' . strtolower($ward) . '/discharged-patients') ?>" class="quick-link-card">
-            <div class="quick-link-icon" style="background: linear-gradient(135deg, #64748b, #94a3b8);">
+            <div class="quick-link-icon discharged">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <path d="M18 4v16M8 4v16M4 8h16M4 16h16"/>
                 </svg>
@@ -323,10 +314,7 @@ QUICK LINKS SECTION - Modern Cards
     </div>
 </div>
 
-<!-- ===============================
-MODERN MODALS - All preserved with updated styling
-=================================-->
-
+<!-- Modals -->
 <!-- Edit Room Modal -->
 <div id="editRoomModal" class="modal" style="display:none;">
     <div class="modal-content">
@@ -397,13 +385,19 @@ MODERN MODALS - All preserved with updated styling
         </div>
 
         <div id="sessionsTab" class="tab-pane active">
-            <div id="sessionsList" class="sessions-list"></div>
+            <div id="sessionsList" class="sessions-list">
+                <div class="loading">Loading sessions...</div>
+            </div>
         </div>
         <div id="admissionTab" class="tab-pane">
-            <div id="admissionNotes" class="notes-card"></div>
+            <div id="admissionNotes" class="notes-card">
+                <div class="loading">Loading admission notes...</div>
+            </div>
         </div>
         <div id="dischargeTab" class="tab-pane">
-            <div id="dischargeNotes" class="notes-card"></div>
+            <div id="dischargeNotes" class="notes-card">
+                <div class="loading">Loading discharge notes...</div>
+            </div>
         </div>
 
         <div class="modal-actions">
@@ -591,8 +585,52 @@ MODERN MODALS - All preserved with updated styling
     </div>
 </div>
 
-<!-- ===== MODERN STYLES ===== -->
-<style>
+<!-- Edit Session Modal -->
+<div id="editSessionModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Session</h2>
+            <button type="button" class="modal-close" onclick="closeEditSessionModal()">✕</button>
+        </div>
+
+        <form method="POST" action="<?= url('sessions/update') ?>" class="modal-form" id="editSessionForm">
+            <input type="hidden" name="session_id" id="editSessionId">
+            <input type="hidden" name="patient_id" id="editSessionPatientId">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+
+            <div class="form-group">
+                <label>Session Date & Time</label>
+                <input type="datetime-local" name="datetime" id="editSessionDatetime" required>
+            </div>
+
+            <div class="checkbox-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="carenotes" id="editSessionCarenotes">
+                    <span>CareNotes Completed</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="tracker" id="editSessionTracker">
+                    <span>Tracker Completed</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="tasks" id="editSessionTasks">
+                    <span>Tasks Completed</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label>Session Notes</label>
+                <textarea name="notes" id="editSessionNotes" rows="4" placeholder="Session notes..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" onclick="closeEditSessionModal()" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">Update Session</button>
+            </div>
+        </form>
+    </div>
+</div>
+<style>/* ===== WARD CONSOLE STYLES ===== */
 :root {
     --primary: #2563eb;
     --primary-dark: #1d4ed8;
@@ -622,6 +660,11 @@ MODERN MODALS - All preserved with updated styling
 @keyframes slideIn {
     from { transform: translateY(-10px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-slide {
@@ -741,6 +784,11 @@ MODERN MODALS - All preserved with updated styling
     align-items: center;
     justify-content: center;
 }
+
+.stat-icon.hope { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.stat-icon.beds { background: linear-gradient(135deg, #10b981, #34d399); }
+.stat-icon.sessions { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.stat-icon.discharged { background: linear-gradient(135deg, #ef4444, #f87171); }
 
 .stat-content {
     flex: 1;
@@ -1003,12 +1051,18 @@ MODERN MODALS - All preserved with updated styling
     transform: translateY(-2px);
 }
 
-/* Dropdown Menu */
-.action-dropdown {
+/* Dropdown Container */
+.dropdown-container {
     position: relative;
+    display: inline-block;
 }
 
-.dropdown-menu {
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-menu-custom {
+    display: none;
     position: absolute;
     right: 0;
     top: 100%;
@@ -1018,11 +1072,11 @@ MODERN MODALS - All preserved with updated styling
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--gray-200);
     min-width: 160px;
-    z-index: 10;
-    display: none;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
 }
 
-.action-dropdown:hover .dropdown-menu {
+.dropdown-menu-custom.show {
     display: block;
 }
 
@@ -1039,6 +1093,11 @@ MODERN MODALS - All preserved with updated styling
     text-align: left;
     cursor: pointer;
     transition: all 0.2s;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
 }
 
 .dropdown-item:hover {
@@ -1047,6 +1106,14 @@ MODERN MODALS - All preserved with updated styling
 
 .dropdown-item.text-danger {
     color: var(--danger);
+}
+
+.dropdown-item.text-danger:hover {
+    background: #fee2e2;
+}
+
+.dropdown-form {
+    margin: 0;
 }
 
 /* Session Preview */
@@ -1128,6 +1195,10 @@ MODERN MODALS - All preserved with updated styling
     align-items: center;
     justify-content: center;
 }
+
+.quick-link-icon.archived-patients { background: linear-gradient(135deg, #f97316, #fb923c); }
+.quick-link-icon.archived-sessions { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+.quick-link-icon.discharged { background: linear-gradient(135deg, #64748b, #94a3b8); }
 
 .quick-link-content {
     flex: 1;
@@ -1468,6 +1539,134 @@ MODERN MODALS - All preserved with updated styling
     margin-bottom: 20px;
 }
 
+/* Sessions Table */
+.sessions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.sessions-table th {
+    background: var(--gray-100);
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--gray-700);
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.sessions-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.sessions-table tr:hover {
+    background: var(--gray-50);
+}
+
+.status-icon {
+    text-align: center;
+    font-size: 16px;
+}
+
+.notes-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Session Actions */
+.session-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.session-actions button,
+.session-actions form {
+    display: inline-flex;
+    align-items: center;
+}
+
+.session-actions .action-link {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.session-actions .action-link:hover {
+    background: var(--gray-100);
+    transform: scale(1.1);
+}
+
+.edit-link {
+    color: #3b82f6 !important;
+}
+
+.edit-link:hover {
+    color: #2563eb !important;
+}
+
+.archive-link {
+    color: #f59e0b !important;
+}
+
+.archive-link:hover {
+    color: #d97706 !important;
+}
+
+.delete-link {
+    color: #ef4444 !important;
+}
+
+.delete-link:hover {
+    color: #dc2626 !important;
+}
+
+/* Notes Card */
+.notes-card {
+    background: var(--gray-50);
+    border-radius: 16px;
+    padding: 20px;
+    min-height: 150px;
+    border: 1px solid var(--gray-200);
+}
+
+.notes-content {
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--gray-700);
+}
+
+.no-notes {
+    color: var(--gray-400);
+    font-style: italic;
+    text-align: center;
+    padding: 40px;
+}
+
+.loading {
+    text-align: center;
+    color: var(--gray-400);
+    padding: 40px;
+    font-style: italic;
+}
+
+.error {
+    text-align: center;
+    color: var(--danger);
+    padding: 40px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .page-header {
@@ -1515,15 +1714,78 @@ MODERN MODALS - All preserved with updated styling
         right: 0;
         bottom: 0;
     }
-}
-</style>
-
-
+    
+    .patient-actions {
+        flex-wrap: wrap;
+    }
+    
+    .btn-icon {
+        flex: 1 1 auto;
+        min-width: 80px;
+    }
+    
+    .dropdown-container {
+        flex: 1 1 100%;
+        margin-top: 5px;
+    }
+    
+    .dropdown-toggle {
+        width: 100%;
+    }
+    
+    .dropdown-menu-custom {
+        width: 100%;
+        position: relative;
+        margin-top: 5px;
+        box-shadow: var(--shadow);
+    }
+    
+    .sessions-table {
+        font-size: 12px;
+    }
+    
+    .sessions-table th,
+    .sessions-table td {
+        padding: 8px;
+    }
+}</style>
 <!-- ===== JAVASCRIPT ===== -->
 <script>
 // Store current patient ID for view modal
 let currentViewPatientId = null;
 let currentViewPatientName = '';
+
+// Close all dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.dropdown-container')) {
+        document.querySelectorAll('.dropdown-menu-custom.show').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
+
+// Toggle dropdown function
+function toggleDropdown(button) {
+    event.stopPropagation();
+    const dropdown = button.nextElementSibling;
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown-menu-custom.show').forEach(menu => {
+        if (menu !== dropdown) {
+            menu.classList.remove('show');
+        }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('show');
+}
+
+// Prevent dropdown from closing when clicking inside
+document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+    menu.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+});
 
 // ===== ADMIT MODAL FUNCTIONS =====
 function openAdmitModal() {
@@ -1554,80 +1816,15 @@ function closeEditRoomModal() {
     document.getElementById('editRoomModal').style.display = 'none';
 }
 
-// ===== DISCHARGE MODAL FUNCTIONS =====
-function openDischargeModal(patientId, initials, room, admissionDate, core10Admission) {
-    currentViewPatientId = patientId;
-    document.getElementById('dischargePatientName').innerText = initials;
-    document.getElementById('dischargePatientId').value = patientId;
-    document.getElementById('dischargePatientRoom').innerText = room;
-    document.getElementById('dischargePatientAdmission').innerText = admissionDate;
-    document.getElementById('dischargePatientCore').innerHTML = core10Admission ? 
-        '<span class="core-done">Done</span>' : 
-        '<span class="core-pending">Pending</span>';
+// ===== PATIENT DETAILS FUNCTIONS =====
+function viewPatientDetails(patientId, patientName) {
+    console.log('viewPatientDetails called with:', patientId, patientName);
     
-    // Load patient sessions for stats
-    loadDischargeSessionData(patientId);
-    
-    // Show modal
-    document.getElementById('dischargeModal').style.display = 'flex';
-}
-
-function closeDischargeModal() {
-    document.getElementById('dischargeModal').style.display = 'none';
-    document.getElementById('dischargeForm').reset();
-}
-
-function loadDischargeSessionData(patientId) {
-    fetch('<?= url('sessions/get-by-patient') ?>?id=' + patientId)
-        .then(response => response.json())
-        .then(data => {
-            // Update stats
-            document.getElementById('dischargeSessionCount').innerText = data.length;
-            
-            const careNotesCount = data.filter(s => s.carenotes_completed).length;
-            const trackersCount = data.filter(s => s.tracker_completed).length;
-            const tasksCount = data.filter(s => s.tasks_completed).length;
-            
-            document.getElementById('dischargeCareNotesCount').innerText = careNotesCount;
-            document.getElementById('dischargeTrackersCount').innerText = trackersCount;
-            document.getElementById('dischargeTasksCount').innerText = tasksCount;
-            
-            // Show recent sessions
-            displayRecentSessions(data.slice(0, 3));
-        })
-        .catch(error => {
-            console.error('Error loading sessions:', error);
-        });
-}
-
-function displayRecentSessions(sessions) {
-    const container = document.getElementById('dischargeRecentSessions');
-    
-    if (!sessions || sessions.length === 0) {
-        container.innerHTML = '<div class="no-sessions">No sessions recorded</div>';
+    if (!patientId) {
+        console.error('No patient ID provided');
         return;
     }
     
-    let html = '';
-    sessions.forEach(s => {
-        const date = new Date(s.datetime);
-        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        html += `<div class="preview-session-item">
-            <span class="preview-session-date">${formattedDate}</span>
-            <span class="preview-session-icons">
-                ${s.carenotes_completed ? '📋' : '⬜'}
-                ${s.tracker_completed ? '📊' : '⬜'}
-                ${s.tasks_completed ? '✅' : '⬜'}
-            </span>
-        </div>`;
-    });
-    
-    container.innerHTML = html;
-}
-
-// ===== PATIENT DETAILS FUNCTIONS =====
-function viewPatientDetails(patientId, patientName) {
     currentViewPatientId = patientId;
     currentViewPatientName = patientName;
     document.getElementById('viewPatientName').innerText = patientName;
@@ -1651,15 +1848,38 @@ function loadPatientSummary(patientId) {
         .then(data => {
             document.getElementById('viewPatientRoom').innerText = data.room_number || 'N/A';
             document.getElementById('viewPatientAdmission').innerText = data.admission_date || 'N/A';
-            document.getElementById('viewPatientCore').innerHTML = data.core10_admission ? 
-                '<span class="core-done">Done</span>' : 
-                '<span class="core-pending">Pending</span>';
+            
+            // Check if patient is discharged by looking at the URL or passing a parameter
+            const isDischargedPage = window.location.href.includes('discharged-patients');
+            
+            if (isDischargedPage) {
+                // On discharged page, show discharge CORE-10
+                // You'll need to fetch this separately or modify your get-summary endpoint
+                loadDischargeCore(patientId);
+            } else {
+                // On active patients page, show admission CORE-10
+                document.getElementById('viewPatientCore').innerHTML = data.core10_admission ? 
+                    '<span class="badge badge-success">Completed</span>' : 
+                    '<span class="badge badge-warning">Pending</span>';
+            }
         })
         .catch(error => {
             console.error('Error loading patient summary:', error);
         });
 }
 
+function loadDischargeCore(patientId) {
+    fetch('<?= url('patients/get-discharge-status') ?>?id=' + patientId)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('viewPatientCore').innerHTML = data.core10_discharge ? 
+                '<span class="badge badge-success">Completed</span>' : 
+                '<span class="badge badge-warning">Pending</span>';
+        })
+        .catch(error => {
+            console.error('Error loading discharge CORE-10:', error);
+        });
+}
 function loadAllSessions(patientId) {
     const sessionsList = document.getElementById('sessionsList');
     sessionsList.innerHTML = '<div class="loading">Loading sessions...</div>';
@@ -1695,6 +1915,10 @@ function displayAllSessions(sessions) {
     sessions.forEach(s => {
         const date = new Date(s.datetime);
         const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const datetimeLocal = s.datetime.substring(0, 16);
+        
+        // Escape notes for JavaScript string
+        const escapedNotes = s.notes ? s.notes.replace(/'/g, "\\'").replace(/\n/g, '\\n') : '';
         
         html += `<tr>
             <td>${formattedDate}</td>
@@ -1703,6 +1927,10 @@ function displayAllSessions(sessions) {
             <td class="status-icon">${s.tasks_completed ? '✅' : '❌'}</td>
             <td class="notes-cell" title="${s.notes || ''}">${s.notes ? s.notes.substring(0, 30) + (s.notes.length > 30 ? '...' : '') : '-'}</td>
             <td class="session-actions">
+<button onclick="console.log('Session data:', {id:${s.id}, patient_id:${s.patient_id}}); editSession(${s.id}, ${s.patient_id || 0}, '${datetimeLocal}', ${s.carenotes_completed}, ${s.tracker_completed}, ${s.tasks_completed}, '${escapedNotes}')" class="action-link edit-link" title="Edit Session">                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                    </svg>
+                </button>
                 <form method="POST" action="<?= url('sessions/archive') ?>" class="inline-form" onsubmit="return confirm('Archive this session?')">
                     <input type="hidden" name="id" value="${s.id}">
                     <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
@@ -1722,6 +1950,103 @@ function displayAllSessions(sessions) {
     container.innerHTML = html;
 }
 
+// ===== DISCHARGE MODAL FUNCTIONS =====
+function openDischargeModal(patientId, initials, room, admissionDate, core10Admission) {
+    currentViewPatientId = patientId;
+    document.getElementById('dischargePatientName').innerText = initials;
+    document.getElementById('dischargePatientId').value = patientId;
+    document.getElementById('dischargePatientRoom').innerText = room;
+    document.getElementById('dischargePatientAdmission').innerText = admissionDate;
+    document.getElementById('dischargePatientCore').innerHTML = core10Admission ? 
+        '<span class="badge badge-success">Done</span>' : 
+        '<span class="badge badge-warning">Pending</span>';
+    
+    loadDischargeSessionData(patientId);
+    document.getElementById('dischargeModal').style.display = 'flex';
+}
+
+function closeDischargeModal() {
+    document.getElementById('dischargeModal').style.display = 'none';
+    document.getElementById('dischargeForm')?.reset();
+}
+
+function loadDischargeSessionData(patientId) {
+    fetch('<?= url('sessions/get-by-patient') ?>?id=' + patientId)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('dischargeSessionCount').innerText = data.length;
+            
+            const careNotesCount = data.filter(s => s.carenotes_completed).length;
+            const trackersCount = data.filter(s => s.tracker_completed).length;
+            const tasksCount = data.filter(s => s.tasks_completed).length;
+            
+            document.getElementById('dischargeCareNotesCount').innerText = careNotesCount;
+            document.getElementById('dischargeTrackersCount').innerText = trackersCount;
+            document.getElementById('dischargeTasksCount').innerText = tasksCount;
+            
+            displayRecentSessions(data.slice(0, 3));
+        })
+        .catch(error => {
+            console.error('Error loading sessions:', error);
+        });
+}
+
+function displayRecentSessions(sessions) {
+    const container = document.getElementById('dischargeRecentSessions');
+    
+    if (!sessions || sessions.length === 0) {
+        container.innerHTML = '<div class="no-sessions">No sessions recorded</div>';
+        return;
+    }
+    
+    let html = '';
+    sessions.forEach(s => {
+        const date = new Date(s.datetime);
+        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        html += `<div class="preview-session-item">
+            <span class="preview-session-date">${formattedDate}</span>
+            <span class="preview-session-icons">
+                ${s.carenotes_completed ? '📋' : '⬜'}
+                ${s.tracker_completed ? '📊' : '⬜'}
+                ${s.tasks_completed ? '✅' : '⬜'}
+            </span>
+        </div>`;
+    });
+    
+    container.innerHTML = html;
+}
+// ===== EDIT SESSION FUNCTIONS =====
+function editSession(sessionId, patientId, datetime, carenotes, tracker, tasks, notes) {
+    console.log('editSession called with:', {sessionId, patientId, datetime, carenotes, tracker, tasks});
+    
+    // If patientId is 0 or undefined, try to get it from currentViewPatientId
+    if (!patientId || patientId === 0) {
+        patientId = currentViewPatientId;
+        console.log('Using currentViewPatientId instead:', patientId);
+    }
+    
+    if (!sessionId) {
+        alert('Error: Missing session ID');
+        return;
+    }
+    
+    if (!patientId) {
+        alert('Error: Missing patient ID');
+        return;
+    }
+    
+    document.getElementById('editSessionId').value = sessionId;
+    document.getElementById('editSessionPatientId').value = patientId;
+    document.getElementById('editSessionDatetime').value = datetime;
+    document.getElementById('editSessionCarenotes').checked = carenotes == 1 || carenotes === true;
+    document.getElementById('editSessionTracker').checked = tracker == 1 || tracker === true;
+    document.getElementById('editSessionTasks').checked = tasks == 1 || tasks === true;
+    document.getElementById('editSessionNotes').value = notes ? notes.replace(/\\n/g, '\n') : '';
+    
+    document.getElementById('editSessionModal').style.display = 'flex';
+}
+// ===== NOTES FUNCTIONS =====
 function loadAdmissionNotes(patientId) {
     const container = document.getElementById('admissionNotes');
     container.innerHTML = '<div class="loading">Loading admission notes...</div>';
@@ -1762,7 +2087,7 @@ function loadDischargeNotes(patientId) {
         });
 }
 
-// Tab switching function
+// ===== TAB FUNCTIONS =====
 function switchTab(tab) {
     const sessionsTab = document.getElementById('sessionsTab');
     const admissionTab = document.getElementById('admissionTab');
@@ -1771,7 +2096,6 @@ function switchTab(tab) {
     const admissionBtn = document.getElementById('admissionTabBtn');
     const dischargeBtn = document.getElementById('dischargeTabBtn');
     
-    // Hide all tabs
     sessionsTab.classList.remove('active');
     admissionTab.classList.remove('active');
     dischargeTab.classList.remove('active');
@@ -1779,7 +2103,6 @@ function switchTab(tab) {
     admissionBtn.classList.remove('active');
     dischargeBtn.classList.remove('active');
     
-    // Show selected tab
     if (tab === 'sessions') {
         sessionsTab.classList.add('active');
         sessionsBtn.classList.add('active');
@@ -1819,6 +2142,7 @@ window.onclick = function(event) {
     const editModal = document.getElementById('editRoomModal');
     const detailsModal = document.getElementById('patientDetailsModal');
     const dischargeModal = document.getElementById('dischargeModal');
+    const editSessionModal = document.getElementById('editSessionModal');
     
     if (event.target == admitModal) {
         admitModal.style.display = 'none';
@@ -1831,6 +2155,9 @@ window.onclick = function(event) {
     }
     if (event.target == dischargeModal) {
         dischargeModal.style.display = 'none';
+    }
+    if (event.target == editSessionModal) {
+        editSessionModal.style.display = 'none';
     }
 }
 </script>

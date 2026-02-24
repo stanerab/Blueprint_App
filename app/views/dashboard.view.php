@@ -46,14 +46,14 @@ foreach($sessionIndex as &$list){
 }
 unset($list);
 
-/* Recent discharges */
-$recentDischarges = array_slice($dischargedPatients, 0, 5);
-
 /* Stats */
 $totalPatients = count($activePatients);
 $totalDischarged = count($dischargedPatients);
 $totalSessions = count($sessions);
 $todaySessions = count(array_filter($sessions, fn($s)=> str_starts_with($s->datetime, $today)));
+
+/* CORE-10 completed count */
+$core10Completed = count(array_filter($activePatients, fn($p)=> $p->core10_admission));
 ?>
 
 <style>
@@ -318,323 +318,104 @@ body {
     color: var(--primary-dark);
 }
 
-/* ===== PATIENTS SECTION ===== */
-.patients-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.patients-header h2 {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin: 0;
-}
-
-.patients-filters {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.filter-select, .search-input {
-    padding: 12px 18px;
-    border: 1px solid var(--gray-200);
-    border-radius: 40px;
-    font-size: 14px;
-    background: white;
-    transition: all 0.3s;
-    min-width: 200px;
-}
-
-.filter-select:focus, .search-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-
-/* ===== PATIENTS GRID ===== */
-.patients-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 24px;
-    margin-bottom: 40px;
-}
-
-.patient-card {
-    background: white;
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: var(--shadow);
-    transition: all 0.3s;
-    border: 1px solid var(--gray-100);
-}
-
-.patient-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--gray-200);
-}
-
-.patient-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.patient-avatar {
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, var(--gray-800), var(--gray-900));
-    color: white;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 20px;
-    box-shadow: var(--shadow);
-}
-
-.ward-badge {
-    padding: 6px 16px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-    color: white;
-}
-
-.ward-badge.hope { background: #059669; }
-.ward-badge.manor { background: #d97706; }
-.ward-badge.lakeside { background: #2563eb; }
-
-.patient-info {
-    background: var(--gray-50);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.info-row {
-    display: flex;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
-.info-row:last-child {
-    margin-bottom: 0;
-}
-
-.info-label {
-    width: 85px;
-    color: var(--gray-500);
-    font-weight: 500;
-}
-
-.info-value {
-    flex: 1;
-    font-weight: 500;
-    color: var(--gray-800);
-}
-
-.badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
-
-.badge.success {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.badge.warning {
-    background: #fed7aa;
-    color: #92400e;
-}
-
-.patient-actions {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.btn-icon {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.3s;
-    background: var(--gray-100);
-    color: var(--gray-700);
-}
-
-.btn-icon:hover {
-    background: var(--gray-200);
-    transform: translateY(-2px);
-}
-
-.btn-icon.primary {
-    background: var(--primary);
-    color: white;
-}
-
-.btn-icon.primary:hover {
-    background: var(--primary-dark);
-}
-
-.btn-icon.danger {
-    background: var(--danger);
-    color: white;
-}
-
-.btn-icon.danger:hover {
-    background: #dc2626;
-}
-
-/* ===== SESSION PREVIEW ===== */
-.session-preview {
-    background: var(--gray-50);
-    border-radius: 16px;
-    padding: 16px;
-}
-
-.session-preview h4 {
-    font-size: 12px;
-    color: var(--gray-500);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 12px 0;
-}
-
-.session-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    font-size: 13px;
-    border-bottom: 1px solid var(--gray-200);
-}
-
-.session-item:last-child {
-    border-bottom: none;
-}
-
-.session-date {
-    color: var(--gray-600);
-}
-
-.session-icons {
-    display: flex;
-    gap: 6px;
-    color: var(--gray-500);
-}
-
-/* ===== DISCHARGES SECTION ===== */
-.discharges-section {
+/* ===== ACTIVITIES SECTION ===== */
+.activities-section {
     background: white;
     border-radius: 20px;
     padding: 24px;
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-100);
+    margin-top: 30px;
 }
 
-.discharges-header {
+.activities-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 }
 
-.discharges-header h2 {
+.activities-header h2 {
     font-size: 20px;
     font-weight: 600;
     color: var(--gray-800);
     margin: 0;
 }
 
-.discharges-list {
+.activities-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.discharge-item {
+.activity-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
     background: var(--gray-50);
     border-radius: 16px;
     transition: all 0.3s;
+    border-left: 3px solid transparent;
 }
 
-.discharge-item:hover {
+.activity-item:hover {
     background: var(--gray-100);
+    transform: translateX(2px);
 }
 
-.discharge-info {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.patient-initial {
-    font-weight: 700;
+.activity-icon {
     width: 40px;
     height: 40px;
     background: white;
-    border-radius: 12px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gray-700);
+    font-size: 20px;
     box-shadow: var(--shadow-sm);
 }
 
-.discharge-meta {
+.activity-content {
+    flex: 1;
+}
+
+.activity-description {
+    font-size: 14px;
+    color: var(--gray-800);
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.activity-meta {
     display: flex;
-    gap: 15px;
     align-items: center;
+    gap: 15px;
+    font-size: 12px;
     flex-wrap: wrap;
 }
 
-.discharge-ward {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+.activity-user {
+    color: var(--gray-600);
     font-weight: 500;
+}
+
+.activity-time {
+    color: var(--gray-500);
+}
+
+.activity-ward {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
     color: white;
 }
 
-.discharge-ward.hope { background: #059669; }
-.discharge-ward.manor { background: #d97706; }
-.discharge-ward.lakeside { background: #2563eb; }
-
-.discharge-date {
-    color: var(--gray-500);
-    font-size: 13px;
-}
-
-.discharge-status {
-    font-size: 12px;
-    font-weight: 600;
-}
+.activity-ward.hope { background: #059669; }
+.activity-ward.manor { background: #d97706; }
+.activity-ward.lakeside { background: #2563eb; }
 
 /* ===== EMPTY STATES ===== */
 .empty-state {
@@ -753,37 +534,15 @@ body {
         grid-template-columns: 1fr;
     }
     
-    .patients-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .patients-filters {
-        flex-direction: column;
-    }
-    
-    .filter-select, .search-input {
-        width: 100%;
-    }
-    
-    .patients-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .patient-actions {
-        flex-direction: column;
-    }
-    
-    .discharge-item {
+    .activity-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
     }
     
-    .discharge-info {
+    .activity-meta {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 5px;
     }
     
     .modal-actions {
@@ -798,10 +557,6 @@ body {
     
     .stat-card .value {
         font-size: 28px;
-    }
-    
-    .patient-card {
-        padding: 20px;
     }
 }
 </style>
@@ -834,11 +589,11 @@ body {
     <div class="stat-card">
         <span class="label">Discharged</span>
         <div class="value"><?= $totalDischarged ?></div>
-        <span class="trend">This month: <?= $stats['discharged_this_month'] ?? 0 ?></span>
+        <span class="trend">This month</span>
     </div>
     <div class="stat-card">
         <span class="label">CORE-10 Completed</span>
-        <div class="value"><?= count(array_filter($activePatients, fn($p)=> $p->core10_admission)) ?></div>
+        <div class="value"><?= $core10Completed ?></div>
         <span class="trend">Admission assessments</span>
     </div>
 </div>
@@ -848,7 +603,6 @@ body {
 <div class="ward-overview">
     <?php
     $wardBeds = ['Hope'=>12, 'Manor'=>10, 'Lakeside'=>10];
-    $wardColors = ['Hope'=>'#059669', 'Manor'=>'#d97706', 'Lakeside'=>'#2563eb'];
     
     foreach($wardPatients as $ward=>$list):
         $coreCount = count(array_filter($list, fn($p)=>$p->core10_admission));
@@ -876,122 +630,73 @@ body {
         </div>
     <?php endforeach; ?>
 </div>
-
-<!-- ACTIVE PATIENTS -->
-<div class="patients-header">
-    <h2>Active Patients</h2>
-    <div class="patients-filters">
-        <select id="wardFilter" class="filter-select">
-            <option value="">All Wards</option>
-            <option value="Hope">Hope Ward</option>
-            <option value="Manor">Manor Ward</option>
-            <option value="Lakeside">Lakeside Ward</option>
-        </select>
-        <input type="text" id="patientSearch" placeholder="Search initials..." class="search-input">
-    </div>
-</div>
-
-<div class="patients-grid">
-    <?php if($activePatients): ?>
-        <?php foreach($activePatients as $patient): 
-            $recentSessions = array_slice($sessionIndex[$patient->id] ?? [], 0, 2);
-        ?>
-            <div class="patient-card" 
-                 data-ward="<?= htmlspecialchars($patient->ward) ?>"
-                 data-initials="<?= strtoupper(htmlspecialchars($patient->initials)) ?>">
-                
-                <div class="patient-header">
-                    <div class="patient-avatar"><?= htmlspecialchars($patient->initials) ?></div>
-                    <span class="ward-badge <?= strtolower($patient->ward) ?>">
-                        <?= htmlspecialchars($patient->ward) ?>
-                    </span>
-                </div>
-
-                <div class="patient-info">
-                    <div class="info-row">
-                        <span class="info-label">Room</span>
-                        <span class="info-value"><?= htmlspecialchars($patient->room_number) ?></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Admitted</span>
-                        <span class="info-value"><?= date('d M Y', strtotime($patient->admission_date)) ?></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">CORE-10</span>
-                        <span class="info-value">
-                            <?php if($patient->core10_admission): ?>
-                                <span class="badge success">Completed</span>
-                            <?php else: ?>
-                                <span class="badge warning">Pending</span>
-                            <?php endif; ?>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="patient-actions">
-                    <a href="<?= url('sessions/create/'.$patient->id) ?>" class="btn-icon primary">📝 Session</a>
-                    <a href="<?= url('patients/view/'.$patient->id) ?>" class="btn-icon">👁️ View</a>
-                    <button onclick="showDischargeModal(<?= $patient->id ?>)" class="btn-icon danger">🏥 Discharge</button>
-                </div>
-
-                <div class="session-preview">
-                    <h4>Recent Sessions</h4>
-                    <?php if($recentSessions): ?>
-                        <?php foreach($recentSessions as $s): ?>
-                            <div class="session-item">
-                                <span class="session-date"><?= date('d M H:i', strtotime($s->datetime)) ?></span>
-                                <span class="session-icons">
-                                    <?= $s->carenotes_completed ? '📋' : '' ?>
-                                    <?= $s->tracker_completed ? '📊' : '' ?>
-                                    <?= $s->tasks_completed ? '✅' : '' ?>
-                                </span>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="no-sessions">No sessions yet</div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <div class="empty-state">
-            <p>No active patients</p>
-            <a href="<?= url('patients/admit') ?>" class="btn-primary">Admit First Patient</a>
-        </div>
-    <?php endif; ?>
-</div>
-
-<!-- RECENT DISCHARGES -->
-<div class="discharges-section">
-    <div class="discharges-header">
-        <h2>Recent Discharges</h2>
-        <a href="<?= url('patients/discharged') ?>" class="ward-link">View All →</a>
+<!-- RECENT ACTIVITIES -->
+<div class="activities-section">
+    <div class="activities-header">
+        <h2>Recent Activities</h2>
+        <a href="<?= url('activities') ?>" class="ward-link">View All →</a>
     </div>
 
-    <div class="discharges-list">
-        <?php if($recentDischarges): ?>
-            <?php foreach($recentDischarges as $p): ?>
-                <div class="discharge-item">
-                    <div class="discharge-info">
-                        <span class="patient-initial"><?= htmlspecialchars($p->initials) ?></span>
-                        <div class="discharge-meta">
-                            <span class="discharge-ward <?= strtolower($p->ward) ?>">
-                                <?= htmlspecialchars($p->ward) ?>
-                            </span>
-                            <span class="discharge-date">
-                                <?= date('d M Y', strtotime($p->discharge_date)) ?>
-                            </span>
+    <div class="activities-list">
+        <?php if(isset($recentActivities) && !empty($recentActivities)): ?>
+            <?php 
+            // Show only the first 3 activities
+            $displayActivities = array_slice($recentActivities, 0, 3);
+            foreach($displayActivities as $activity): 
+            ?>
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <?php
+                        $icon = '📋';
+                        switch($activity->action_type) {
+                            case 'patient_admitted': $icon = '➕'; break;
+                            case 'patient_discharged': $icon = '🚪'; break;
+                            case 'patient_archived': $icon = '📦'; break;
+                            case 'patient_restored': $icon = '↩️'; break;
+                            case 'patient_deleted': $icon = '🗑️'; break;
+                            case 'session_created': $icon = '📝'; break;
+                            case 'session_updated': $icon = '✏️'; break;
+                            case 'session_archived': $icon = '📦'; break;
+                            case 'session_deleted': $icon = '🗑️'; break;
+                            case 'session_restored': $icon = '↩️'; break;
+                            case 'room_changed': $icon = '🔄'; break;
+                            default: $icon = '📋';
+                        }
+                        echo $icon;
+                        ?>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-description">
+                            <?= htmlspecialchars($activity->description) ?>
                         </div>
-                    </div>
-                    <div class="discharge-status">
-                        <?= $p->core10_discharge 
-                            ? '<span class="badge success">CORE-10 Complete</span>' 
-                            : '<span class="badge warning">CORE-10 Pending</span>' ?>
+                        <div class="activity-meta">
+                            <span class="activity-user"><?= htmlspecialchars($activity->user_name ?? 'System') ?></span>
+                            <span class="activity-time"><?= date('d M H:i', strtotime($activity->created_at)) ?></span>
+                            <?php if(isset($activity->ward) && $activity->ward): ?>
+                                <span class="activity-ward <?= strtolower($activity->ward) ?>">
+                                    <?= htmlspecialchars($activity->ward) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
+            
+            <!-- Show a message if there are more activities -->
+            <?php if(count($recentActivities) > 3): ?>
+                <div class="activities-footer">
+                    <a href="<?= url('activities') ?>" class="view-all-link">
+                        View all <?= count($recentActivities) ?> activities →
+                    </a>
+                </div>
+            <?php endif; ?>
+            
         <?php else: ?>
-            <div class="empty-state">No recent discharges</div>
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <p>No recent activities</p>
+                <small>Activities will appear here as you use the system</small>
+            </div>
         <?php endif; ?>
     </div>
 </div>
@@ -1022,29 +727,7 @@ body {
 </div>
 
 <script>
-// Filter functionality
-const wardFilter = document.getElementById('wardFilter');
-const searchInput = document.getElementById('patientSearch');
-
-function filterPatients() {
-    const ward = wardFilter?.value.toLowerCase() || '';
-    const search = searchInput?.value.toUpperCase() || '';
-
-    document.querySelectorAll('.patient-card').forEach(card => {
-        const cardWard = card.dataset.ward.toLowerCase();
-        const cardInitials = card.dataset.initials;
-        
-        const wardMatch = !ward || cardWard === ward;
-        const searchMatch = !search || cardInitials.includes(search);
-        
-        card.style.display = wardMatch && searchMatch ? 'block' : 'none';
-    });
-}
-
-wardFilter?.addEventListener('change', filterPatients);
-searchInput?.addEventListener('input', filterPatients);
-
-// Discharge modal
+// Discharge modal functions
 function showDischargeModal(id) {
     document.getElementById('dischargePatientId').value = id;
     document.getElementById('dischargeModal').style.display = 'flex';

@@ -47,15 +47,17 @@ function url($path) {
                             <span class="detail-label">Discharged</span>
                             <span class="detail-value"><?= date('d/m/Y', strtotime($p->discharge_date)) ?></span>
                         </div>
-                        <div class="detail-item">
+                        <!-- TWO CORE-10 BADGES: ADMISSION & DISCHARGE -->
+                        <div class="detail-item core10-row">
                             <span class="detail-label">CORE-10</span>
-                            <span class="detail-value">
-                                <?php if($p->core10_discharge): ?>
-                                    <span class="badge-success">Completed</span>
-                                <?php else: ?>
-                                    <span class="badge-warning">Pending</span>
-                                <?php endif; ?>
-                            </span>
+                            <div class="core10-badges">
+                                <span class="core10-badge admission-badge <?= ($p->core10_admission ?? false) ? 'completed' : 'pending' ?>">
+                                    Admission: <?= ($p->core10_admission ?? false) ? '✓' : '○' ?>
+                                </span>
+                                <span class="core10-badge discharge-badge <?= ($p->core10_discharge ?? false) ? 'completed' : 'pending' ?>">
+                                    Discharge: <?= ($p->core10_discharge ?? false) ? '✓' : '○' ?>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     
@@ -80,17 +82,6 @@ function url($path) {
                         </form>
                     </div>
 
-                    <!-- Admission Notes Preview -->
-                    <?php if(!empty($p->notes)): ?>
-                        <div class="notes-preview">
-                            <div class="notes-preview-header">
-                                <span>📝 Admission Notes</span>
-                            </div>
-                            <div class="notes-preview-content">
-                                <?= e(substr($p->notes, 0, 100)) ?>...
-                            </div>
-                        </div>
-                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -104,7 +95,7 @@ function url($path) {
     <?php endif; ?>
 </div>
 
-<!-- Patient Details Modal (reused from main ward view) -->
+<!-- Patient Details Modal (updated with two CORE-10 fields) -->
 <div id="patientDetailsModal" class="modal" style="display:none;">
     <div class="modal-content large-modal">
         <div class="modal-header">
@@ -112,27 +103,40 @@ function url($path) {
             <button type="button" class="modal-close" onclick="closePatientDetailsModal()">✕</button>
         </div>
 
-        <!-- Patient Summary Card -->
-        <div class="patient-summary-card">
-            <div class="summary-row">
-                <div class="summary-item">
-                    <span class="summary-label">Ward:</span>
-                    <span class="summary-value" id="viewPatientWard"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Room:</span>
-                    <span class="summary-value" id="viewPatientRoom"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Admitted:</span>
-                    <span class="summary-value" id="viewPatientAdmission"></span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">CORE-10:</span>
-                    <span class="summary-value" id="viewPatientCore"></span>
-                </div>
-            </div>
+
+<!-- Patient Summary Card -->
+<div class="patient-summary-card">
+    <div class="summary-row">
+        <div class="summary-item">
+            <span class="summary-label">Ward:</span>
+            <span class="summary-value" id="viewPatientWard"></span>
         </div>
+        <div class="summary-item">
+            <span class="summary-label">Room:</span>
+            <span class="summary-value" id="viewPatientRoom"></span>
+        </div>
+    </div>
+    <div class="summary-row">
+        <div class="summary-item">
+            <span class="summary-label">Admitted:</span>
+            <span class="summary-value" id="viewPatientAdmissionDateTime"></span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Discharged:</span>
+            <span class="summary-value" id="viewPatientDischargeDateTime"></span>
+        </div>
+    </div>
+    <div class="summary-row">
+        <div class="summary-item">
+            <span class="summary-label">Admission CORE-10:</span>
+            <span class="summary-value" id="viewPatientAdmissionCore"></span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Discharge CORE-10:</span>
+            <span class="summary-value" id="viewPatientDischargeCore"></span>
+        </div>
+    </div>
+</div>
 
         <!-- Tabs for switching between views -->
         <div class="details-tabs">
@@ -169,99 +173,240 @@ function url($path) {
 </div>
 
 <style>
+/* ===== PAGE LAYOUT ===== */
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f0f2f5;
+    color: #1e293b;
+    padding: 30px;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+/* ===== HEADER ===== */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-header h1::before {
+    content: "🚪";
+    font-size: 30px;
+}
+
+.page-subtitle {
+    font-size: 15px;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+.btn-outline {
+    border: 1px solid #cbd5e1;
+    background: white;
+    padding: 12px 24px;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #334155;
+    transition: all .25s ease;
+}
+
+.btn-outline:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-2px);
+}
+
+/* ===== GRID ===== */
+
+.records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+    gap: 25px;
+}
+
+/* ===== CARD ===== */
+
+.record-card {
+    background: white;
+    border-radius: 22px;
+    padding: 28px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+    transition: all .25s ease;
+}
+
+.record-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+
+.record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.record-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+}
+
 .record-status.discharged {
-    background: #e6f7ed;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 30px;
+    background: #dcfce7;
     color: #166534;
 }
 
-.badge-success {
-    background: #d4edda;
-    color: #155724;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+/* DETAILS */
+
+.record-details {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
 }
 
-.badge-warning {
-    background: #fff3cd;
-    color: #856404;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
 }
 
-.btn-view, .btn-delete {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.detail-label {
+    color: #64748b;
+}
+
+.detail-value {
+    font-weight: 600;
+}
+
+/* CORE 10 BADGES */
+
+.core10-badges {
+    display: flex;
     gap: 8px;
-    padding: 10px;
+    flex-wrap: wrap;
+}
+
+.core10-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 30px;
+    font-weight: 600;
+}
+
+.core10-badge.completed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.core10-badge.pending {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ACTIONS */
+
+.record-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.btn-view,
+.btn-delete {
+    flex: 1;
+    padding: 12px;
+    border-radius: 40px;
     border: none;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all .25s ease;
+    font-size: 14px;
 }
 
 .btn-view {
-    background: #1e3a8a;
+    background: #2563eb;
     color: white;
 }
 
 .btn-view:hover {
-    background: #3b82f6;
+    background: #1d4ed8;
     transform: translateY(-2px);
 }
 
 .btn-delete {
-    background: #e74c3c;
+    background: #ef4444;
     color: white;
 }
 
 .btn-delete:hover {
-    background: #c0392b;
+    background: #dc2626;
     transform: translateY(-2px);
 }
 
-.record-actions {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
+/* NOTES PREVIEW */
 
 .notes-preview {
     background: #f8fafc;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #94a3b8;
+    border-radius: 14px;
+    padding: 14px;
+    border-left: 4px solid #94a3b8;
 }
 
 .notes-preview-header {
     font-size: 12px;
     font-weight: 600;
+    margin-bottom: 6px;
     color: #64748b;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
 }
 
 .notes-preview-content {
     font-size: 13px;
     color: #475569;
-    line-height: 1.5;
 }
 
-/* Modal Styles */
+/* ===== MODAL MODERN ===== */
+
 .modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
+    inset: 0;
+    background: rgba(15,23,42,0.6);
+    backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
     z-index: 1000;
@@ -270,18 +415,13 @@ function url($path) {
 
 .modal-content {
     background: white;
-    border-radius: 16px;
-    padding: 30px;
-    max-width: 500px;
-    width: 90%;
+    border-radius: 24px;
+    padding: 35px;
+    max-width: 950px;
+    width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-}
-
-.large-modal {
-    max-width: 900px;
-    width: 95%;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.2);
 }
 
 .modal-header {
@@ -292,246 +432,45 @@ function url($path) {
 }
 
 .modal-header h2 {
-    margin: 0;
-    font-size: 20px;
-    color: #1e293b;
+    font-size: 22px;
 }
 
 .modal-close {
-    background: none;
     border: none;
-    font-size: 24px;
+    background: none;
+    font-size: 22px;
     cursor: pointer;
-    color: #64748b;
-    padding: 5px;
 }
 
-.modal-close:hover {
-    color: #1e293b;
-}
-
-.patient-summary-card {
-    background: #f8fafc;
-    border-radius: 10px;
-    padding: 15px;
-    margin: 15px 0;
-    border: 1px solid #e2e8f0;
-}
-
-.summary-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.summary-item {
-    flex: 1;
-    min-width: 120px;
-}
-
-.summary-label {
-    display: block;
-    font-size: 12px;
-    color: #64748b;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.summary-value {
-    font-size: 16px;
-    font-weight: 500;
-    color: #1e293b;
-}
+/* TABS */
 
 .details-tabs {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 10px;
 }
 
 .tab-btn {
-    padding: 8px 16px;
-    background: none;
-    border: none;
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
+    padding: 10px 18px;
+    border-radius: 30px;
+    border: 1px solid #e2e8f0;
+    background: white;
     cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s;
-}
-
-.tab-btn:hover {
-    background: #f1f5f9;
-    color: #334155;
+    font-weight: 500;
 }
 
 .tab-btn.active {
-    background: #1e3a8a;
+    background: #2563eb;
     color: white;
+    border-color: #2563eb;
 }
 
 .tab-content {
     display: none;
-    max-height: 400px;
-    overflow-y: auto;
-    margin-bottom: 20px;
 }
 
 .tab-content.active {
     display: block;
-}
-
-.sessions-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-
-.sessions-table th {
-    background: #f8fafc;
-    padding: 12px;
-    text-align: left;
-    font-weight: 600;
-    color: #475569;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.sessions-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-/* Notes Cards Styling */
-.notes-card {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 20px;
-    min-height: 200px;
-    border: 1px solid #e2e8f0;
-}
-
-.notes-content {
-    line-height: 1.6;
-    color: #334155;
-    white-space: pre-wrap;
-    font-family: 'Courier New', monospace;
-    padding: 15px;
-    background: #ffffff;
-    border-radius: 8px;
-    border-left: 4px solid;
-}
-
-#admissionNotes .notes-content {
-    border-left-color: #3498db;
-}
-
-#dischargeNotes .notes-content {
-    border-left-color: #e74c3c;
-}
-
-.notes-content strong {
-    color: #1e3a8a;
-    font-weight: 600;
-}
-
-.notes-separator {
-    border: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #94a3b8, transparent);
-    margin: 15px 0;
-}
-
-.no-notes {
-    color: #94a3b8;
-    font-style: italic;
-    text-align: center;
-    padding: 40px;
-}
-
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: #64748b;
-    font-style: italic;
-}
-
-.error {
-    text-align: center;
-    padding: 40px;
-    color: #dc2626;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.modal-actions button {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    font-size: 14px;
-}
-
-.btn-secondary {
-    background: #f1f5f9;
-    color: #475569;
-}
-
-.btn-secondary:hover {
-    background: #e2e8f0;
-}
-
-@media (max-width: 768px) {
-    .record-actions {
-        flex-direction: column;
-    }
-    
-    .summary-row {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .details-tabs {
-        flex-direction: column;
-    }
-    
-    .tab-btn {
-        width: 100%;
-        text-align: center;
-    }
-}
-/* Admission notes specific styling */
-.admission-notes {
-    border-left-color: #3498db !important;
-    background: linear-gradient(to right, #f8fafc, #ffffff);
-}
-
-/* Discharge notes specific styling */
-#dischargeNotes .notes-content {
-    border-left-color: #e74c3c !important;
-    background: linear-gradient(to right, #fff5f5, #ffffff);
-}
-
-/* Notes content improvements */
-.notes-content {
-    line-height: 1.6;
-    color: #334155;
-    white-space: pre-wrap;
-    font-family: 'Courier New', monospace;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 8px;
-    border-left: 4px solid;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 </style>
 
@@ -542,16 +481,16 @@ let currentViewPatientId = null;
 function viewPatientDetails(patientId, patientName) {
     currentViewPatientId = patientId;
     document.getElementById('viewPatientName').innerText = patientName;
-    
+
     // Show modal with loading
     document.getElementById('patientDetailsModal').style.display = 'flex';
-    
+
     // Load patient data
     loadPatientSummary(patientId);
     loadAllSessions(patientId);
     loadAdmissionNotes(patientId);
     loadDischargeNotes(patientId);
-    
+
     // Reset to sessions tab
     switchTab('sessions');
 }
@@ -560,22 +499,34 @@ function loadPatientSummary(patientId) {
     fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
         .then(response => response.json())
         .then(data => {
+            console.log('Patient summary data:', data);
             document.getElementById('viewPatientWard').innerText = data.ward || 'N/A';
             document.getElementById('viewPatientRoom').innerText = data.room_number || 'N/A';
-            document.getElementById('viewPatientAdmission').innerText = data.admission_date || 'N/A';
-            document.getElementById('viewPatientCore').innerHTML = data.core10_admission ? 
-                '<span class="badge-success">Done</span>' : 
-                '<span class="badge-warning">Pending</span>';
+            
+            // Extract only date part (remove time) if time is 00:00
+            const admissionDate = data.admission_datetime ? data.admission_datetime.split(' ')[0] : 'N/A';
+            const dischargeDate = data.discharge_datetime ? data.discharge_datetime.split(' ')[0] : 'N/A';
+            document.getElementById('viewPatientAdmissionDateTime').innerText = admissionDate;
+            document.getElementById('viewPatientDischargeDateTime').innerText = dischargeDate;
+
+            // Admission CORE-10 badge
+            document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission
+                ? '<span class="badge-success">Completed</span>'
+                : '<span class="badge-warning">Pending</span>';
+
+            // Discharge CORE-10 badge
+            document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge
+                ? '<span class="badge-success">Completed</span>'
+                : '<span class="badge-warning">Pending</span>';
         })
         .catch(error => {
             console.error('Error loading patient summary:', error);
         });
 }
-
 function loadAllSessions(patientId) {
     const sessionsList = document.getElementById('sessionsList');
     sessionsList.innerHTML = '<div class="loading">Loading sessions...</div>';
-    
+
     fetch('<?= url('sessions/get-by-patient') ?>?id=' + patientId)
         .then(response => {
             if (!response.ok) {
@@ -594,20 +545,20 @@ function loadAllSessions(patientId) {
 
 function displayAllSessions(sessions) {
     const container = document.getElementById('sessionsList');
-    
+
     if (!sessions || sessions.length === 0) {
         container.innerHTML = '<div class="no-notes">No sessions recorded for this patient</div>';
         return;
     }
-    
+
     let html = '<table class="sessions-table">';
     html += '<thead><tr><th>Date & Time</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th></tr></thead>';
     html += '<tbody>';
-    
+
     sessions.forEach(s => {
         const date = new Date(s.datetime);
         const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
+
         html += `<tr>
             <td>${formattedDate}</td>
             <td class="status-icon">${s.carenotes_completed ? '✅' : '❌'}</td>
@@ -616,24 +567,23 @@ function displayAllSessions(sessions) {
             <td class="notes-cell">${s.notes ? s.notes.substring(0, 50) + (s.notes.length > 50 ? '...' : '') : '-'}</td>
         </tr>`;
     });
-    
+
     html += '</tbody></table>';
     container.innerHTML = html;
 }
+
 function loadAdmissionNotes(patientId) {
     const container = document.getElementById('admissionNotes');
     container.innerHTML = '<div class="loading">Loading admission notes...</div>';
-    
+
     fetch('<?= url('patients/get-notes') ?>?id=' + patientId)
         .then(response => response.json())
         .then(data => {
             if (data.notes && data.notes.trim() !== '') {
-                // Format admission notes
                 let formattedNotes = data.notes
                     .replace(/\n/g, '<br>')
                     .replace(/CORE-10 completed on admission/g, '<strong>CORE-10 on admission</strong>')
                     .replace(/Admission Date:/g, '<strong>Admission Date:</strong>');
-                
                 container.innerHTML = `<div class="notes-content admission-notes">${formattedNotes}</div>`;
             } else {
                 container.innerHTML = '<div class="no-notes">No admission notes available</div>';
@@ -644,22 +594,33 @@ function loadAdmissionNotes(patientId) {
             container.innerHTML = '<div class="error">Failed to load admission notes</div>';
         });
 }
+
 function loadDischargeNotes(patientId) {
     const container = document.getElementById('dischargeNotes');
     container.innerHTML = '<div class="loading">Loading discharge notes...</div>';
-    
+
     fetch('<?= url('patients/get-discharge-notes') ?>?id=' + patientId)
         .then(response => response.json())
         .then(data => {
             if (data.notes && data.notes.trim() !== '') {
-                // Format discharge notes with proper styling
-                let formattedNotes = data.notes
-                    .replace(/\n/g, '<br>')
-                    .replace(/CORE-10 completed at discharge: /g, '<strong>CORE-10 at discharge:</strong> ')
-                    .replace(/Discharge Notes: /g, '<strong>Notes:</strong> ')
-                    .replace(/={50,}/g, '<hr class="notes-separator">')
-                    .replace(/DISCHARGE NOTES \[(.*?)\]/g, '<strong>Discharge Date:</strong> $1');
+                // Extract only the actual notes content after "Notes:" 
+                let notesText = data.notes;
+                // Remove any leading timestamp and markers up to "Notes:"
+                const notesMatch = notesText.match(/Notes:\s*(.*?)(?:\n|$)/is);
+                if (notesMatch && notesMatch[1]) {
+                    notesText = notesMatch[1].trim();
+                } else {
+                    // Fallback: remove everything before the first occurrence of "Notes:" if present
+                    const notesIndex = notesText.indexOf('Notes:');
+                    if (notesIndex !== -1) {
+                        notesText = notesText.substring(notesIndex + 6).trim();
+                    }
+                }
+                // Remove any trailing separators or markers
+                notesText = notesText.replace(/={3,}/g, '').trim();
                 
+                // Replace newlines with <br> for HTML display
+                let formattedNotes = notesText.replace(/\n/g, '<br>');
                 container.innerHTML = `<div class="notes-content">${formattedNotes}</div>`;
             } else {
                 container.innerHTML = '<div class="no-notes">No discharge notes available</div>';
@@ -678,16 +639,14 @@ function switchTab(tab) {
     const sessionsBtn = document.getElementById('sessionsTabBtn');
     const admissionBtn = document.getElementById('admissionTabBtn');
     const dischargeBtn = document.getElementById('dischargeTabBtn');
-    
-    // Hide all tabs
+
     sessionsTab.classList.remove('active');
     admissionTab.classList.remove('active');
     dischargeTab.classList.remove('active');
     sessionsBtn.classList.remove('active');
     admissionBtn.classList.remove('active');
     dischargeBtn.classList.remove('active');
-    
-    // Show selected tab
+
     if (tab === 'sessions') {
         sessionsTab.classList.add('active');
         sessionsBtn.classList.add('active');

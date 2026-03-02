@@ -17,65 +17,78 @@ class PatientController
     /**
      * Store a new patient (called from ward pages)
      */
-    public function store()
-    {
-        // Verify CSRF token
-        verify_csrf($_POST['csrf_token'] ?? '');
+   /**
+ * Store a new patient (called from ward pages)
+ */
+public function store()
+{
+    // Verify CSRF token
+    verify_csrf($_POST['csrf_token'] ?? '');
 
-        // Validate required fields
-        $errors = [];
-        
-        if (empty($_POST['ward'])) {
-            $errors[] = 'Ward is required';
-        }
-        
-        if (empty($_POST['room_number'])) {
-            $errors[] = 'Room number is required';
-        }
-        
-        if (empty($_POST['initials'])) {
-            $errors[] = 'Patient initials are required';
-        }
-
-        // Check if room is available in the ward
-        if (!empty($_POST['ward']) && !empty($_POST['room_number'])) {
-            if (!Patient::isRoomAvailable($_POST['ward'], $_POST['room_number'])) {
-                $errors[] = 'Room ' . $_POST['room_number'] . ' is already occupied in ' . $_POST['ward'] . ' ward';
-            }
-        }
-
-        // If there are errors, redirect back with error messages
-        if (!empty($errors)) {
-            $_SESSION['errors'] = $errors;
-            $_SESSION['old'] = $_POST;
-            redirect('/wards/' . strtolower($_POST['ward']));
-            return;
-        }
-
-        // Create the patient
-        $result = Patient::create($_POST);
-
-        if ($result) {
-            // Get the new patient ID
-            $db = Database::getInstance();
-            $patientId = $db->lastInsertId();
-            
-            // Log the activity
-            ActivityLog::create([
-                'action_type' => 'patient_admitted',
-                'description' => 'Admitted patient ' . strtoupper($_POST['initials']) . ' to Room ' . $_POST['room_number'] . ' in ' . $_POST['ward'] . ' ward',
-                'patient_id' => $patientId,
-                'ward' => $_POST['ward']
-            ]);
-            
-            $_SESSION['success'] = 'Patient ' . strtoupper($_POST['initials']) . ' admitted successfully to Room ' . $_POST['room_number'];
-        } else {
-            $_SESSION['error'] = 'Failed to admit patient. Please try again.';
-        }
-
-        // Redirect back to the ward page
-        redirect('/wards/' . strtolower($_POST['ward']));
+    // Validate required fields
+    $errors = [];
+    
+    if (empty($_POST['ward'])) {
+        $errors[] = 'Ward is required';
     }
+    
+    if (empty($_POST['room_number'])) {
+        $errors[] = 'Room number is required';
+    }
+    
+    if (empty($_POST['initials'])) {
+        $errors[] = 'Patient initials are required';
+    }
+
+    // Check if room is available in the ward
+    if (!empty($_POST['ward']) && !empty($_POST['room_number'])) {
+        if (!Patient::isRoomAvailable($_POST['ward'], $_POST['room_number'])) {
+            $errors[] = 'Room ' . $_POST['room_number'] . ' is already occupied in ' . $_POST['ward'] . ' ward';
+        }
+    }
+
+    // If there are errors, redirect back with error messages
+    if (!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        $_SESSION['old'] = $_POST;
+        redirect('/wards/' . strtolower($_POST['ward']));
+        return;
+    }
+
+    // Prepare data for insertion – ensure core10_admission is set
+    $data = [
+        'ward'          => $_POST['ward'],
+        'room_number'   => $_POST['room_number'],
+        'initials'      => strtoupper($_POST['initials']),
+        'admission_date'=> $_POST['admission_date'] ?? date('Y-m-d'),
+        'core10_admission' => isset($_POST['core10_admission']) ? 1 : 0,  // ✅ this is the key fix
+        'notes'         => $_POST['notes'] ?? null
+    ];
+
+    // Create the patient
+    $result = Patient::create($data);
+
+    if ($result) {
+        // Get the new patient ID
+        $db = \App\Config\Database::getInstance();
+        $patientId = $db->lastInsertId();
+        
+        // Log the activity
+        ActivityLog::create([
+            'action_type' => 'patient_admitted',
+            'description' => 'Admitted patient ' . strtoupper($data['initials']) . ' to Room ' . $data['room_number'] . ' in ' . $data['ward'] . ' ward',
+            'patient_id' => $patientId,
+            'ward' => $data['ward']
+        ]);
+        
+        $_SESSION['success'] = 'Patient ' . strtoupper($data['initials']) . ' admitted successfully to Room ' . $data['room_number'];
+    } else {
+        $_SESSION['error'] = 'Failed to admit patient. Please try again.';
+    }
+
+    // Redirect back to the ward page
+    redirect('/wards/' . strtolower($_POST['ward']));
+}
 
     /**
      * View single patient
@@ -128,7 +141,7 @@ class PatientController
     }
 
     /**
-     * Show all patients (optional)
+     * Show all patients
      */
     public function index()
     {
@@ -256,33 +269,35 @@ class PatientController
     // ========== AJAX METHODS (WITH QUERY PARAMETERS) ==========
 
    /**
+/**
  * Get patient summary as JSON for AJAX calls
  */
 public function getSummaryJson()
 {
-    // Turn off error reporting to prevent HTML output
     error_reporting(0);
     ini_set('display_errors', 0);
-    
-    // Clear any previous output
     if (ob_get_level()) ob_clean();
-    
     header('Content-Type: application/json');
     
     try {
-        error_log("========== getSummaryJson CALLED ==========");
-        
         Auth::requireLogin();
         
         $patientId = $_GET['id'] ?? null;
-        
         if (!$patientId || !is_numeric($patientId)) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid patient ID']);
             exit;
         }
         
-        $patient = Patient::find($patientId);
+        $db = \App\Config\Database::getInstance();
+        $stmt = $db->prepare("
+            SELECT id, initials, ward, room_number, 
+                   admission_date, discharge_date,
+                   core10_admission, core10_discharge 
+            FROM patients WHERE id = ?
+        ");
+        $stmt->execute([$patientId]);
+        $patient = $stmt->fetch(\PDO::FETCH_OBJ);
         
         if (!$patient) {
             http_response_code(404);
@@ -290,22 +305,29 @@ public function getSummaryJson()
             exit;
         }
         
+        // Format datetimes
+        $admissionDateTime = $patient->admission_date 
+            ? date('d/m/Y H:i', strtotime($patient->admission_date)) 
+            : null;
+        $dischargeDateTime = $patient->discharge_date 
+            ? date('d/m/Y H:i', strtotime($patient->discharge_date)) 
+            : null;
+        
         $response = [
-            'id' => $patient->id,
-            'initials' => $patient->initials,
-            'ward' => $patient->ward,
-            'room_number' => $patient->room_number,
-            'admission_date' => $patient->admission_date ? date('d/m/Y', strtotime($patient->admission_date)) : null,
-            'discharge_date' => $patient->discharge_date ? date('d/m/Y', strtotime($patient->discharge_date)) : null,
-            'core10_admission' => (bool)$patient->core10_admission,
-            'core10_discharge' => (bool)$patient->core10_discharge,
-            'is_discharged' => $patient->discharge_date ? true : false
+            'id'                   => $patient->id,
+            'initials'             => $patient->initials,
+            'ward'                 => $patient->ward,
+            'room_number'          => $patient->room_number,
+            'admission_datetime'   => $admissionDateTime,
+            'discharge_datetime'   => $dischargeDateTime,
+            'core10_admission'     => (bool)$patient->core10_admission,
+            'core10_discharge'     => (bool)$patient->core10_discharge,
+            'is_discharged'        => $patient->discharge_date ? true : false
         ];
         
         echo json_encode($response);
         
     } catch (\Exception $e) {
-        error_log("EXCEPTION in getSummaryJson: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['error' => 'Server error']);
     }

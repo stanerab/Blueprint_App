@@ -36,7 +36,7 @@ class ActivityLog
     }
 
     /**
-     * Get recent activity logs
+     * Get recent activity logs (global)
      */
     public static function getRecent($limit = 10)
     {
@@ -58,6 +58,28 @@ class ActivityLog
             return $stmt->fetchAll(PDO::FETCH_OBJ);
         } catch (PDOException $e) {
             error_log("Failed to get activity logs: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get recent activity logs by user (for user-specific feeds)
+     */
+    public static function getRecentByUser($userId, $limit = 10)
+    {
+        try {
+            $db = Database::getInstance();
+            
+            $stmt = $db->prepare("
+                SELECT * FROM activity_logs 
+                WHERE user_id = ? 
+                ORDER BY created_at DESC 
+                LIMIT ?
+            ");
+            $stmt->execute([$userId, $limit]);
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            error_log("Failed to get activity logs by user: " . $e->getMessage());
             return [];
         }
     }
@@ -91,24 +113,10 @@ class ActivityLog
     }
     
     /**
-     * Get activity logs by user
+     * Get activity logs by user (alias for getRecentByUser, for consistency)
      */
     public static function getByUser($userId, $limit = 10)
     {
-        try {
-            $db = Database::getInstance();
-            
-            $stmt = $db->prepare("
-                SELECT * FROM activity_logs 
-                WHERE user_id = ? 
-                ORDER BY created_at DESC 
-                LIMIT ?
-            ");
-            $stmt->execute([$userId, $limit]);
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (PDOException $e) {
-            error_log("Failed to get activity logs by user: " . $e->getMessage());
-            return [];
-        }
+        return self::getRecentByUser($userId, $limit);
     }
 }

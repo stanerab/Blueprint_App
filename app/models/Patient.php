@@ -324,4 +324,88 @@ class Patient
         $stmt = $db->prepare("UPDATE patients SET is_archived = 0 WHERE id = ?");
         return $stmt->execute([$id]);
     }
+    
+    /**
+     * Get patients created by a specific user
+     * @param int $userId
+     * @param bool $archived
+     * @return array
+     */
+    public static function getByUser($userId, $archived = false)
+    {
+        $db = Database::getInstance();
+        $archivedFlag = $archived ? 1 : 0;
+        
+        $stmt = $db->prepare("
+            SELECT p.*, u.username as created_by_username 
+            FROM patients p 
+            LEFT JOIN users u ON p.created_by = u.id 
+            WHERE p.created_by = ? AND p.is_archived = ?
+            ORDER BY p.created_at DESC
+        ");
+        $stmt->execute([$userId, $archivedFlag]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Get active patients by ward created by specific user
+     * @param string $ward
+     * @param int $userId
+     * @return array
+     */
+    public static function getActiveByWardAndUser($ward, $userId)
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("
+            SELECT * FROM patients 
+            WHERE ward = ? 
+            AND discharge_date IS NULL 
+            AND is_archived = 0 
+            AND created_by = ?
+            ORDER BY CAST(room_number AS UNSIGNED) ASC
+        ");
+        $stmt->execute([$ward, $userId]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Get discharged patients by ward created by specific user
+     * @param string $ward
+     * @param int $userId
+     * @return array
+     */
+    public static function getDischargedByWardAndUser($ward, $userId)
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("
+            SELECT * FROM patients 
+            WHERE ward = ? 
+            AND discharge_date IS NOT NULL 
+            AND is_archived = 0 
+            AND created_by = ?
+            ORDER BY discharge_date DESC
+        ");
+        $stmt->execute([$ward, $userId]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Get archived patients by ward created by specific user
+     * @param string $ward
+     * @param int $userId
+     * @return array
+     */
+    public static function getArchivedByWardAndUser($ward, $userId)
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("
+            SELECT * FROM patients 
+            WHERE ward = ? 
+            AND is_archived = 1 
+            AND created_by = ?
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([$ward, $userId]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
 }

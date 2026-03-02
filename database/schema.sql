@@ -78,3 +78,18 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL
 );
+
+-- Users table already has id
+-- Make sure patients and sessions have created_by foreign keys
+
+-- If not already set, add foreign key constraints
+ALTER TABLE patients 
+ADD CONSTRAINT fk_patients_created_by 
+FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE sessions 
+ADD CONSTRAINT fk_sessions_created_by 
+FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- If role column doesn't exist, add it
+ALTER TABLE users ADD COLUMN role ENUM('admin', 'user') DEFAULT 'user' AFTER full_name;

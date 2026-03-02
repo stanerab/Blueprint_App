@@ -1,7 +1,21 @@
-<?php $title = 'Clinical Dashboard'; ?>
-
 <?php
+$title = 'Clinical Dashboard';
+
+date_default_timezone_set('Europe/London');
+
 $today = date('Y-m-d');
+$hour = (int) date('H');
+
+/* Greeting Logic */
+if ($hour >= 5 && $hour < 12) {
+    $greeting = "Good Morning";
+} elseif ($hour >= 12 && $hour < 17) {
+    $greeting = "Good Afternoon";
+} elseif ($hour >= 17 && $hour < 22) {
+    $greeting = "Good Evening";
+} else {
+    $greeting = "Good Night";
+}
 
 /* -------------------------
    PREPROCESS DATA (OPTIMIZED)
@@ -11,38 +25,39 @@ $patients = $patients ?? [];
 $sessions = $sessions ?? [];
 
 /* Active / discharged */
-$activePatients = array_filter($patients, fn($p)=> !$p->discharge_date);
-$dischargedPatients = array_filter($patients, fn($p)=> $p->discharge_date);
+$activePatients = array_filter($patients, fn($p) => !$p->discharge_date);
+$dischargedPatients = array_filter($patients, fn($p) => $p->discharge_date);
 
 /* Ward patient grouping */
 $wardPatients = [
-    'Hope'=>[],
-    'Manor'=>[],
-    'Lakeside'=>[]
+    'Hope' => [],
+    'Manor' => [],
+    'Lakeside' => []
 ];
 
-foreach($activePatients as $p){
-    $wardPatients[$p->ward][]=$p;
+foreach ($activePatients as $p) {
+    $wardPatients[$p->ward][] = $p;
 }
 
 /* Ward sessions today */
-$wardSessions=['Hope'=>0,'Manor'=>0,'Lakeside'=>0];
+$wardSessions = ['Hope'=>0,'Manor'=>0,'Lakeside'=>0];
 
-foreach($sessions as $s){
-    if(str_starts_with($s->datetime,$today)){
+foreach ($sessions as $s) {
+    if (str_starts_with($s->datetime, $today)) {
         $wardSessions[$s->ward]++;
     }
 }
 
 /* Index sessions by patient id */
-$sessionIndex=[];
-foreach($sessions as $s){
-    $sessionIndex[$s->patient_id][]=$s;
+$sessionIndex = [];
+
+foreach ($sessions as $s) {
+    $sessionIndex[$s->patient_id][] = $s;
 }
 
 /* Sort sessions newest first */
-foreach($sessionIndex as &$list){
-    usort($list, fn($a,$b)=>strtotime($b->datetime)-strtotime($a->datetime));
+foreach ($sessionIndex as &$list) {
+    usort($list, fn($a,$b) => strtotime($b->datetime) - strtotime($a->datetime));
 }
 unset($list);
 
@@ -50,12 +65,11 @@ unset($list);
 $totalPatients = count($activePatients);
 $totalDischarged = count($dischargedPatients);
 $totalSessions = count($sessions);
-$todaySessions = count(array_filter($sessions, fn($s)=> str_starts_with($s->datetime, $today)));
+$todaySessions = count(array_filter($sessions, fn($s) => str_starts_with($s->datetime, $today)));
 
 /* CORE-10 completed count */
-$core10Completed = count(array_filter($activePatients, fn($p)=> $p->core10_admission));
+$core10Completed = count(array_filter($activePatients, fn($p) => $p->core10_admission));
 ?>
-
 <style>
 /* ===== MODERN DASHBOARD STYLES ===== */
 :root {
@@ -795,8 +809,10 @@ body {
 <!-- HEADER -->
 <div class="dashboard-header">
     <div class="header-left">
-        <h1>Clinical Dashboard</h1>
-        <p class="welcome-text">Dr. <?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username']) ?></p>
+        <h1>Dashboard</h1>
+<p class="welcome-text">
+    <?= $greeting ?>, <?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username']) ?>
+</p>
     </div>
     <div class="header-right">
         <a href="<?= url('wards/hope') ?>" class="btn-outline">

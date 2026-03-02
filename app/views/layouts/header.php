@@ -75,8 +75,8 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                         <li>
                             <span class="dropdown-item-text text-muted">
-                                Role: <?= $_SESSION['role'] ?? 'user'; ?>
-                            </span>
+    Role: <?= ucfirst($_SESSION['role'] ?? 'user'); ?>
+</span>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>

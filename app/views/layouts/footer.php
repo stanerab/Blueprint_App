@@ -6,7 +6,7 @@
                 <div class="col-md-3">
                     <h5 class="fw-bold">Blueprint</h5>
                     <p class="small text-white-50">
-                        Clinical task management system for psychology ward.
+                  A purpose built clinical management system delivering structured patient tracking, session documentation, CORE-10 oversight, and coordinated ward operations for modern psychology services.
                     </p>
                 </div>
                 <div class="col-md-3">

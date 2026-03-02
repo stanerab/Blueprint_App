@@ -1,0 +1,71 @@
+/* ===== RESPONSIVE ONLY ===== */
+
+/* Large Desktop */
+@media (min-width: 1400px) {
+    .stats-grid {
+        gap: 25px;
+    }
+
+    .ward-overview {
+        gap: 25px;
+    }
+}
+
+/* Desktop */
+@media (max-width: 1199px) {
+    .ward-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+    .ward-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .patients-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .ward-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .patients-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .stat-card .value {
+        font-size: 28px;
+    }
+}

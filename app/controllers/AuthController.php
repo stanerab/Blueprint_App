@@ -26,7 +26,7 @@ class AuthController
         view('auth.login', ['error' => 'Invalid username or password']);
     }
     
-    // ✅ KEEP THIS ONE (using Auth::logout)
+    //  (using Auth::logout)
     public function logout()
     {
         Auth::logout();

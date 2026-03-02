@@ -52,9 +52,9 @@
         });
         </script>
         
-        <div class="demo-credentials">
+       <!-- <div class="demo-credentials">
             <p><strong>Demo Credentials:</strong></p>
             <p>Username: admin<br>Password: admin123</p>
-        </div>
+        </div> -->
     </div>
 </div>

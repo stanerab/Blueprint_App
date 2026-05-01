@@ -114,10 +114,9 @@ Tracks all staff actions including:
 
 ---
 
-## Installation
+## ⚠️ Usage Notice
 
 ```bash
-## ⚠️ Usage Notice
 
 This repository is made public for portfolio and demonstration purposes only.  
 Cloning, forking, copying, or redistributing any part of this code without explicit 

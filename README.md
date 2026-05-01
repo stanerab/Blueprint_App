@@ -117,21 +117,13 @@ Tracks all staff actions including:
 ## Installation
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/stanerab/Blueprint_App.git
+## ⚠️ Usage Notice
 
-# 2. Install dependencies
-composer install
+This repository is made public for portfolio and demonstration purposes only.  
+Cloning, forking, copying, or redistributing any part of this code without explicit 
+written permission from the developer is not permitted.
 
-# 3. Set up environment variables
-cp .env.example .env
-# Edit .env with your database credentials
-
-# 4. Import the database schema
-# Import database/schema.sql into your MySQL database
-
-# 5. Visit the app
-# http://localhost/Blueprint/public
+© 2026 Stanley Erhabor. All rights reserved.
 ```
 
 ---

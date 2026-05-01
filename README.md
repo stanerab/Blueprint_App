@@ -1,233 +1,235 @@
-Blueprint
+# Blueprint 
 
-Blueprint is a clinical management web application designed to support psychologists and clinical teams in managing patients, sessions, and treatment workflows in a structured and user-friendly way.
+Blueprint is a clinical Session management web application designed to support psychologists and clinical teams in managing patients, sessions, and treatment workflows in a structured and efficient way.
 
-⸻
+Built in collaboration with a clinical psychologist at a private mental health hospital, Blueprint has evolved through three rounds of real stakeholder testing and feedback — from a ward-based management dashboard (v1.0) to a session-focused clinical workflow tool (v1.4).
 
-Overview
+**Live Demo:** https://blueprintcaretech.com
+
+---
+
+## Overview
 
 Blueprint was developed to simplify day-to-day clinical operations, including:
 
-* Patient tracking across wards
-* Session scheduling and management
-* Individual and group therapy session tracking
-* CORE-10 monitoring
-* Clinical note organisation
-* Activity tracking for audit and accountability
+- Patient tracking across wards
+- Session scheduling and management
+- Individual and group therapy session tracking
+- CORE-10 outcome monitoring
+- Clinical note organisation
+- Activity tracking for audit and accountability
 
-The system focuses heavily on usability, ensuring clinicians can navigate quickly and efficiently in real-world clinical environments.
+The system focuses heavily on usability, ensuring clinicians can navigate quickly and efficiently in real-world clinical environments with minimal clicks.
 
-⸻
+---
 
-Key Features
+## Key Features
 
-⸻
+### Dashboard
+- Overview of active patients and today's sessions
+- Ward-based patient summaries (Hope, Lakeside, Manor)
+- Quick action shortcuts for faster workflows
+- Ward-coloured session cards for instant visual identification
+- Activity log with full audit trail
 
-Dashboard
+### Calendar System
+- View all sessions across the month
+- Add individual or group sessions directly from the calendar
+- Click any day to view all sessions for that date
+- Click sessions to open full details instantly
+- Supports both individual and group session visibility
+- Ward-coloured chips for quick identification
 
-* Overview of active patients and sessions
-* Ward-based summaries (Hope, Lakeside, Manor)
-* Today’s sessions with quick actions
-* Activity tracking
-* Quick action shortcuts for faster workflows
+### Patient Management
+- Admit patients with ward and room allocation
+- Edit patient details and room changes
+- Discharge patients with backdated discharge date support
+- View full patient session history
+- Discharged patient management
+- Archived session retrieval
 
-⸻
+### CORE-10 Tracking
+- Record CORE-10 completion on admission
+- Record CORE-10 completion on discharge
+- Editable admission and discharge CORE-10 status
+- Visual completion indicators (Completed / Pending)
 
-Calendar System
+*Added based on direct clinician workflow feedback.*
 
-* View sessions across days
-* Add individual sessions directly from calendar
-* Add group sessions directly from calendar
-* Click a day to view all sessions
-* Click sessions to open details instantly
-* Supports both individual and group session visibility
-
-⸻
-
-Patient Management
-
-* Add patients
-* Edit patients
-* Discharge patients
-* Backdate discharge dates
-* Ward allocation
-* Room tracking
-* View full patient history
-* Discharged patient management
-* Archived session retrieval
-
-⸻
-
-CORE-10 Tracking
-
-* Record CORE-10 on admission
-* Record CORE-10 on discharge
-* Editable admission CORE-10
-* Editable discharge CORE-10
-* Visual completion indicators
-
-Added based on real clinician workflow feedback.
-
-⸻
-
-Individual Session Management
-
+### Individual Session Management
 Create and manage one-to-one clinical sessions with:
+- CareNotes tracking
+- Tracker completion
+- Task tracking
+- Session notes
+- Archive and delete sessions
 
-* CareNotes tracking
-* Tracker completion
-* Task tracking
-* Session notes
-* Archive sessions
-* Delete sessions
+### Group Session Management *(introduced in v1.4)*
+- Create group therapy sessions across one or multiple wards
+- Dynamic patient attendance register loaded by ward
+- Mark attendance live (Attended / Declined / DNA)
+- Record per-patient attendance notes
+- View historical group sessions with full attendance details
+- Delete group sessions with activity log entry
+- Full calendar integration for group sessions
 
-⸻
+*Built based on direct psychologist feedback from real clinical workflows.*
 
-Group Session Management (v1.4)
-
-New feature introduced after stakeholder testing.
-
-* Create group therapy sessions
-* Select multiple wards
-* Dynamic patient attendance register
-* Mark attendance live
-* Record attendance notes
-* View historical group sessions
-* View full attendance details
-* Delete group sessions when needed
-* Calendar integration for group sessions
-
-Built based on direct psychologist feedback.
-
-⸻
-
-Ward Filtering
-
+### Ward Filtering
 Filter patients and sessions by ward across:
+- Dashboard today's sessions
+- Calendar
+- Patient selection dropdown
+- Group session attendance register
 
-* Dashboard
-* Calendar
-* Patient selection
-* Group sessions
+### Clinical Notes
+- Admission notes
+- Discharge notes
+- Structured note viewing
+- Improved readability for long notes
 
-⸻
+### Activity Log
+Tracks all staff actions including:
+- Session creation, updates, archiving and deletion
+- Patient admissions, room changes and discharges
+- Group session creation and deletion
+- Ward badge display for quick identification
 
-Clinical Notes
+*Supports clinical accountability and CQC audit requirements.*
 
-* Admission notes
-* Discharge notes
-* Structured note viewing
-* Improved readability for long notes
+---
 
-⸻
+## Tech Stack
 
-Activity Log
+| Layer | Technology |
+|---|---|
+| Backend | PHP (Custom MVC Architecture) |
+| Frontend | HTML, CSS, Vanilla JavaScript |
+| Styling | Bootstrap Icons, Custom CSS |
+| Database | MySQL |
+| Auth | Session-based authentication with CSRF protection |
+| Environment | PHP dotenv (vlucas/phpdotenv) |
+| Version Control | Git & GitHub |
+| Hosting | Hostinger |
 
-Tracks staff actions such as:
+---
 
-* Session creation
-* Session deletion
-* Session archiving
-* Patient updates
-* Group session activity
+## Installation
 
-Supports accountability and auditing.
+```bash
+# 1. Clone the repository
+git clone https://github.com/stanerab/Blueprint_App.git
 
-⸻
+# 2. Install dependencies
+composer install
 
-Tech Stack
+# 3. Set up environment variables
+cp .env.example .env
+# Edit .env with your database credentials
 
-Backend: PHP (CodeIgniter-style MVC structure)
-Frontend: HTML, CSS (Bootstrap), JavaScript
-Database: MySQL
-Version Control: Git & GitHub
+# 4. Import the database schema
+# Import database/schema.sql into your MySQL database
 
-Live Demo: https://blueprintcaretech.com
+# 5. Visit the app
+# http://localhost/Blueprint/public
+```
 
-⸻
+---
 
-Version History
+## Security
+- CSRF protection on all forms
+- Session-based authentication
+- Secure password hashing
+- Environment variables for all credentials (never committed to version control)
 
-v1.4 (Latest)
+---
 
-* Added full group session workflow
-* Added group attendance register
-* Added group session history
-* Added group session detail views
-* Added group session deletion
-* Added group sessions to calendar
-* Added editable discharge CORE-10
-* Added backdated discharge support
-* Improved patient modal workflow
-* Multiple UI/UX improvements
-* Bug fixes after stakeholder testing
+## Version History
 
-⸻
+### v1.4 *(Current)*
+- Added full group session workflow with attendance register
+- Added group session history and detail views
+- Added group session deletion with activity logging
+- Added group sessions to calendar widget
+- Added editable discharge CORE-10
+- Added backdated discharge date support
+- Improved patient modal with Add Session button
+- Ward colour consistency throughout the entire app
+- Mobile responsive improvements
+- Multiple UI/UX improvements based on stakeholder feedback
+- Bug fixes from third round of stakeholder testing
 
-v1.2
+### v1.2
+- Introduced calendar system
+- Added session creation via calendar
+- Added ward filtering across dashboard and patient selection
+- Enabled CORE-10 editing after admission
+- Improved UI/UX based on clinician feedback
 
-* Introduced calendar system
-* Added session creation via calendar
-* Improved UI/UX based on clinician feedback
-* Added ward filtering
-* Enabled CORE-10 editing after admission
+### v1.0
+- Initial patient and individual session management system
+- Ward-based dashboard with bed counts and CORE-10 stats
+- Individual session tracking per ward
 
-⸻
+#### v1.0 Screenshots
 
-v1.0
-
-* Initial patient and individual session management system
-v1 Homepage Overview
+**Homepage Overview**
 ![v1 Homepage Overview](screenshots/v1.0-homepage.png)
-v1 Activity Tracking View
-![v1 Activity Tracking View](screenshots/v1.0-homepage2.png)
-v1 Ward based navigation, eg hope, 
-lakesideside and manor ward
-![v1 Ward based navigation, eg hope,lakesideside and manor ward](screenshots/v1.0-homepage3.png)
-v1 Admit patient modal, ward based
-![v1 Admit patient modal](screenshots/v1.0-homepage8.png)
-v1 Patient modal, ward based
-![v1 Patient modal](screenshots/v1.0-homepage6.png)
-v1 Patient cart selection, ward based
-![v1 Patient cart selection](screenshots/v1.0-homepage4.png)
-v1 Archived sessions page, ward based
-![v1 Archived sessions page](screenshots/v1.0-homepage7.png)
-v1 Discharged page, ward based
-![v1 Discharged page](screenshots/v1.0-homepage5.png)
 
-⸻
+**Activity Tracking**
+![v1 Activity Tracking](screenshots/v1.0-homepage2.png)
 
-Project Purpose
+**Ward-Based Navigation**
+![v1 Ward Navigation](screenshots/v1.0-homepage3.png)
 
-This project was developed in collaboration with a clinical psychologist to:
+**Admit Patient Modal**
+![v1 Admit Patient](screenshots/v1.0-homepage8.png)
 
-* Improve workflow efficiency
-* Reduce friction in session tracking
-* Provide clearer visibility of patient activity
-* Support better clinical decision-making
+**Patient Modal**
+![v1 Patient Modal](screenshots/v1.0-homepage6.png)
 
-Blueprint continues to evolve through real stakeholder feedback and testing.
+**Patient Card Selection**
+![v1 Patient Selection](screenshots/v1.0-homepage4.png)
 
-⸻
+**Archived Sessions**
+![v1 Archived Sessions](screenshots/v1.0-homepage7.png)
 
-Security
+**Discharged Patients**
+![v1 Discharged](screenshots/v1.0-homepage5.png)
 
-* CSRF protection implemented
-* Session-based authentication
-* Secure password hashing
+---
 
-⸻
+## Project Purpose
 
-Future Improvements
+Blueprint was developed in close collaboration with a clinical psychologist to:
 
-* Role-based access control
-* Reporting & analytics dashboard
-* Mobile optimisation improvements
-* Multi-hospital support
-  
+- Improve workflow efficiency in a private mental health hospital setting
+- Reduce friction in session tracking and documentation
+- Provide clearer visibility of patient activity across wards
+- Support clinical decision-making and governance requirements
+- Replace paper-based processes with a structured digital workflow
 
-⸻
+Blueprint continues to evolve through real stakeholder feedback and iterative testing.
 
-License 📑
+---
 
-This project is currently for educational, portfolio, and clinical prototype use
+## Future Improvements
+- Role-based access control (admin, psychologist, nurse)
+- Reporting and analytics dashboard
+- CORE-10 score entry (not just completion status)
+- Multi-hospital support
+- Export session reports to PDF
+
+---
+
+## Developer
+
+**Stanley Erhabor**  
+Full Stack Developer  
+[GitHub](https://github.com/stanerab)
+
+---
+
+## License
+
+This project is currently for educational, portfolio, and clinical prototype use.

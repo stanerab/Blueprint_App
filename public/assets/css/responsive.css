@@ -1,0 +1,505 @@
+/* =====================================================
+   RESPONSIVE.CSS – FINAL CLEAN VERSION (with dashboard fix)
+   Place this file LAST in your HTML <head>
+   ===================================================== */
+
+/* ----- Mobile styles (max-width: 767px) ----- */
+@media (max-width: 767px) {
+
+    /* ---------- Global resets ---------- */
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+
+    .container, .container-fluid {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    [class*="col-"] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        margin-bottom: 20px !important;
+    }
+
+    [class*="col-"]:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* ---------- STAT CARDS (2 columns, nice boxes) ---------- */
+    .stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+    }
+
+    .stats-grid.secondary-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+        margin-top: 0 !important;
+    }
+
+    .stat-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 16px 12px !important;
+        margin: 0 !important;
+        background: #fff !important;
+        border-radius: 16px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+        min-height: 100px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .stat-card .value,
+    .stat-card h1,
+    .stat-card h3,
+    .stat-card .large-number {
+        font-size: 28px !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        margin: 0 0 4px 0 !important;
+        color: #333 !important;
+    }
+
+    .stat-card .label,
+    .stat-card p,
+    .stat-card small {
+        font-size: 13px !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        color: #666 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    /* For the last card (e.g., CORE-10) if you want it full width */
+    .stats-grid .stat-card:last-child:nth-child(odd) {
+        grid-column: span 2;   /* makes it full width when there's an odd number of cards */
+    }
+
+    /* ----- DASHBOARD STATS BAR (override inline CSS) ----- */
+    .stats-bar {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+
+    /* ---------- PATIENT SECTION ---------- */
+    .section-title {
+        font-size: 20px !important;
+        margin: 8px 0 !important;
+    }
+
+    .search-filters {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* ----- SEARCH BOX with button (horizontal on mobile) ----- */
+    .search-box {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-height: 44px !important;
+        margin-bottom: 8px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .search-box input[type="text"],
+    .search-box #patientSearch {
+        flex: 1 !important;
+        height: 44px !important;
+        padding: 8px 12px !important;
+        font-size: 16px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .search-box button {
+        width: auto !important;
+        height: 44px !important;
+        padding: 8px 16px !important;
+        font-size: 14px !important;
+        background-color: #0066cc !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+    }
+
+    /* ----- ROOM FILTER ----- */
+    .filter-select,
+    #roomFilter {
+        width: 100% !important;
+        height: 44px !important;
+        padding: 8px 12px !important;
+        font-size: 16px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        margin: 0 0 12px 0 !important;
+        background-color: white !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ----- PATIENTS GRID / CARDS ----- */
+    .patients-grid,
+    #patientsGrid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-top: 0 !important;
+        padding: 0 !important;
+    }
+
+    .patient-card {
+        margin: 0 0 8px 0 !important;
+        padding: 16px !important;
+        background: #fff !important;
+        border-radius: 16px !important;
+        border-left: 5px solid #0066cc !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .patient-card .room-name {
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        margin-bottom: 4px !important;
+    }
+
+    .patient-card .admitted-date {
+        font-size: 13px !important;
+        color: #666 !important;
+        margin-bottom: 8px !important;
+    }
+
+    .core-indicators {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        margin-top: 8px !important;
+    }
+
+    .core-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        padding: 6px 12px !important;
+        background: #f2f2f2 !important;
+        border-radius: 30px !important;
+        font-size: 13px !important;
+    }
+
+    .core-badge.admission {
+        background: #e3f2fd !important;
+        color: #0066cc !important;
+    }
+
+    .core-badge.discharge {
+        background: #fff3e0 !important;
+        color: #cc7b00 !important;
+    }
+
+    /* ---------- FOOTER (stack with minimal spacing) ---------- */
+    footer,
+    .site-footer {
+        padding: 25px 15px 15px !important;
+        text-align: left !important;
+    }
+
+    footer .row,
+    .site-footer .row {
+        display: block !important;
+        margin: 0 !important;
+    }
+
+    footer [class*="col-"],
+    .site-footer [class*="col-"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 0 20px 0 !important;
+    }
+
+    footer [class*="col-"]:last-child,
+    .site-footer [class*="col-"]:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    footer h5, footer h6,
+    .site-footer h5, .site-footer h6,
+    h6.fw-bold {
+        font-size: 16px !important;
+        margin: 0 0 8px 0 !important;
+        font-weight: 600 !important;
+    }
+
+    footer ul, .site-footer ul,
+    ul.list-unstyled {
+        padding-left: 0 !important;
+        list-style: none !important;
+        margin: 0 !important;
+    }
+
+    footer li, .site-footer li,
+    ul.list-unstyled li {
+        margin-bottom: 6px !important;
+        line-height: 1.5 !important;
+        font-size: 14px !important;
+    }
+
+    footer a, .site-footer a,
+    ul.list-unstyled a {
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: 14px !important;
+    }
+
+    footer a:hover {
+        color: #ffb400 !important;
+    }
+
+    /* ---------- CONTENT CONTAINER ---------- */
+    .content-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+/* ---------- Small mobile adjustments (max-width: 480px) ---------- */
+@media (max-width: 480px) {
+    .stats-grid {
+        gap: 8px !important;
+    }
+
+    .stat-card {
+        padding: 12px 8px !important;
+    }
+
+    .stat-card .value {
+        font-size: 24px !important;
+    }
+
+    .stat-card .label {
+        font-size: 12px !important;
+    }
+
+    /* Dashboard stats bar same adjustments */
+    .stats-bar {
+        gap: 8px !important;
+    }
+
+    .search-box button {
+        padding: 8px 10px !important;
+        font-size: 13px !important;
+    }
+
+    .search-box input[type="text"] {
+        font-size: 14px !important;
+    }
+
+    .patient-card {
+        padding: 12px !important;
+    }
+}
+/* ===== OPTIMIZED MOBILE DASHBOARD ===== */
+@media (max-width: 767px) {
+    
+    /* Header adjustments */
+    .dashboard-header {
+        padding: 20px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .header-left h1 {
+        font-size: 24px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .welcome-text {
+        font-size: 16px !important;
+    }
+    
+    /* Ward navigation buttons - make them smaller and horizontal scroll if needed */
+    .header-right {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+    
+    .btn-outline {
+        padding: 8px 16px !important;
+        font-size: 14px !important;
+        flex: 0 1 auto !important;
+    }
+    
+    /* ===== STATS BAR - COMPACT DESIGN ===== */
+    .stats-bar {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 25px !important;
+    }
+    
+    .stat-card {
+        padding: 12px !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        min-height: 70px !important;
+    }
+    
+    .stat-card::before {
+        width: 3px !important;
+    }
+    
+    .stat-info {
+        flex: 1 !important;
+    }
+    
+    .stat-label {
+        font-size: 11px !important;
+        margin-bottom: 2px !important;
+        letter-spacing: 0.3px !important;
+    }
+    
+    .stat-value {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .stat-trend {
+        font-size: 9px !important;
+        display: block !important;
+        margin-top: 2px !important;
+        opacity: 0.7 !important;
+    }
+    
+    .stat-icon {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 18px !important;
+        margin: 0 !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* ===== WARD OVERVIEW CARDS ===== */
+    .section-title {
+        font-size: 20px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .ward-overview {
+        gap: 15px !important;
+        margin-bottom: 25px !important;
+    }
+    
+    .ward-card {
+        padding: 18px !important;
+    }
+    
+    .ward-header {
+        margin-bottom: 15px !important;
+    }
+    
+    .ward-header h3 {
+        font-size: 20px !important;
+    }
+    
+    .bed-count {
+        font-size: 13px !important;
+        padding: 4px 12px !important;
+    }
+    
+    .ward-stats {
+        gap: 12px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .ward-stat {
+        padding: 12px !important;
+    }
+    
+    .ward-stat .stat-label {
+        font-size: 11px !important;
+    }
+    
+    .ward-stat .stat-value {
+        font-size: 22px !important;
+    }
+    
+    .ward-link {
+        font-size: 14px !important;
+    }
+}
+
+/* Extra small devices (under 400px) */
+@media (max-width: 400px) {
+    .stat-card {
+        padding: 10px !important;
+        min-height: 65px !important;
+    }
+    
+    .stat-value {
+        font-size: 20px !important;
+    }
+    
+    .stat-label {
+        font-size: 10px !important;
+    }
+    
+    .stat-trend {
+        font-size: 8px !important;
+    }
+    
+    .stat-icon {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 16px !important;
+    }
+    
+    /* Optional: Hide trend text on very small screens */
+    .stat-trend {
+        display: none !important;
+    }
+}
+@media (max-width: 767px) {
+    /* Make any container with 'session' in the class scrollable */
+    [class*="session"] {
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}

@@ -173,10 +173,13 @@ written permission from the developer is not permitted.
 ![v1 Admit Patient](screenshots/v1.2-Admit-patient.png)
 
 **Add session, dynamic round 3 wards and room drop down**
-![v1 Admit Patient](screenshots/v1.2-add-section.png)
+![v1 Admit Patient](screenshots/v1.2-add-session.png)
 
 **Calender session view**
 ![v1 Admit Patient](screenshots/v1.2-calendar-session-view.png)
+
+**View today's session modal**
+![v1 Admit Patient](screenshots/v1.2-view-session.png)
 
 **Patient Card Selection**
 ![v1 Patient Selection](screenshots/v1.2-homepage3.png)

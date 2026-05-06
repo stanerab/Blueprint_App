@@ -169,9 +169,6 @@ written permission from the developer is not permitted.
 **Homepage Overview**
 ![v1 Homepage Overview](screenshots/v1.2-homepag2.png)
 
-**Patient Card Selection**
-![v1 Patient Selection](screenshots/v1.2-homepage3.png)
-
 **Admit Patient Modal**
 ![v1 Admit Patient](screenshots/v1.2-Admit-patient.png)
 
@@ -181,11 +178,14 @@ written permission from the developer is not permitted.
 **Calender session view**
 ![v1 Admit Patient](screenshots/v1.2-calendar-session-view.png)
 
+**Patient Card Selection**
+![v1 Patient Selection](screenshots/v1.2-homepage3.png)
+
 **Activity Logs with audit trail**
 ![v1 Activity Tracking](screenshots/v1.2-activity-logs.png)
 
 **Patient Modal**
-![v1 Patient Modal](screenshots/v1.2-homepage3.png)
+![v1 Patient Modal](screenshots/v1.2-patient-modal.png)
 
 **Archived Sessions**
 ![v1 Archived Sessions](screenshots/v1.2-achived-sessions.png)

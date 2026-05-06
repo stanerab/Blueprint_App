@@ -794,6 +794,15 @@ body.modal-open {
     padding: 0.5rem 0;
     min-height: 0;
 }
+.bp-cal-session-chip.gs-chip {
+    background: #8b5cf6;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    box-sizing: border-box;
+}
 
 #calDayList::-webkit-scrollbar {
     width: 0px;
@@ -2960,8 +2969,6 @@ footer {
     <option value="Skills">Skills</option>
     <option value="Mindfulness">Mindfulness</option>
     <option value="Art Therapy">Art Therapy</option>
-    <option value="Music Therapy">Music Therapy</option>
-    <option value="Occupational Therapy">Occupational Therapy</option>
     <option value="Psychoeducation">Psychoeducation</option>
     <option value="Relaxation">Relaxation</option>
     <option value="Other">Other</option>
@@ -4478,8 +4485,9 @@ const CalendarWidget = (() => {
                     chips += `<div class="bp-cal-session-chip ${wardClass}" onclick="event.stopPropagation();CalendarWidget.openSession(${s.id},${s.patient_id},'${initials}')" title="${initials} ${time} - ${s.ward} Ward">${initials} ${time}</div>`;
                 } else {
                     // Group session chip
-                    const time = s.time.substring(0,5);
-                    chips += `<div class="bp-cal-session-chip gs-chip" onclick="event.stopPropagation();CalendarWidget.openGroupSession(${s.id})" title="Group: ${s.title} (${s.patient_count} patients)"> ${s.title} ${time}</div>`;
+const time = s.time.substring(0,5);
+const shortTitle = s.title.length > 3 ? s.title.substring(0, 3) + '…' : s.title;
+chips += `<div class="bp-cal-session-chip gs-chip" onclick="event.stopPropagation();CalendarWidget.openGroupSession(${s.id})" title="Group: ${s.title} (${s.patient_count} patients)">👥 ${shortTitle} ${time}</div>`;
                 }
             });
             if (daySessions.length > MAX_CHIPS) chips += `<div class="bp-cal-more" onclick="event.stopPropagation();CalendarWidget.openDay('${dateStr}')">+${daySessions.length - MAX_CHIPS} more</div>`;

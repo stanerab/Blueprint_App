@@ -150,12 +150,54 @@ written permission from the developer is not permitted.
 - Multiple UI/UX improvements based on stakeholder feedback
 - Bug fixes from third round of stakeholder testing
 
+#### v1.4 Screenshots
+
+**Homepage Overview**
+![v1 Homepage Overview](screenshots/v1.0-homepage.png)
+
 ### v1.2
 - Introduced calendar system
 - Added session creation via calendar
 - Added ward filtering across dashboard and patient selection
 - Enabled CORE-10 editing after admission
 - Improved UI/UX based on clinician feedback
+
+#### v1.2 Screenshots
+
+**Homepage Overview**
+![v1 Homepage Overview](screenshots/v1.2 homepage1.png)
+
+**Homepage Overview**
+![v1 Homepage Overview](screenshots/v1.2 homepage2.png)
+
+**Homepage Overview**
+![v1 Homepage Overview](screenshots/v1.2 homepage3.png)
+
+**Admit Patient Modal**
+![v1 Admit Patient](screenshots/v1.2 Admit patient.png)
+
+**Add session, dynamic round 3 wards and room drop down**
+![v1 Admit Patient](screenshots/v1.2 add session.png)
+
+**Activity Tracking**
+![v1 Activity Tracking](screenshots/v1.2  activity logs.png)
+
+**Patient Modal**
+![v1 Patient Modal](screenshots/v1.0-homepage6.png)
+
+**Patient Card Selection**
+![v1 Patient Selection](screenshots/v1.0-homepage4.png)
+
+**Archived Sessions**
+![v1 Archived Sessions](screenshots/v1.2 discharged .png)
+
+**Discharged Patient modal**
+![v1 Discharged](screenshots/v1.2 patient modal.png)
+
+**Discharged Patient list**
+![v1 Discharged](screenshots/v1.2 patient modal.png)
+
+
 
 ### v1.0
 - Initial patient and individual session management system

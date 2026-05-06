@@ -163,7 +163,7 @@ written permission from the developer is not permitted.
 
 #### v1.2 Screenshots
 
-**Homepage Overview**
+**Homepage Overview, no need for ward Navgation as the previous v1.0**
 ![v1 Homepage Overview](screenshots/v1.2-homepage1.png)
 
 **Homepage Overview**

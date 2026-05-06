@@ -152,8 +152,7 @@ written permission from the developer is not permitted.
 
 #### v1.4 Screenshots
 
-**Homepage Overview**
-![v1 Homepage Overview](screenshots/v1.0-homepage.png)
+
 
 ### v1.2
 - Introduced calendar system
@@ -165,22 +164,25 @@ written permission from the developer is not permitted.
 #### v1.2 Screenshots
 
 **Homepage Overview**
-![v1 Homepage Overview](screenshots/v1.2 homepage1.png)
+![v1 Homepage Overview](screenshots/v1.2-homepage1.png)
 
 **Homepage Overview**
-![v1 Homepage Overview](screenshots/v1.2 homepage2.png)
+![v1 Homepage Overview](screenshots/v1.2-homepag2.png)
 
 **Homepage Overview**
-![v1 Homepage Overview](screenshots/v1.2 homepage3.png)
+![v1 Homepage Overview](screenshots/v1.2-homepage3.png)
 
 **Admit Patient Modal**
-![v1 Admit Patient](screenshots/v1.2 Admit patient.png)
+![v1 Admit Patient](screenshots/v1.2-Admit-patient.png)
 
 **Add session, dynamic round 3 wards and room drop down**
-![v1 Admit Patient](screenshots/v1.2 add session.png)
+![v1 Admit Patient](screenshots/v1.2-add-section.png)
 
-**Activity Tracking**
-![v1 Activity Tracking](screenshots/v1.2  activity logs.png)
+**Calender session view**
+![v1 Admit Patient](v1.2-calendar-session-view.png)
+
+**Activity Logs with audit trail**
+![v1 Activity Tracking](screenshots/v1.2-activity-logs.png)
 
 **Patient Modal**
 ![v1 Patient Modal](screenshots/v1.0-homepage6.png)
@@ -189,13 +191,13 @@ written permission from the developer is not permitted.
 ![v1 Patient Selection](screenshots/v1.0-homepage4.png)
 
 **Archived Sessions**
-![v1 Archived Sessions](screenshots/v1.2 discharged .png)
-
-**Discharged Patient modal**
-![v1 Discharged](screenshots/v1.2 patient modal.png)
+![v1 Archived Sessions](screenshots/v1.2-achived-sessions.png)
 
 **Discharged Patient list**
-![v1 Discharged](screenshots/v1.2 patient modal.png)
+![v1 Discharged](screenshots/v1.2-discharged.png)
+
+**Discharged Patient modal**
+![v1 Discharged](screenshots/v1.2-discharged-view-modal.png)
 
 
 

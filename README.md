@@ -184,11 +184,11 @@ written permission from the developer is not permitted.
 **Patient Card Selection**
 ![v1 Patient Selection](screenshots/v1.2-homepage3.png)
 
-**Activity Logs with audit trail**
-![v1 Activity Tracking](screenshots/v1.2-activity-logs.png)
-
 **Patient Modal**
 ![v1 Patient Modal](screenshots/v1.2-patient-modal.png)
+
+**Activity Logs with audit trail**
+![v1 Activity Tracking](screenshots/v1.2-activity-logs.png)
 
 **Archived Sessions**
 ![v1 Archived Sessions](screenshots/v1.2-achived-sessions.png)

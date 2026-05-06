@@ -179,7 +179,7 @@ written permission from the developer is not permitted.
 ![v1 Admit Patient](screenshots/v1.2-add-section.png)
 
 **Calender session view**
-![v1 Admit Patient](v1.2-calendar-session-view.png)
+![v1 Admit Patient](screenshots/v1.2-calendar-session-view.png)
 
 **Activity Logs with audit trail**
 ![v1 Activity Tracking](screenshots/v1.2-activity-logs.png)

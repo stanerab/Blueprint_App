@@ -2279,6 +2279,21 @@ footer {
 #groupSessionDetailAttendance {
     overflow-x: auto;
 }
+/* substle badge */
+.status-done {
+    background: #d1fae5;
+    color: #065f46;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 2rem;
+}
+
+.status-pending {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
 
 /* Attendance Cards Layout */
 .attendance-cards {
@@ -3256,9 +3271,9 @@ footer {
                     
                     html += `<tr data-session-id="${s.id}">
                         <td style="white-space: nowrap;">${formatted}</td>
-                        <td class="status-icon">${s.carenotes_completed ? '✅' : '❌'}</td>
-                        <td class="status-icon">${s.tracker_completed ? '✅' : '❌'}</td>
-                        <td class="status-icon">${s.tasks_completed ? '✅' : '❌'}</td>
+                        <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
+                        <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
+                        <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
                         <td class="notes-cell" title="${escapeHtml(fullNote)}">${escapeHtml(fullNote.length > 60 ? fullNote.substring(0, 60) + '...' : fullNote)}</td>
                         <td class="session-actions">
                             <button onclick="event.stopPropagation(); editSession(${s.id}, ${s.patient_id}, '${s.datetime}', ${s.carenotes_completed}, ${s.tracker_completed}, ${s.tasks_completed}, '${(s.notes || '').replace(/'/g, "\\'")}')" class="action-icon" title="Edit session"><i class="bi bi-pencil"></i></button>

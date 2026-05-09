@@ -500,17 +500,19 @@ class SessionController
             $sessions = Session::getByPatient((int)$patientId);
             $formattedSessions = [];
             
-            foreach ($sessions as $session) {
-                $formattedSessions[] = [
-                    'id' => (int)$session->id,
-                    'patient_id' => (int)$session->patient_id,
-                    'datetime' => $session->datetime,
-                    'carenotes_completed' => (bool)$session->carenotes_completed,
-                    'tracker_completed' => (bool)$session->tracker_completed,
-                    'tasks_completed' => (bool)$session->tasks_completed,
-                    'notes' => $session->notes ?? ''
-                ];
-            }
+          foreach ($sessions as $session) {
+    $formattedSessions[] = [
+        'id' => (int)$session->id,
+        'patient_id' => (int)$session->patient_id,
+        'datetime' => $session->datetime,
+        'carenotes_completed' => (bool)$session->carenotes_completed,
+        'tracker_completed' => (bool)$session->tracker_completed,
+        'tasks_completed' => (bool)$session->tasks_completed,
+        'notes' => $session->notes ?? '',
+        'ward' => $session->ward ?? '',
+        'room_number' => $session->room_number ?? '?'
+    ];
+}
             
             $this->jsonResponse($formattedSessions);
 

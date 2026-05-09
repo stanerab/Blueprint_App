@@ -3200,27 +3200,26 @@ footer {
     document.querySelectorAll('.modal').forEach(modal => { modalDisplayObserver.observe(modal, { attributes: true }); });
 
     // ==================== PATIENT SELECTION ====================
-    function onPatientSelect(patientId) {
-        if (!patientId) {
-            currentSelectedPatientId = null;
-            selectedPatientName = '';
-            applyAllFilters();
-            return;
-        }
-
-        currentSelectedPatientId = patientId;
-
-        // Use the dropdown label as an immediate display name (e.g. "Room 1 – AK")
-        const select = document.getElementById('patientSelect');
-        const selectedOpt = select.options[select.selectedIndex];
-        const optLabel = selectedOpt ? selectedOpt.textContent.trim() : '—';
-
-        // Open the patient details modal directly — no card step
-        viewPatientDetails(patientId, optLabel);
-
-        // Reset dropdown back to placeholder so it doesn't stay "selected"
-        select.value = '';
+   function onPatientSelect(patientId) {
+    if (!patientId) {
+        currentSelectedPatientId = null;
+        selectedPatientName = '';
+        applyAllFilters();
+        return;
     }
+
+    modalStack.length = 0; // clear stack — direct navigation from dropdown
+
+    currentSelectedPatientId = patientId;
+
+    const select = document.getElementById('patientSelect');
+    const selectedOpt = select.options[select.selectedIndex];
+    const optLabel = selectedOpt ? selectedOpt.textContent.trim() : '—';
+
+    viewPatientDetails(patientId, optLabel);
+
+    select.value = '';
+}
 
     function clearSelectedPatient() {
         currentSelectedPatientId = null;
@@ -3244,7 +3243,20 @@ footer {
         loadDischargeNotes(patientId);
         switchTab('sessions');
     }
-    function closePatientDetailsModal() { currentViewPatientId = null; document.getElementById('patientDetailsModal').style.display = 'none'; }
+
+   function closePatientDetailsModal() {
+    currentViewPatientId = null;
+    document.getElementById('patientDetailsModal').style.display = 'none';
+    
+    // Only go back if stack has something AND it's not empty
+    if (modalStack.length > 0) {
+        const previous = modalStack.pop();
+        if (previous && document.getElementById(previous)) {
+            document.getElementById(previous).style.display = 'flex';
+            bringModalToFront(previous);
+        }
+    }
+}
     function loadPatientSummary(patientId) {
         fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
             .then(r => r.json())
@@ -3464,19 +3476,36 @@ async function deleteGroupSession(sessionId) {
         } else { wardSelect.value = ""; wardSelect.setCustomValidity(''); wardSelect.dispatchEvent(new Event('change')); modal.style.display = 'flex'; }
     }
     function closeSessionModal() { document.getElementById('sessionModal').style.display = 'none'; }
-    function editSession(id, patient_id, datetime, carenotes, tracker, tasks, notes) {
-        document.getElementById('patientDetailsModal').style.display = 'none';
-        document.getElementById('editSessionId').value = id;
-        document.getElementById('editSessionPatientId').value = patient_id;
-        document.getElementById('editSessionDatetime').value = datetime;
-        document.getElementById('editSessionCarenotes').checked = carenotes == 1;
-        document.getElementById('editSessionTracker').checked = tracker == 1;
-        document.getElementById('editSessionTasks').checked = tasks == 1;
-        document.getElementById('editSessionNotes').value = notes || '';
-        document.getElementById('editSessionModal').style.display = 'flex';
-        bringModalToFront('editSessionModal');
+ function editSession(id, patient_id, datetime, carenotes, tracker, tasks, notes) {
+    if (document.getElementById('patientDetailsModal').style.display === 'flex') {
+        pushModal('patientDetailsModal');
+    } else if (document.getElementById('singleSessionModal').style.display === 'flex') {
+        pushModal('singleSessionModal');
     }
-    function closeEditSessionModal() { document.getElementById('editSessionModal').style.display = 'none'; }
+
+    document.getElementById('patientDetailsModal').style.display = 'none';
+    document.getElementById('singleSessionModal').style.display = 'none';
+    document.getElementById('editSessionId').value = id;
+    document.getElementById('editSessionPatientId').value = patient_id;
+    document.getElementById('editSessionDatetime').value = datetime;
+    document.getElementById('editSessionCarenotes').checked = carenotes == 1;
+    document.getElementById('editSessionTracker').checked = tracker == 1;
+    document.getElementById('editSessionTasks').checked = tasks == 1;
+    document.getElementById('editSessionNotes').value = notes || '';
+    document.getElementById('editSessionModal').style.display = 'flex';
+    bringModalToFront('editSessionModal');
+}
+
+function closeEditSessionModal() {
+    document.getElementById('editSessionModal').style.display = 'none';
+    if (modalStack.length > 0) {
+        const previous = modalStack.pop();
+        if (previous && document.getElementById(previous)) {
+            document.getElementById(previous).style.display = 'flex';
+            bringModalToFront(previous);
+        }
+    }
+}
 
     // ==================== SINGLE SESSION VIEW ====================
     function openSingleSessionModal(sessionId, patientId, patientName) {
@@ -3565,36 +3594,56 @@ async function deleteGroupSession(sessionId) {
         }
         document.getElementById('sessionDetailNotes').innerHTML = notes;
     }
-    function closeSingleSessionModal() { document.getElementById('singleSessionModal').style.display = 'none'; currentSingleSession = null; }
 
-    function editCurrentSession() {
-        if (currentSingleSession) {
-            const session = currentSingleSession;
-            closeSingleSessionModal();
-            setTimeout(() => {
-                editSession(
-                    session.id, 
-                    session.patient_id, 
-                    session.datetime, 
-                    session.carenotes_completed ? 1 : 0, 
-                    session.tracker_completed ? 1 : 0, 
-                    session.tasks_completed ? 1 : 0, 
-                    session.notes || ''
-                );
-            }, 100);
+  function closeSingleSessionModal() { 
+    document.getElementById('singleSessionModal').style.display = 'none'; 
+    currentSingleSession = null;
+    if (modalStack.length > 0) {
+        const previous = modalStack.pop();
+        if (previous && document.getElementById(previous)) {
+            // If going back to calendar day modal, reload its content
+            if (previous === 'calDayModal' && window._calDayDate) {
+                CalendarWidget.dayClick(window._calDayDate);
+            } else {
+                document.getElementById(previous).style.display = 'flex';
+                bringModalToFront(previous);
+            }
         }
     }
+}
 
-    function viewFullHistoryFromSession() {
-        if (currentSingleSession) {
-            const patientName = currentSingleSession.initials || '';
-            const patientId = currentSingleSession.patient_id;
-            closeSingleSessionModal();
-            setTimeout(() => {
-                viewPatientDetails(patientId, patientName);
-            }, 100);
-        }
+ function editCurrentSession() {
+    if (currentSingleSession) {
+        const session = currentSingleSession;
+        pushModal('singleSessionModal');
+        document.getElementById('singleSessionModal').style.display = 'none';
+        // Don't null currentSingleSession — we need it if user comes back
+        setTimeout(() => {
+            editSession(
+                session.id, 
+                session.patient_id, 
+                session.datetime, 
+                session.carenotes_completed ? 1 : 0, 
+                session.tracker_completed ? 1 : 0, 
+                session.tasks_completed ? 1 : 0, 
+                session.notes || ''
+            );
+        }, 100);
     }
+}
+
+ function viewFullHistoryFromSession() {
+    if (currentSingleSession) {
+        const patientName = currentSingleSession.initials || '';
+        const patientId = currentSingleSession.patient_id;
+        pushModal('singleSessionModal');
+        document.getElementById('singleSessionModal').style.display = 'none';
+        currentSingleSession = null; // safe to null here since we saved patientId/patientName
+        setTimeout(() => {
+            viewPatientDetails(patientId, patientName);
+        }, 100);
+    }
+}
 
     function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
@@ -3610,7 +3659,14 @@ async function deleteGroupSession(sessionId) {
         try {
             const response = await fetch('<?= url('patients/change-room') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
             const data = await response.json();
-            if (data.success) { showMessage('Room changed successfully'); closeChangeRoomModal(); setTimeout(() => location.reload(), 800); }
+              if (data.success) {
+    showMessage('Room changed successfully');
+    closeChangeRoomModal();
+    // Refresh patient summary in modal if open
+    if (currentViewPatientId) {
+        setTimeout(() => loadPatientSummary(currentViewPatientId), 150);
+    }
+}          
             else showMessage(data.error || 'Failed to change room', true);
         } catch (err) { showMessage('Network error', true); console.error(err); }
     }
@@ -3688,6 +3744,26 @@ async function deleteGroupSession(sessionId) {
             console.error(err);
         }
     }
+
+    // ==================== MODAL STACK ====================
+const modalStack = [];
+
+function pushModal(modalId) {
+    modalStack.push(modalId);
+}
+
+function popModal() {
+    // Close current modal
+    const current = modalStack.pop();
+    if (current) document.getElementById(current).style.display = 'none';
+    
+    // Re-open previous modal if exists
+    const previous = modalStack[modalStack.length - 1];
+    if (previous) {
+        document.getElementById(previous).style.display = 'flex';
+        bringModalToFront(previous);
+    }
+}
 
     // ==================== CORE-10 ADMISSION EDITABLE ====================
     function toggleCore10Admission() {
@@ -3846,19 +3922,80 @@ async function deleteGroupSession(sessionId) {
         } catch (err) { showMessage('Network error', true); console.error(err); }
     }
     async function submitEditSessionForm(event) {
-        event.preventDefault();
-        const form = document.getElementById('editSessionForm');
-        const formData = new FormData(form);
-        formData.set('carenotes', form.querySelector('[name="carenotes"]')?.checked ? '1' : '0');
-        formData.set('tracker', form.querySelector('[name="tracker"]')?.checked ? '1' : '0');
-        formData.set('tasks', form.querySelector('[name="tasks"]')?.checked ? '1' : '0');
-        try {
-            const response = await fetch('<?= url('sessions/update') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            const data = await response.json();
-            if (data.success) { showMessage('Session updated successfully'); closeEditSessionModal(); if (typeof CalendarWidget !== 'undefined') CalendarWidget.refresh(); setTimeout(() => location.reload(), 800); }
-            else showMessage(data.error || 'Failed to update session', true);
-        } catch (err) { showMessage('Network error', true); console.error(err); }
-    }
+    event.preventDefault();
+    const form = document.getElementById('editSessionForm');
+    const formData = new FormData(form);
+    formData.set('carenotes', form.querySelector('[name="carenotes"]')?.checked ? '1' : '0');
+    formData.set('tracker', form.querySelector('[name="tracker"]')?.checked ? '1' : '0');
+    formData.set('tasks', form.querySelector('[name="tasks"]')?.checked ? '1' : '0');
+    try {
+        const response = await fetch('<?= url('sessions/update') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('Session updated successfully');
+            closeEditSessionModal();
+            if (typeof CalendarWidget !== 'undefined') CalendarWidget.refresh();
+
+            // Update today's session card in DOM without reload
+            const sessionId = document.getElementById('editSessionId').value;
+            const sessionCard = document.querySelector(`.session-card[data-session-id="${sessionId}"]`);
+            if (sessionCard) {
+                const newDatetime = document.getElementById('editSessionDatetime').value;
+                const carenotes = form.querySelector('[name="carenotes"]')?.checked ? 1 : 0;
+                const tracker = form.querySelector('[name="tracker"]')?.checked ? 1 : 0;
+                const tasks = form.querySelector('[name="tasks"]')?.checked ? 1 : 0;
+                const notes = document.getElementById('editSessionNotes').value;
+
+                sessionCard.dataset.sessionDatetime = newDatetime;
+                sessionCard.dataset.sessionCarenotes = carenotes;
+                sessionCard.dataset.sessionTracker = tracker;
+                sessionCard.dataset.sessionTasks = tasks;
+                sessionCard.dataset.sessionNotes = notes;
+
+                const timeEl = sessionCard.querySelector('.session-time');
+                if (timeEl) timeEl.innerHTML = `<i class="bi bi-clock"></i> ${newDatetime.substring(11,16)}`;
+
+                const iconsEl = sessionCard.querySelector('.session-icons');
+                if (iconsEl) {
+                    iconsEl.innerHTML =
+                        (carenotes ? '<i class="bi bi-journal-text" title="CareNotes completed"></i>' : '') +
+                        (tracker ? '<i class="bi bi-graph-up" title="Tracker completed"></i>' : '') +
+                        (tasks ? '<i class="bi bi-check-circle" title="Tasks completed"></i>' : '');
+                }
+            }
+
+          // Reload sessions in patient modal if open
+if (currentViewPatientId) {
+    setTimeout(() => loadAllSessions(currentViewPatientId), 150);
+}
+
+// Update currentSingleSession data if it was open
+if (currentSingleSession && currentSingleSession.id == document.getElementById('editSessionId').value) {
+    const newDatetime = document.getElementById('editSessionDatetime').value;
+    const carenotes = form.querySelector('[name="carenotes"]')?.checked ? 1 : 0;
+    const tracker = form.querySelector('[name="tracker"]')?.checked ? 1 : 0;
+    const tasks = form.querySelector('[name="tasks"]')?.checked ? 1 : 0;
+    const notes = document.getElementById('editSessionNotes').value;
+
+    currentSingleSession.datetime = newDatetime;
+    currentSingleSession.carenotes_completed = carenotes;
+    currentSingleSession.tracker_completed = tracker;
+    currentSingleSession.tasks_completed = tasks;
+    currentSingleSession.notes = notes;
+
+    setTimeout(() => {
+        if (document.getElementById('singleSessionModal').style.display === 'flex') {
+            displaySingleSession(currentSingleSession, currentSingleSession.initials);
+        }
+    }, 200);
+}
+
+        } else {
+            showMessage(data.error || 'Failed to update session', true);
+        }
+    } catch (err) { showMessage('Network error', true); console.error(err); }
+}
+
     async function archiveSession(sessionId, ward) {
         if (!confirm('Archive this session?')) return;
         const formData = new FormData();
@@ -4191,90 +4328,61 @@ ${(() => {
     }
 }
 
+function closeViewGroupSessionsModal() {
+    document.getElementById('viewGroupSessionsModal').style.display = 'none';
+}
+
+function closeGroupSessionDetailsModal() {
+    document.getElementById('groupSessionDetailsModal').style.display = 'none';
+    const previous = modalStack[modalStack.length - 1];
+    if (previous) {
+        modalStack.pop();
+        document.getElementById(previous).style.display = 'flex';
+        bringModalToFront(previous);
+    }
+}
+
 async function viewGroupSessionDetails(sessionId) {
+    if (document.getElementById('viewGroupSessionsModal').style.display === 'flex') {
+        pushModal('viewGroupSessionsModal');
+    }
     try {
-const response = await fetch('<?= url('group-sessions/get-json') ?>?id=' + sessionId);
+        const response = await fetch('<?= url('group-sessions/get-json') ?>?id=' + sessionId);
         const data = await response.json();
         const modal = document.getElementById('groupSessionDetailsModal');
 
         document.getElementById('groupSessionDetailTitle').innerHTML = `<i class="bi bi-people-fill"></i> ${escapeHtml(data.group_type)}`;
-        
-        const sessionDate = new Date(data.session_date + 'T' + data.session_time);
-        const formattedDate = sessionDate.toLocaleDateString('en-GB');
-        const formattedTime = sessionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('groupSessionDetailDatetime').innerText = `${formattedDate} ${formattedTime}`;
-        
-        document.getElementById('groupSessionDetailWard').innerText = data.ward || data.ward_snapshot || 'Mixed Wards';
-        document.getElementById('groupSessionDetailNotes').innerHTML = escapeHtml(data.notes) || '<em>No notes</em>';
+        const dt = new Date(data.session_date + ' ' + data.session_time);
+        document.getElementById('groupSessionDetailDatetime').innerText = dt.toLocaleDateString('en-GB') + ' ' + dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+        const wardValue = data.ward || data.ward_snapshot || 'Mixed Wards';
+        const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+        const wardBadgesHtml = wardValue.split(',').map(w => w.trim()).filter(Boolean)
+            .map(w => `<span style="background:${wardColours[w] || '#8b5cf6'};color:white;padding:3px 10px;border-radius:2rem;font-size:0.75rem;font-weight:600;margin-right:4px;">${w}</span>`)
+            .join('');
+        document.getElementById('groupSessionDetailWard').innerHTML = wardBadgesHtml || 'Mixed Wards';
+        document.getElementById('groupSessionDetailNotes').innerHTML = escapeHtml(data.notes || 'No notes');
 
-        // Group attendance by ward
-        const grouped = {};
-        const wardOrder = ['Hope', 'Lakeside', 'Manor'];
-        
+        const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+        let attHtml = '<table class="gs-register"><thead><tr><th>Ward</th><th>Room</th><th>Patient</th><th>Status</th><th>Notes</th></tr></thead><tbody>';
         (data.attendance || []).forEach(a => {
-            const ward = a.ward;
-            if (!grouped[ward]) grouped[ward] = [];
-            grouped[ward].push(a);
-        });
-
-        // Build HTML with ward groups
-        let attendanceHtml = '<div class="attendance-by-ward">';
-        
-        wardOrder.forEach(ward => {
-            const patients = grouped[ward];
-            if (!patients || patients.length === 0) return;
-            
-            attendanceHtml += `
-                <div class="ward-attendance-group">
-                    <div class="ward-attendance-header">
-                        <span class="ward-name">${escapeHtml(ward)}</span>
-                        <span class="patient-count">${patients.length} patient(s)</span>
-                    </div>
-                    <div class="ward-patients-list">
-            `;
-            
-            patients.forEach(p => {
-                let status = '';
-                let statusClass = '';
-                if (p.attended) { 
-                    status = 'Attended'; 
-                    statusClass = 'status-attended'; 
-                } else if (p.declined) { 
-                    status = 'Declined'; 
-                    statusClass = 'status-declined'; 
-                } else if (p.dna) { 
-                    status = 'DNA'; 
-                    statusClass = 'status-dna'; 
-                } else { 
-                    status = 'Pending'; 
-                    statusClass = 'status-pending'; 
-                }
-                
-                attendanceHtml += `
-                    <div class="patient-attendance-item">
-                        <span class="patient-details">
-                            <span class="patient-room">Bed ${p.room_number}</span>
-                            <span class="patient-initials">${escapeHtml(p.patient_initials)}</span>
-                        </span>
-                        <span class="attendance-badge ${statusClass}">${status}</span>
-                        ${p.notes ? `<div class="attendance-item-notes">${escapeHtml(p.notes)}</div>` : ''}
-                    </div>
-                `;
-            });
-            
-            attendanceHtml += `
-                    </div>
-                </div>
+            const colour = wardColour[a.ward] || '#94a3b8';
+            let status, statusColour;
+            if (a.attended)      { status = '✓ Attended'; statusColour = '#065f46'; }
+            else if (a.declined) { status = '✗ Declined'; statusColour = '#991b1b'; }
+            else if (a.dna)      { status = '⚠ DNA';      statusColour = '#92400e'; }
+            else                 { status = '—';           statusColour = '#94a3b8'; }
+            attHtml += `
+                <tr>
+                    <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
+                    <td>Bed ${a.room_number}</td>
+                    <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
+                    <td style="color:${statusColour}; font-weight:500;">${status}</td>
+                    <td>${escapeHtml(a.notes || '')}</td>
+                </tr>
             `;
         });
-        
-        attendanceHtml += '</div>';
-        
-        if (Object.keys(grouped).length === 0) {
-            attendanceHtml = '<div class="no-attendance"><em>No attendance records found</em></div>';
-        }
-        
-        document.getElementById('groupSessionDetailAttendance').innerHTML = attendanceHtml;
+        attHtml += '</tbody></table>';
+        document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x: auto;">${attHtml}</div>`;
 
         modal.style.display = 'flex';
         bringModalToFront('groupSessionDetailsModal');
@@ -4283,63 +4391,6 @@ const response = await fetch('<?= url('group-sessions/get-json') ?>?id=' + sessi
         showMessage('Error loading details', true);
     }
 }
-
-
-
-
-function closeViewGroupSessionsModal() {
-    document.getElementById('viewGroupSessionsModal').style.display = 'none';
-}
-
-function closeGroupSessionDetailsModal() {
-    document.getElementById('groupSessionDetailsModal').style.display = 'none';
-}
-    async function viewGroupSessionDetails(sessionId) {
-        try {
-const response = await fetch('<?= url('group-sessions/get-json') ?>?id=' + sessionId);
-        const data = await response.json();
-            const modal = document.getElementById('groupSessionDetailsModal');
-
-            document.getElementById('groupSessionDetailTitle').innerHTML = `<i class="bi bi-people-fill"></i> ${escapeHtml(data.group_type)}`;
-            const dt = new Date(data.session_date + ' ' + data.session_time);
-            document.getElementById('groupSessionDetailDatetime').innerText = dt.toLocaleDateString('en-GB') + ' ' + dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-const wardValue = data.ward || data.ward_snapshot || 'Mixed Wards';
-const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
-const wardBadgesHtml = wardValue.split(',').map(w => w.trim()).filter(Boolean)
-    .map(w => `<span style="background:${wardColours[w] || '#8b5cf6'};color:white;padding:3px 10px;border-radius:2rem;font-size:0.75rem;font-weight:600;margin-right:4px;">${w}</span>`)
-    .join('');
-document.getElementById('groupSessionDetailWard').innerHTML = wardBadgesHtml || 'Mixed Wards';
-            document.getElementById('groupSessionDetailNotes').innerHTML = escapeHtml(data.notes || 'No notes');
-
-            const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
-            let attHtml = '<table class="gs-register"><thead><tr><th>Ward</th><th>Room</th><th>Patient</th><th>Status</th><th>Notes</th></tr></thead><tbody>';
-            (data.attendance || []).forEach(a => {
-                const colour = wardColour[a.ward] || '#94a3b8';
-                let status, statusColour;
-                if (a.attended)      { status = '✓ Attended'; statusColour = '#065f46'; }
-                else if (a.declined) { status = '✗ Declined'; statusColour = '#991b1b'; }
-                else if (a.dna)      { status = '⚠ DNA';      statusColour = '#92400e'; }
-                else                 { status = '—';           statusColour = '#94a3b8'; }
-                attHtml += `
-                    <tr>
-                        <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
-                        <td>Bed ${a.room_number}</td>
-                        <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
-                        <td style="color:${statusColour}; font-weight:500;">${status}</td>
-                        <td>${escapeHtml(a.notes || '')}</td>
-                    </tr>
-                `;
-            });
-            attHtml += '</tbody></table>';
-            document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x: auto;">${attHtml}</div>`;
-
-            modal.style.display = 'flex';
-            bringModalToFront('groupSessionDetailsModal');
-        } catch (err) {
-            console.error('Error loading group session details:', err);
-            showMessage('Error loading details', true);
-        }
-    }
 
     async function refreshGroupSessionsList() {
     const modal = document.getElementById('viewGroupSessionsModal');
@@ -4601,14 +4652,19 @@ chips += `<div class="bp-cal-session-chip gs-chip" onclick="event.stopPropagatio
             if (modal) modal.style.display = 'flex';
         },
         openDay(dateStr) { this.dayClick(dateStr); },
-        openSession(sessionId, patientId, initials) {
-            document.getElementById('calDayModal').style.display = 'none';
-            openSingleSessionModal(sessionId, patientId, initials);
-        },
-        openGroupSession(sessionId) {
-            document.getElementById('calDayModal').style.display = 'none';
-            viewGroupSessionDetails(sessionId);
-        }
+       openSession(sessionId, patientId, initials) {
+    // Only push calDayModal if it's actually open
+    if (document.getElementById('calDayModal').style.display === 'flex') {
+        pushModal('calDayModal');
+        document.getElementById('calDayModal').style.display = 'none';
+    }
+    openSingleSessionModal(sessionId, patientId, initials);
+},
+      openGroupSession(sessionId) {
+    pushModal('calDayModal');
+    document.getElementById('calDayModal').style.display = 'none';
+    viewGroupSessionDetails(sessionId);
+}
     };
 })();
 
@@ -4629,9 +4685,16 @@ chips += `<div class="bp-cal-session-chip gs-chip" onclick="event.stopPropagatio
             if (e.target.id === 'editSessionModal') closeEditSessionModal();
             if (e.target.id === 'changeRoomModal') closeChangeRoomModal();
             if (e.target.id === 'dischargeModal') closeDischargeModal();
-            if (e.target.id === 'calDayModal') document.getElementById('calDayModal').style.display = 'none';
-            if (e.target.id === 'singleSessionModal') closeSingleSessionModal();
+            if (e.target.id === 'calDayModal') { modalStack.length = 0; document.getElementById('calDayModal').style.display = 'none'; }
+            if (e.target.id === 'singleSessionModal') { modalStack.length = 0; closeSingleSessionModal(); }
+            if (e.target.id === 'patientDetailsModal') { modalStack.length = 0; closePatientDetailsModal(); }
         };
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); });
+document.addEventListener('keydown', e => { 
+    if (e.key === 'Escape') { 
+        modalStack.length = 0; 
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); 
+    }
+});    
+    
     });
     </script>

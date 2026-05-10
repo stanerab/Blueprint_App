@@ -68,6 +68,7 @@ Create and manage one-to-one clinical sessions with:
 - Create group therapy sessions across one or multiple wards
 - Dynamic patient attendance register loaded by ward
 - Mark attendance live (Attended / Declined / DNA)
+- Schedule group sessions
 - Record per-patient attendance notes
 - View historical group sessions with full attendance details
 - Delete group sessions with activity log entry

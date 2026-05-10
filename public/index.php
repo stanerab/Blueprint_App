@@ -112,6 +112,7 @@ $router->add('GET', '/group-sessions/today-json', 'GroupSessionController@todayJ
 $router->add('POST', '/group-sessions/update', 'GroupSessionController@update');
 $router->add('GET', '/group-sessions/get-by-date', 'GroupSessionController@getByDateJson');
 $router->add('POST', '/group-sessions/delete', 'GroupSessionController@delete');
+$router->add('POST', '/group-sessions/complete', 'GroupSessionController@complete');
 
 
 /* AJAX PATIENT ROUTES */

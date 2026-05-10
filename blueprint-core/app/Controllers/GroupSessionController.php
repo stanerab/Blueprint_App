@@ -34,10 +34,11 @@ class GroupSessionController
                 exit;
             }
 
-            $dt          = new \DateTime($rawDatetime);
-            $sessionDate = $dt->format('Y-m-d');
-            $sessionTime = $dt->format('H:i:s');
-            $status      = 'completed';
+         $dt          = new \DateTime($rawDatetime);
+         $sessionDate = $dt->format('Y-m-d');
+         $sessionTime = $dt->format('H:i:s');
+         $today       = (new \DateTime())->format('Y-m-d');
+         $status      = ($sessionDate > $today) ? 'scheduled' : 'completed';
 
             $ward = null;
             if ($wardSnapshot !== '') {
@@ -137,6 +138,87 @@ class GroupSessionController
             $this->jsonResponse(['error' => 'Server error'], null, 500);
         }
     }
+// Completed group sesion
+public function complete()
+{
+    header('Content-Type: application/json');
+
+    if (empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+        echo json_encode(['success' => false, 'error' => 'Invalid request']);
+        exit;
+    }
+
+    $id         = (int)($_POST['id'] ?? 0);
+    $attendance = json_decode($_POST['attendance'] ?? '[]', true) ?: [];
+
+    if (!$id) {
+        echo json_encode(['success' => false, 'error' => 'Invalid session ID']);
+        exit;
+    }
+
+    try {
+        $db = Database::getInstance();
+
+        // Update session status to completed
+        $db->prepare('UPDATE group_sessions SET status = ? WHERE id = ?')
+           ->execute(['completed', $id]);
+
+        // Update or insert attendance records
+        foreach ($attendance as $att) {
+            $patientId = (int)($att['patient_id'] ?? 0);
+            if (!$patientId) continue;
+            $attStatus = $att['status'] ?? 'not_set';
+            $attNotes  = trim($att['notes'] ?? '');
+
+            // Check if attendance record exists
+            $stmt = $db->prepare('SELECT id FROM group_session_attendance WHERE group_session_id = ? AND patient_id = ?');
+            $stmt->execute([$id, $patientId]);
+            $existing = $stmt->fetch(\PDO::FETCH_OBJ);
+
+            if ($existing) {
+                $db->prepare('UPDATE group_session_attendance SET attended=?, declined=?, dna=?, notes=? WHERE id=?')
+                   ->execute([
+                       ($attStatus === 'attended') ? 1 : 0,
+                       ($attStatus === 'declined') ? 1 : 0,
+                       ($attStatus === 'dna')      ? 1 : 0,
+                       $attNotes,
+                       $existing->id
+                   ]);
+            } else {
+                $db->prepare('INSERT INTO group_session_attendance (group_session_id, patient_id, attended, declined, dna, notes) VALUES (?,?,?,?,?,?)')
+                   ->execute([
+                       $id, $patientId,
+                       ($attStatus === 'attended') ? 1 : 0,
+                       ($attStatus === 'declined') ? 1 : 0,
+                       ($attStatus === 'dna')      ? 1 : 0,
+                       $attNotes
+                   ]);
+            }
+        }
+
+        // Log activity
+        $stmt = $db->prepare('SELECT group_type, ward, ward_snapshot FROM group_sessions WHERE id = ?');
+        $stmt->execute([$id]);
+        $session = $stmt->fetch(\PDO::FETCH_OBJ);
+
+        if ($session) {
+            $userId      = $_SESSION['user_id'] ?? 0;
+            $userName    = $_SESSION['username'] ?? 'Unknown';
+            $logWard     = $session->ward ?? $session->ward_snapshot ?? null;
+            $description = "Completed group session '{$session->group_type}'";
+
+            $db->prepare('INSERT INTO activity_logs (user_id, user_name, action_type, description, ward) VALUES (?,?,?,?,?)')
+               ->execute([$userId, $userName, 'group_session_created', $description, $logWard]);
+        }
+
+        echo json_encode(['success' => true]);
+        exit;
+
+    } catch (\Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        exit;
+    }
+}
 
     // ── getJson() ────────────────────────────────────────────
     public function getJson()
@@ -173,8 +255,8 @@ class GroupSessionController
 
         $db   = Database::getInstance();
         $stmt = $db->prepare(
-            'SELECT gs.id, gs.group_type AS title, gs.session_time AS time,
-                    gs.ward, gs.ward_snapshot, COUNT(ga.id) AS patient_count
+          'SELECT gs.id, gs.group_type AS title, gs.session_time AS time,
+        gs.ward, gs.ward_snapshot, gs.status, COUNT(ga.id) AS patient_count
              FROM group_sessions gs
              LEFT JOIN group_session_attendance ga ON gs.id = ga.group_session_id
              WHERE gs.session_date = ?

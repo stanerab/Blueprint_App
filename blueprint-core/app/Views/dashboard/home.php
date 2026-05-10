@@ -2294,7 +2294,14 @@ footer {
     font-size: 0.9rem;
     font-weight: 500;
 }
+/* required field */
+select:invalid {
+    box-shadow: none;
+}
 
+#sessionPatient:invalid {
+    border-color: var(--clinical-border);
+}
 /* Attendance Cards Layout */
 .attendance-cards {
     display: grid;
@@ -2716,22 +2723,22 @@ footer {
     </div>
     </div>
 
-    <!-- ADMIT MODAL -->
-    <div id="admitModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h2><i class="bi bi-person-plus"></i> Admit Patient</h2><button class="modal-close" onclick="closeAdmitModal()">✕</button></div>
-            <form id="admitForm" onsubmit="submitAdmitForm(event)" novalidate>
-                <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                <div class="form-group"><label>Ward</label><select name="ward" id="admitWard" required onchange="updateAdmitRoomOptions()"><option value="">Select Ward</option><option value="Hope">Hope Ward</option><option value="Lakeside">Lakeside Ward</option><option value="Manor">Manor Ward</option></select></div>
-                <div class="form-group"><label>Room Number</label><select name="room_number" id="admitRoom" required><option value="">Select Ward first</option></select></div>
-                <div class="form-group"><label>Patient Initials</label><input type="text" name="initials" maxlength="3" placeholder="e.g., JD" required></div>
-                <div class="form-group"><label>Admission Date</label><input type="date" name="admission_date" value="<?= date('Y-m-d') ?>"></div>
-                <label class="checkbox-label"><input type="checkbox" name="core10_admission"> <i class="bi bi-check2-circle"></i> CORE-10 completed on admission</label>
-                <div class="form-group"><label>Notes</label><textarea name="notes" rows="3" placeholder="Add admission notes..."></textarea></div>
-                <div class="modal-actions"><button type="button" onclick="closeAdmitModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Admit Patient</button></div>
-            </form>
-        </div>
+   <!-- ADMIT MODAL -->
+<div id="admitModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2><i class="bi bi-person-plus"></i> Admit Patient</h2><button class="modal-close" onclick="closeAdmitModal()">✕</button></div>
+        <form id="admitForm" onsubmit="submitAdmitForm(event)" novalidate>
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <div class="form-group"><label>Ward</label><select name="ward" id="admitWard" onchange="updateAdmitRoomOptions()"><option value="">Select Ward</option><option value="Hope">Hope Ward</option><option value="Lakeside">Lakeside Ward</option><option value="Manor">Manor Ward</option></select></div>
+            <div class="form-group"><label>Room Number</label><select name="room_number" id="admitRoom"><option value="">Select Ward first</option></select></div>
+            <div class="form-group"><label>Patient Initials</label><input type="text" name="initials" maxlength="3" placeholder="e.g., JD"></div>
+            <div class="form-group"><label>Admission Date</label><input type="date" name="admission_date" value="<?= date('Y-m-d') ?>"></div>
+            <label class="checkbox-label"><input type="checkbox" name="core10_admission"> <i class="bi bi-check2-circle"></i> CORE-10 completed on admission</label>
+            <div class="form-group"><label>Notes</label><textarea name="notes" rows="3" placeholder="Add admission notes..."></textarea></div>
+            <div class="modal-actions"><button type="button" onclick="closeAdmitModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Admit Patient</button></div>
+        </form>
     </div>
+</div>
 
   <!-- SESSION MODAL -->
 <div id="sessionModal" class="modal">
@@ -2742,8 +2749,8 @@ footer {
             <div class="form-group"><label>Ward</label><select name="ward" id="sessionWard" onchange="filterPatientsByWard()"><option value="">All Patients</option><option value="Hope">Hope Ward</option><option value="Lakeside">Lakeside Ward</option><option value="Manor">Manor Ward</option></select></div>
             <div class="form-group">
                 <label>Patient</label>
-                <select name="patient_id" id="sessionPatient" required>
-                    <option value="">Select Patient</option>
+<select name="patient_id" id="sessionPatient">
+    <option value="">Select Patient</option>
                     <?php
                     $sessionGrouped = ['Hope' => [], 'Lakeside' => [], 'Manor' => []];
                     foreach ($patients as $p) {
@@ -2977,7 +2984,7 @@ footer {
                 <div class="gs-form-row">
                     <div class="form-group gs-form-group">
                         <label for="groupType">Group Type</label>
-                   <select name="group_type" id="groupType" required class="gs-select" onchange="toggleCustomGroupType()">
+                   <select name="group_type" id="groupType" class="gs-select" onchange="toggleCustomGroupType()">
     <option value="" disabled selected>Select group type…</option>
     <option value="DBT">DBT</option>
     <option value="CBT">CBT</option>
@@ -3243,17 +3250,19 @@ footer {
         loadDischargeNotes(patientId);
         switchTab('sessions');
     }
-
-   function closePatientDetailsModal() {
+function closePatientDetailsModal() {
     currentViewPatientId = null;
     document.getElementById('patientDetailsModal').style.display = 'none';
     
-    // Only go back if stack has something AND it's not empty
     if (modalStack.length > 0) {
         const previous = modalStack.pop();
         if (previous && document.getElementById(previous)) {
             document.getElementById(previous).style.display = 'flex';
             bringModalToFront(previous);
+            // If going back to single session modal, refresh its display
+            if (previous === 'singleSessionModal' && currentSingleSession) {
+                displaySingleSession(currentSingleSession, currentSingleSession.initials);
+            }
         }
     }
 }
@@ -3638,7 +3647,7 @@ function closeEditSessionModal() {
         const patientId = currentSingleSession.patient_id;
         pushModal('singleSessionModal');
         document.getElementById('singleSessionModal').style.display = 'none';
-        currentSingleSession = null; // safe to null here since we saved patientId/patientName
+        // Do NOT null currentSingleSession — needed when coming back
         setTimeout(() => {
             viewPatientDetails(patientId, patientName);
         }, 100);
@@ -3893,10 +3902,40 @@ function popModal() {
         const ward = document.getElementById('admitWard').value;
         const room = document.getElementById('admitRoom').value;
         const initials = document.getElementById('admitInitials')?.value || document.querySelector('#admitForm input[name="initials"]').value;
-        if (!ward) { showMessage('Please select a ward', true); document.getElementById('admitWard').focus(); return; }
-        if (!room) { showMessage('Please select a room number', true); document.getElementById('admitRoom').focus(); return; }
-        if (!initials || initials.trim().length === 0) { showMessage('Please enter patient initials', true); document.getElementById('admitInitials')?.focus(); return; }
-        if (initials.length > 3) { showMessage('Initials must be 3 characters or less', true); return; }
+      if (!ward) { 
+    showMessage('Please select a ward', true); 
+    const wardSelect = document.getElementById('admitWard');
+    wardSelect.style.borderColor = '#dc2626';
+    wardSelect.focus();
+    wardSelect.addEventListener('change', function clearError() {
+        wardSelect.style.borderColor = '';
+        wardSelect.removeEventListener('change', clearError);
+    });
+    return; 
+}
+if (!room) { 
+    showMessage('Please select a room number', true); 
+    const roomSelect = document.getElementById('admitRoom');
+    roomSelect.style.borderColor = '#dc2626';
+    roomSelect.focus();
+    roomSelect.addEventListener('change', function clearError() {
+        roomSelect.style.borderColor = '';
+        roomSelect.removeEventListener('change', clearError);
+    });
+    return; 
+}
+if (!initials || initials.trim().length === 0) { 
+    showMessage('Please enter patient initials', true);
+    const initialsInput = document.querySelector('#admitForm input[name="initials"]');
+    initialsInput.style.borderColor = '#dc2626';
+    initialsInput.focus();
+    initialsInput.addEventListener('input', function clearError() {
+        initialsInput.style.borderColor = '';
+        initialsInput.removeEventListener('input', clearError);
+    });
+    return; 
+}
+if (initials.length > 3) { showMessage('Initials must be 3 characters or less', true); return; }
         const formData = new FormData(form);
         try {
             const response = await fetch('<?= url('patients/store') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
@@ -3909,7 +3948,17 @@ function popModal() {
         event.preventDefault();
         const form = document.getElementById('sessionForm');
         const patientVal = document.getElementById('sessionPatient').value;
-        if (!patientVal) { showMessage('Please select a patient', true); document.getElementById('sessionPatient').focus(); return; }
+        if (!patientVal) { 
+    showMessage('Please select a patient', true);
+    const patientSelect = document.getElementById('sessionPatient');
+    patientSelect.style.borderColor = '#dc2626';
+    patientSelect.focus();
+    patientSelect.addEventListener('change', function clearError() {
+        patientSelect.style.borderColor = '';
+        patientSelect.removeEventListener('change', clearError);
+    });
+    return; 
+}        
         const formData = new FormData(form);
         formData.set('carenotes', form.querySelector('[name="carenotes"]')?.checked ? '1' : '0');
         formData.set('tracker', form.querySelector('[name="tracker"]')?.checked ? '1' : '0');
@@ -4079,199 +4128,216 @@ if (currentSingleSession && currentSingleSession.id == document.getElementById('
     }
 
     async function loadGroupAttendanceTable() {
-        const selectedWards = [];
-        if (document.getElementById('filterWardHope').checked) selectedWards.push('Hope');
-        if (document.getElementById('filterWardLakeside').checked) selectedWards.push('Lakeside');
-        if (document.getElementById('filterWardManor').checked) selectedWards.push('Manor');
+    const selectedWards = [];
+    if (document.getElementById('filterWardHope').checked) selectedWards.push('Hope');
+    if (document.getElementById('filterWardLakeside').checked) selectedWards.push('Lakeside');
+    if (document.getElementById('filterWardManor').checked) selectedWards.push('Manor');
 
-        const container = document.getElementById('groupAttendanceTable');
+    const container = document.getElementById('groupAttendanceTable');
 
-        if (selectedWards.length === 0) {
-            container.innerHTML = '<p class="gs-placeholder">Select at least one ward to load patients</p>';
-            return;
-        }
-
-        container.innerHTML = '<div class="gs-loading"><i class="bi bi-arrow-repeat"></i> Loading patients...</div>';
-
-        try {
-            // Fetch patients from all selected wards in parallel
-            const results = await Promise.all(
-                selectedWards.map(ward =>
-                    fetch('<?= url('patients/get-by-ward') ?>?ward=' + encodeURIComponent(ward)).then(r => r.json())
-                )
-            );
-
-            let allPatients = [];
-            results.forEach((patients, idx) => {
-                const ward = selectedWards[idx];
-                (patients || []).forEach(p => {
-                    p._ward = ward;
-                    allPatients.push(p);
-                });
-            });
-
-            if (!allPatients.length) {
-                container.innerHTML = '<p class="gs-placeholder">No active patients in the selected wards</p>';
-                return;
-            }
-
-            // Sort by ward order then room number
-            const wardOrder = { Hope: 1, Lakeside: 2, Manor: 3 };
-            allPatients.sort((a, b) => {
-                const wa = wardOrder[a.ward || a._ward] || 9;
-                const wb = wardOrder[b.ward || b._ward] || 9;
-                if (wa !== wb) return wa - wb;
-                return (parseInt(a.room_number) || 0) - (parseInt(b.room_number) || 0);
-            });
-
-            const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
-
-            // Build table HTML
-            let html = `
-                <table class="gs-register">
-                    <thead>
-                        <tr>
-                            <th style="width: 15%">Ward</th>
-                            <th style="width: 10%">Room</th>
-                            <th style="width: 15%">Patient</th>
-                            <th style="width: 12%; text-align:center;">Attended</th>
-                            <th style="width: 12%; text-align:center;">Declined</th>
-                            <th style="width: 12%; text-align:center;">DNA</th>
-                            <th style="width: 24%">Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            // Group by ward
-            const grouped = {};
-            allPatients.forEach(p => {
-                const ward = p.ward || p._ward;
-                if (!grouped[ward]) grouped[ward] = [];
-                grouped[ward].push(p);
-            });
-
-            for (const ward of ['Hope', 'Lakeside', 'Manor']) {
-                const wardPatients = grouped[ward];
-                if (!wardPatients) continue;
-                const colour = wardColour[ward] || '#94a3b8';
-
-                wardPatients.forEach((p, idx) => {
-                    if (idx === 0) {
-                        // First row: show ward name
-                        html += `
-                            <tr data-patient-id="${p.id}" class="ward-group-row">
-                                <td style="background: ${colour}10; border-left: 4px solid ${colour};">
-                                    <span class="gs-ward-badge" style="background:${colour};">${ward} Ward</span>
-                                </td>
-                                <td>Bed ${p.room_number}</td>
-                                <td><strong>${escapeHtml(p.initials)}</strong></td>
-                                <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="attended"></td>
-                                <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="declined"></td>
-                                <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="dna"></td>
-                                <td><input type="text" class="gs-notes-input" name="att_notes_${p.id}" placeholder="Optional note"></td>
-                            </tr>
-                        `;
-                    } else {
-                        // Subsequent rows: hide ward cell (just blank)
-                        html += `
-                            <tr data-patient-id="${p.id}" class="ward-patient-row">
-                                <td style="background: ${colour}05; border-left: 4px solid ${colour};"></td>
-                                <td>Bed ${p.room_number}</td>
-                                <td><strong>${escapeHtml(p.initials)}</strong></td>
-                                <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="attended"></td>
-                                <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="declined"></td>
-                                <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="dna"></td>
-                                <td><input type="text" class="gs-notes-input" name="att_notes_${p.id}" placeholder="Optional note"></td>
-                            </tr>
-                        `;
-                    }
-                });
-            }
-
-            html += '</tbody></table>';
-            container.innerHTML = html;
-
-        } catch (err) {
-            console.error('Error loading patients:', err);
-            container.innerHTML = '<p class="error">Error loading patients. See console.</p>';
-        }
+    if (selectedWards.length === 0) {
+        container.innerHTML = '<p class="gs-placeholder">Select at least one ward to load patients</p>';
+        return;
     }
 
-    async function submitGroupSession(event) {
-        event.preventDefault();
+    container.innerHTML = '<div class="gs-loading"><i class="bi bi-arrow-repeat"></i> Loading patients...</div>';
 
-        let selectedGroupType = document.getElementById('groupType').value;
-        if (selectedGroupType === 'Other') {
-            const custom = document.getElementById('customGroupType').value.trim();
-            if (!custom) {
-                showMessage('Please enter a custom group type', true);
-                return;
-            }
-            selectedGroupType = custom;
-        }
+    // Detect if session date is in the future
+    const selectedDatetime = document.getElementById('groupSessionDatetime').value;
+    const selectedDate = selectedDatetime ? selectedDatetime.substring(0, 10) : '';
+    const today = new Date().toISOString().substring(0, 10);
+    const isFuture = selectedDate > today;
 
-        const datetime = document.getElementById('groupSessionDatetime').value;
-        const notes = document.getElementById('groupSessionNotes').value;
+    try {
+        const results = await Promise.all(
+            selectedWards.map(ward =>
+                fetch('<?= url('patients/get-by-ward') ?>?ward=' + encodeURIComponent(ward)).then(r => r.json())
+            )
+        );
 
-        if (!selectedGroupType) { showMessage('Please select a group type', true); return; }
-        if (!datetime) { showMessage('Please select a date and time', true); return; }
-
-        // Wait a tiny bit to ensure DOM is ready
-        await new Promise(r => setTimeout(r, 50));
-
-        const rows = document.querySelectorAll('#groupAttendanceTable tbody tr[data-patient-id]');
-        if (rows.length === 0) {
-            showMessage('No patients loaded – please select at least one ward and wait for the patient list to load.', true);
-            return;
-        }
-
-        const attendance = [];
-        rows.forEach(row => {
-            const patientId = row.getAttribute('data-patient-id');
-            const checkedRadio = row.querySelector('input[type="radio"]:checked');
-            const status = checkedRadio ? checkedRadio.value : 'not_set';
-            const notesInput = row.querySelector(`input[name="att_notes_${patientId}"]`).value;
-            attendance.push({
-                patient_id: patientId,
-                status: status,
-                notes: notesInput
+        let allPatients = [];
+        results.forEach((patients, idx) => {
+            const ward = selectedWards[idx];
+            (patients || []).forEach(p => {
+                p._ward = ward;
+                allPatients.push(p);
             });
         });
-       const wardSnapshot = ['Hope','Lakeside','Manor']
-    .filter(w => document.getElementById('filterWard' + w)?.checked)
-    .join(',');
 
-const formData = new FormData();
-formData.append('csrf_token', document.querySelector('#groupSessionForm input[name="csrf_token"]').value);
-formData.append('group_type', selectedGroupType);
-formData.append('datetime', datetime);
-formData.append('notes', notes);
-formData.append('ward_snapshot', wardSnapshot);
-formData.append('attendance', JSON.stringify(attendance));
-
-const url = '<?= url('group-sessions/store') ?>';
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const data = await response.json();
-            if (data.success) {
-                showMessage('Group session saved successfully');
-                closeGroupSessionModal();
-                if (typeof CalendarWidget !== 'undefined') CalendarWidget.refresh();
-                setTimeout(() => location.reload(), 800);
-            } else {
-                showMessage(data.error || 'Failed to save group session', true);
-            }
-        } catch (err) {
-            console.error('Submit error:', err);
-            showMessage('Network error: ' + err.message, true);
+        if (!allPatients.length) {
+            container.innerHTML = '<p class="gs-placeholder">No active patients in the selected wards</p>';
+            return;
         }
+
+        const wardOrder = { Hope: 1, Lakeside: 2, Manor: 3 };
+        allPatients.sort((a, b) => {
+            const wa = wardOrder[a.ward || a._ward] || 9;
+            const wb = wardOrder[b.ward || b._ward] || 9;
+            if (wa !== wb) return wa - wb;
+            return (parseInt(a.room_number) || 0) - (parseInt(b.room_number) || 0);
+        });
+
+        const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+
+        let html = `
+            <table class="gs-register">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Ward</th>
+                        <th style="width: 10%">Room</th>
+                        <th style="width: 15%">Patient</th>
+                        ${isFuture ? 
+                            '<th colspan="3" style="text-align:center;color:#94a3b8;font-style:italic;font-weight:400;">Attendance available on session day</th>' : 
+                            '<th style="width: 12%; text-align:center;">Attended</th><th style="width: 12%; text-align:center;">Declined</th><th style="width: 12%; text-align:center;">DNA</th>'
+                        }
+                        <th style="width: 24%">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        const grouped = {};
+        allPatients.forEach(p => {
+            const ward = p.ward || p._ward;
+            if (!grouped[ward]) grouped[ward] = [];
+            grouped[ward].push(p);
+        });
+
+        for (const ward of ['Hope', 'Lakeside', 'Manor']) {
+            const wardPatients = grouped[ward];
+            if (!wardPatients) continue;
+            const colour = wardColour[ward] || '#94a3b8';
+
+            wardPatients.forEach((p, idx) => {
+                if (idx === 0) {
+                    html += `
+                        <tr data-patient-id="${p.id}" class="ward-group-row">
+                            <td style="background: ${colour}10; border-left: 4px solid ${colour};">
+                                <span class="gs-ward-badge" style="background:${colour};">${ward} Ward</span>
+                            </td>
+                            <td>Bed ${p.room_number}</td>
+                            <td><strong>${escapeHtml(p.initials)}</strong></td>
+                            ${isFuture ?
+                                `<td colspan="3" style="text-align:center;color:#94a3b8;font-size:0.8rem;">—</td>` :
+                                `<td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="attended"></td>
+                                 <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="declined"></td>
+                                 <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="dna"></td>`
+                            }
+                            <td><input type="text" class="gs-notes-input" name="att_notes_${p.id}" placeholder="Optional note"></td>
+                        </tr>
+                    `;
+                } else {
+                    html += `
+                        <tr data-patient-id="${p.id}" class="ward-patient-row">
+                            <td style="background: ${colour}05; border-left: 4px solid ${colour};"></td>
+                            <td>Bed ${p.room_number}</td>
+                            <td><strong>${escapeHtml(p.initials)}</strong></td>
+                            ${isFuture ?
+                                `<td colspan="3" style="text-align:center;color:#94a3b8;font-size:0.8rem;">—</td>` :
+                                `<td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="attended"></td>
+                                 <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="declined"></td>
+                                 <td class="gs-radio-cell"><input type="radio" name="att_${p.id}" value="dna"></td>`
+                            }
+                            <td><input type="text" class="gs-notes-input" name="att_notes_${p.id}" placeholder="Optional note"></td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        html += '</tbody></table>';
+
+        if (isFuture) {
+            html += `<p style="margin-top:0.75rem;font-size:0.8rem;color:#94a3b8;text-align:center;">
+                <i class="bi bi-info-circle"></i> This is a scheduled session. Attendance can be marked on the session day.
+            </p>`;
+        }
+
+        container.innerHTML = html;
+
+    } catch (err) {
+        console.error('Error loading patients:', err);
+        container.innerHTML = '<p class="error">Error loading patients. See console.</p>';
+    }
+}
+
+
+  async function submitGroupSession(event) {
+    event.preventDefault();
+
+    let selectedGroupType = document.getElementById('groupType').value;
+    if (selectedGroupType === 'Other') {
+        const custom = document.getElementById('customGroupType').value.trim();
+        if (!custom) {
+            showMessage('Please enter a custom group type', true);
+            return;
+        }
+        selectedGroupType = custom;
     }
 
+    const datetime = document.getElementById('groupSessionDatetime').value;
+    const notes = document.getElementById('groupSessionNotes').value;
+
+    if (!selectedGroupType) { showMessage('Please select a group type', true); return; }
+    if (!datetime) { showMessage('Please select a date and time', true); return; }
+
+    const selectedDate = datetime.substring(0, 10);
+    const today = new Date().toISOString().substring(0, 10);
+    const isFuture = selectedDate > today;
+
+    await new Promise(r => setTimeout(r, 50));
+
+    const rows = document.querySelectorAll('#groupAttendanceTable tbody tr[data-patient-id]');
+    if (rows.length === 0) {
+        showMessage('No patients loaded – please select at least one ward and wait for the patient list to load.', true);
+        return;
+    }
+
+    const attendance = [];
+    rows.forEach(row => {
+        const patientId = row.getAttribute('data-patient-id');
+        const checkedRadio = row.querySelector('input[type="radio"]:checked');
+        const status = isFuture ? 'not_set' : (checkedRadio ? checkedRadio.value : 'not_set');
+        const notesInput = row.querySelector(`input[name="att_notes_${patientId}"]`);
+        attendance.push({
+            patient_id: patientId,
+            status: status,
+            notes: notesInput ? notesInput.value : ''
+        });
+    });
+
+    const wardSnapshot = ['Hope','Lakeside','Manor']
+        .filter(w => document.getElementById('filterWard' + w)?.checked)
+        .join(',');
+
+    const formData = new FormData();
+    formData.append('csrf_token', document.querySelector('#groupSessionForm input[name="csrf_token"]').value);
+    formData.append('group_type', selectedGroupType);
+    formData.append('datetime', datetime);
+    formData.append('notes', notes);
+    formData.append('ward_snapshot', wardSnapshot);
+    formData.append('attendance', JSON.stringify(attendance));
+
+    try {
+        const response = await fetch('<?= url('group-sessions/store') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage(isFuture ? 'Group session scheduled successfully' : 'Group session saved successfully');
+            closeGroupSessionModal();
+            if (typeof CalendarWidget !== 'undefined') CalendarWidget.refresh();
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showMessage(data.error || 'Failed to save group session', true);
+        }
+    } catch (err) {
+        console.error('Submit error:', err);
+        showMessage('Network error: ' + err.message, true);
+    }
+}
 
     // View functions (unchanged but kept for completeness)
     async function openViewGroupSessionsModal() {
@@ -4299,9 +4365,15 @@ const response = await fetch('<?= url('group-sessions/list-json') ?>');
             html += `
                 <div class="group-session-card" data-id="${s.id}">
                     <div class="group-session-header">
-                        <strong class="group-session-type">${escapeHtml(s.group_type)}</strong>
-                        <span class="group-session-datetime">${formattedDate} ${formattedTime}</span>
-                    </div>
+    <strong class="group-session-type">${escapeHtml(s.group_type)}</strong>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+        ${s.status === 'scheduled' ? 
+            '<span style="background:#ede9fe;color:#6d28d9;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:2rem;">Scheduled</span>' : 
+            '<span style="background:#d1fae5;color:#065f46;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:2rem;">Completed</span>'
+        }
+        <span class="group-session-datetime">${formattedDate} ${formattedTime}</span>
+    </div>
+</div>
                     <div class="group-session-details">
 ${(() => {
     const wardLabel = s.ward || s.ward_snapshot || 'Mixed';
@@ -4362,27 +4434,93 @@ async function viewGroupSessionDetails(sessionId) {
         document.getElementById('groupSessionDetailWard').innerHTML = wardBadgesHtml || 'Mixed Wards';
         document.getElementById('groupSessionDetailNotes').innerHTML = escapeHtml(data.notes || 'No notes');
 
-        const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
-        let attHtml = '<table class="gs-register"><thead><tr><th>Ward</th><th>Room</th><th>Patient</th><th>Status</th><th>Notes</th></tr></thead><tbody>';
-        (data.attendance || []).forEach(a => {
-            const colour = wardColour[a.ward] || '#94a3b8';
-            let status, statusColour;
-            if (a.attended)      { status = '✓ Attended'; statusColour = '#065f46'; }
-            else if (a.declined) { status = '✗ Declined'; statusColour = '#991b1b'; }
-            else if (a.dna)      { status = '⚠ DNA';      statusColour = '#92400e'; }
-            else                 { status = '—';           statusColour = '#94a3b8'; }
-            attHtml += `
+const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+const sessionDate = data.session_date;
+const today = new Date().toISOString().substring(0, 10);
+const isScheduled = data.status === 'scheduled';
+const canComplete = isScheduled && sessionDate <= today;
+
+if (isScheduled && !canComplete) {
+    // Future scheduled session — show patient list without attendance
+    let attHtml = '<table class="gs-register"><thead><tr><th>Ward</th><th>Room</th><th>Patient</th><th>Status</th></tr></thead><tbody>';
+    (data.attendance || []).forEach(a => {
+        const colour = wardColour[a.ward] || '#94a3b8';
+        attHtml += `
+            <tr>
+                <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
+                <td>Bed ${a.room_number}</td>
+                <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
+                <td style="color:#94a3b8;font-size:0.8rem;">Attendance available on session day</td>
+            </tr>
+        `;
+    });
+    attHtml += '</tbody></table>';
+    document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x:auto;">${attHtml}</div>`;
+
+} else if (canComplete) {
+    // Session date is today — show attendance form to complete it
+    let attHtml = `
+        <div style="background:#ede9fe;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;color:#6d28d9;">
+            <i class="bi bi-calendar-check"></i> This session is scheduled for today. Mark attendance and complete it.
+        </div>
+        <table class="gs-register" id="completeAttendanceTable">
+            <thead>
                 <tr>
-                    <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
-                    <td>Bed ${a.room_number}</td>
-                    <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
-                    <td style="color:${statusColour}; font-weight:500;">${status}</td>
-                    <td>${escapeHtml(a.notes || '')}</td>
+                    <th>Ward</th><th>Room</th><th>Patient</th>
+                    <th style="text-align:center;">Attended</th>
+                    <th style="text-align:center;">Declined</th>
+                    <th style="text-align:center;">DNA</th>
+                    <th>Notes</th>
                 </tr>
-            `;
-        });
-        attHtml += '</tbody></table>';
-        document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x: auto;">${attHtml}</div>`;
+            </thead>
+            <tbody>
+    `;
+    (data.attendance || []).forEach(a => {
+        const colour = wardColour[a.ward] || '#94a3b8';
+        attHtml += `
+            <tr data-patient-id="${a.patient_id}">
+                <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
+                <td>Bed ${a.room_number}</td>
+                <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
+                <td class="gs-radio-cell"><input type="radio" name="complete_att_${a.patient_id}" value="attended"></td>
+                <td class="gs-radio-cell"><input type="radio" name="complete_att_${a.patient_id}" value="declined"></td>
+                <td class="gs-radio-cell"><input type="radio" name="complete_att_${a.patient_id}" value="dna"></td>
+                <td><input type="text" class="gs-notes-input" name="complete_notes_${a.patient_id}" placeholder="Optional note" value="${escapeHtml(a.notes || '')}"></td>
+            </tr>
+        `;
+    });
+    attHtml += `</tbody></table>
+        <div style="margin-top:1rem;text-align:right;">
+            <button class="btn-primary" onclick="completeGroupSession(${data.id})">
+                <i class="bi bi-check-circle"></i> Mark as Completed
+            </button>
+        </div>
+    `;
+    document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x:auto;">${attHtml}</div>`;
+
+} else {
+    // Already completed — show read-only attendance table
+    let attHtml = '<table class="gs-register"><thead><tr><th>Ward</th><th>Room</th><th>Patient</th><th>Status</th><th>Notes</th></tr></thead><tbody>';
+    (data.attendance || []).forEach(a => {
+        const colour = wardColour[a.ward] || '#94a3b8';
+        let status, statusColour;
+        if (a.attended)      { status = '✓ Attended'; statusColour = '#065f46'; }
+        else if (a.declined) { status = '✗ Declined'; statusColour = '#991b1b'; }
+        else if (a.dna)      { status = '⚠ DNA';      statusColour = '#92400e'; }
+        else                 { status = '—';           statusColour = '#94a3b8'; }
+        attHtml += `
+            <tr>
+                <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
+                <td>Bed ${a.room_number}</td>
+                <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
+                <td style="color:${statusColour};font-weight:500;">${status}</td>
+                <td>${escapeHtml(a.notes || '')}</td>
+            </tr>
+        `;
+    });
+    attHtml += '</tbody></table>';
+    document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x:auto;">${attHtml}</div>`;
+}
 
         modal.style.display = 'flex';
         bringModalToFront('groupSessionDetailsModal');
@@ -4434,7 +4572,45 @@ const response = await fetch('<?= url('group-sessions/list-json') ?>');
     }
 }
 
-    
+    async function completeGroupSession(sessionId) {
+    const rows = document.querySelectorAll('#completeAttendanceTable tbody tr[data-patient-id]');
+    const attendance = [];
+    rows.forEach(row => {
+        const patientId = row.getAttribute('data-patient-id');
+        const checkedRadio = row.querySelector(`input[name="complete_att_${patientId}"]:checked`);
+        const notesInput = row.querySelector(`input[name="complete_notes_${patientId}"]`);
+        attendance.push({
+            patient_id: patientId,
+            status: checkedRadio ? checkedRadio.value : 'not_set',
+            notes: notesInput ? notesInput.value : ''
+        });
+    });
+
+    const formData = new FormData();
+    formData.append('id', sessionId);
+    formData.append('attendance', JSON.stringify(attendance));
+    formData.append('csrf_token', '<?= csrf_token() ?>');
+
+    try {
+        const response = await fetch('<?= url('group-sessions/complete') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('Group session completed successfully');
+            closeGroupSessionDetailsModal();
+            if (typeof CalendarWidget !== 'undefined') CalendarWidget.refresh();
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showMessage(data.error || 'Failed to complete session', true);
+        }
+    } catch (err) {
+        showMessage('Network error', true);
+    }
+}
+
 // ==================== CALENDAR WIDGET (shows individual + group sessions) ====================
 const CalendarWidget = (() => {
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4492,15 +4668,16 @@ const CalendarWidget = (() => {
                 sessions.forEach(s => {
                     const m = s.session_date.substring(0,7);
                     if (!byMonth[m]) byMonth[m] = [];
-                    byMonth[m].push({
-                        id: s.id,
-                        title: s.group_type,
-                        date: s.session_date,
-                        time: s.session_time,
-                        ward: s.ward || 'Mixed',
-                        patient_count: s.patient_count,
-                        type: 'group'
-                    });
+                  byMonth[m].push({
+    id: s.id,
+    title: s.group_type,
+    date: s.session_date,
+    time: s.session_time,
+    ward: s.ward || 'Mixed',
+    patient_count: s.patient_count,
+    status: s.status || 'completed',
+    type: 'group'
+});
                 });
                 for (let m in byMonth) groupCache[m] = byMonth[m];
                 cb(groupCache[key] || []);
@@ -4553,8 +4730,8 @@ const CalendarWidget = (() => {
                     // Group session chip
 const time = s.time.substring(0,5);
 const shortTitle = s.title.length > 3 ? s.title.substring(0, 3) + '…' : s.title;
-chips += `<div class="bp-cal-session-chip gs-chip" onclick="event.stopPropagation();CalendarWidget.openGroupSession(${s.id})" title="Group: ${s.title} (${s.patient_count} patients)">👥 ${shortTitle} ${time}</div>`;
-                }
+const chipStyle = s.status === 'scheduled' ? 'opacity:0.65;border:1px dashed #8b5cf6;' : '';
+chips += `<div class="bp-cal-session-chip gs-chip" style="${chipStyle}" onclick="event.stopPropagation();CalendarWidget.openGroupSession(${s.id})" title="${s.status === 'scheduled' ? 'Scheduled: ' : 'Group: '}${s.title} (${s.patient_count} patients)"><span style="font-size:0.6rem;font-weight:700;opacity:0.8;margin-right:1px;">G</span>${shortTitle} ${time}</div>`;}
             });
             if (daySessions.length > MAX_CHIPS) chips += `<div class="bp-cal-more" onclick="event.stopPropagation();CalendarWidget.openDay('${dateStr}')">+${daySessions.length - MAX_CHIPS} more</div>`;
             html += `<div class="${cls}" onclick="CalendarWidget.dayClick('${dateStr}')"><div class="bp-cal-num">${d}</div><div class="bp-cal-sessions">${chips}</div></div>`;
@@ -4660,9 +4837,12 @@ chips += `<div class="bp-cal-session-chip gs-chip" onclick="event.stopPropagatio
     }
     openSingleSessionModal(sessionId, patientId, initials);
 },
-      openGroupSession(sessionId) {
-    pushModal('calDayModal');
-    document.getElementById('calDayModal').style.display = 'none';
+     openGroupSession(sessionId) {
+    // Only push calDayModal if it's actually open
+    if (document.getElementById('calDayModal').style.display === 'flex') {
+        pushModal('calDayModal');
+        document.getElementById('calDayModal').style.display = 'none';
+    }
     viewGroupSessionDetails(sessionId);
 }
     };

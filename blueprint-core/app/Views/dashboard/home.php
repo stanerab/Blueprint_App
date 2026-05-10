@@ -2630,9 +2630,10 @@ select:invalid {
                 </div>
                 <div class="bp-cal-grid" id="calGrid"><div class="bp-cal-loading">Loading calendar...</div></div>
                 <div class="bp-cal-legend">
-                    <span><span class="bp-cal-dot" style="background:#eab308;"></span>Hope</span>
-                    <span><span class="bp-cal-dot" style="background:#22c55e;"></span>Lakeside</span>
-                    <span><span class="bp-cal-dot" style="background:#3b82f6;"></span>Manor</span>
+                <span><span class="bp-cal-dot" style="background:#eab308;"></span>Hope</span>
+                <span><span class="bp-cal-dot" style="background:#22c55e;"></span>Lakeside</span>
+                <span><span class="bp-cal-dot" style="background:#3b82f6;"></span>Manor</span>
+                <span><span class="bp-cal-dot" style="background:#8b5cf6;"></span>Group</span>
                 </div>
             </div>
         </div>
@@ -4731,7 +4732,8 @@ const CalendarWidget = (() => {
 const time = s.time.substring(0,5);
 const shortTitle = s.title.length > 3 ? s.title.substring(0, 3) + '…' : s.title;
 const chipStyle = s.status === 'scheduled' ? 'opacity:0.65;border:1px dashed #8b5cf6;' : '';
-chips += `<div class="bp-cal-session-chip gs-chip" style="${chipStyle}" onclick="event.stopPropagation();CalendarWidget.openGroupSession(${s.id})" title="${s.status === 'scheduled' ? 'Scheduled: ' : 'Group: '}${s.title} (${s.patient_count} patients)"><span style="font-size:0.6rem;font-weight:700;opacity:0.8;margin-right:1px;">G</span>${shortTitle} ${time}</div>`;}
+chips += `<div class="bp-cal-session-chip gs-chip" style="${chipStyle}" onclick="event.stopPropagation();CalendarWidget.openGroupSession(${s.id})" title="${s.status === 'scheduled' ? 'Scheduled: ' : 'Group: '}${s.title} (${s.patient_count} patients)">${shortTitle} ${time}</div>`;
+}
             });
             if (daySessions.length > MAX_CHIPS) chips += `<div class="bp-cal-more" onclick="event.stopPropagation();CalendarWidget.openDay('${dateStr}')">+${daySessions.length - MAX_CHIPS} more</div>`;
             html += `<div class="${cls}" onclick="CalendarWidget.dayClick('${dateStr}')"><div class="bp-cal-num">${d}</div><div class="bp-cal-sessions">${chips}</div></div>`;

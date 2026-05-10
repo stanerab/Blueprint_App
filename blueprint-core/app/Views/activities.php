@@ -1,5 +1,5 @@
 <?php $title = $title ?? 'All Activities'; ?>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 <style>
 /* ===== SHARED DASHBOARD STYLES ===== */
 :root {
@@ -449,28 +449,33 @@
             <?php endif; ?>
                 <div class="activity-full-item">
                     <div class="activity-time"><?= date('H:i', strtotime($activity->created_at)) ?></div>
-                    <div class="activity-icon-large">
-                        <?php
-                        // Plain text symbols – no emojis
-                        $icon = '•';
-                        switch($activity->action_type) {
-                            case 'patient_admitted': $icon = '+'; break;
-                            case 'patient_discharged': $icon = '→'; break;
-                            case 'patient_archived': $icon = '↓'; break;
-                            case 'patient_restored': $icon = '↺'; break;
-                            case 'patient_deleted': $icon = '×'; break;
-                            case 'session_created': $icon = '+'; break;
-                            case 'session_updated': $icon = '✎'; break;
-                            case 'session_archived': $icon = '↓'; break;
-                            case 'session_deleted': $icon = '×'; break;
-                            case 'session_restored': $icon = '↺'; break;
-                            case 'room_changed': $icon = '⇄'; break;
-                            case 'group_session_created': $icon = '👥'; break;
-                            case 'group_session_deleted': $icon = '🗑️'; break;
-                        }
-                        echo $icon;
-                        ?>
-                    </div>
+              <div class="activity-icon-large">
+    <?php
+    $icon = '•';
+    $isBootstrap = false;
+    switch($activity->action_type) {
+        case 'patient_admitted':        $icon = '+';  break;
+        case 'patient_discharged':      $icon = '→';  break;
+        case 'patient_archived':        $icon = '↓';  break;
+        case 'patient_restored':        $icon = '↺';  break;
+        case 'patient_deleted':         $icon = '×';  break;
+        case 'session_created':         $icon = '+';  break;
+        case 'session_updated':         $icon = '✎';  break;
+        case 'session_archived':        $icon = '↓';  break;
+        case 'session_deleted':         $icon = '×';  break;
+        case 'session_restored':        $icon = '↺';  break;
+        case 'room_changed':            $icon = '⇄';  break;
+        case 'group_session_created':   $icon = 'bi-people-fill';    $isBootstrap = true; break;
+        case 'group_session_scheduled': $icon = 'bi-calendar-event'; $isBootstrap = true; break;
+        case 'group_session_deleted':   $icon = '×'; break;
+    }
+    if ($isBootstrap) {
+        echo '<i class="bi ' . $icon . '"></i>';
+    } else {
+        echo $icon;
+    }
+    ?>
+</div>
                     <div class="activity-details">
                         <div class="activity-desc"><?= htmlspecialchars($activity->description) ?></div>
                         <div class="activity-meta-full">

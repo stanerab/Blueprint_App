@@ -75,24 +75,26 @@ class GroupSessionController
                 }
             }
 
-            // ── Activity log ──────────────────────────────────────────────────
-            $userId      = $_SESSION['user_id'] ?? 0;
-            $userName    = $_SESSION['username'] ?? 'Unknown';
-            $description = "Created group session '{$groupType}'";
-            $logWard     = $ward ?? $wardSnapshot ?? null;
+           // ── Activity log ──────────────────────────────────────────────────
+$userId      = $_SESSION['user_id'] ?? 0;
+$userName    = $_SESSION['username'] ?? 'Unknown';
+$description = $status === 'scheduled'
+    ? "Scheduled group session '{$groupType}' for {$sessionDate}"
+    : "Created group session '{$groupType}'";
+$logWard     = $ward ?? $wardSnapshot ?? null;
 
-            $db->prepare(
-                'INSERT INTO activity_logs (user_id, user_name, action_type, description, ward)
-                 VALUES (?, ?, ?, ?, ?)'
-            )->execute([$userId, $userName, 'group_session_created', $description, $logWard]);
+$db->prepare(
+    'INSERT INTO activity_logs (user_id, user_name, action_type, description, ward)
+     VALUES (?, ?, ?, ?, ?)'
+)->execute([$userId, $userName, $status === 'scheduled' ? 'group_session_scheduled' : 'group_session_created', $description, $logWard]);
 
-            echo json_encode(['success' => true, 'id' => $groupSessionId]);
-            exit;
+echo json_encode(['success' => true, 'id' => $groupSessionId]);
+exit;
 
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-            exit;
-        }
+} catch (\Exception $e) {
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    exit;
+}
     }
 
     // ── todayJson() ──────────────────────────────────────────

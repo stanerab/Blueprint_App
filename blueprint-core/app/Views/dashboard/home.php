@@ -2101,7 +2101,43 @@ footer {
     padding: 2rem;
     color: #94a3b8;
 }
+/* calendar chips */
 
+.bp-cal-session-chip {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+    font-size: 0.65rem;
+    padding: 1px 3px;
+    border-radius: 2px;
+    margin-bottom: 1px;
+    cursor: pointer;
+}
+
+.bp-cal-day {
+    min-width: 0;
+    overflow: hidden;
+    min-height: 62px;
+    padding: 2px;
+}
+
+.bp-cal-sessions {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.bp-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 2px;
+}
 /* Responsive */
 @media (max-width: 600px) {
     .patient-attendance-item {

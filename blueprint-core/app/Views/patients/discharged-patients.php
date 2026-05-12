@@ -77,12 +77,12 @@ $grouped = $grouped ?? [
                             <div class="detail-item core10-row">
                                 <span class="detail-label">CORE-10</span>
                                 <div class="core10-badges">
-                                    <span class="core10-badge <?= $p->core10_admission ? 'completed' : 'pending' ?>">
-                                        Admission <?= $p->core10_admission ? '✓' : '○' ?>
-                                    </span>
-                                    <span class="core10-badge <?= $p->core10_discharge ? 'completed' : 'pending' ?>">
-                                        Discharge <?= $p->core10_discharge ? '✓' : '○' ?>
-                                    </span>
+                                <span class="core10-badge <?= $p->core10_admission ? 'completed' : 'pending' ?>">
+    Admission <?= $p->core10_admission ? '✓' : '✗' ?>
+</span>
+<span class="core10-badge <?= $p->core10_discharge ? 'completed' : 'pending' ?>">
+    Discharge <?= $p->core10_discharge ? '✓' : '✗' ?>
+</span>
                                 </div>
                             </div>
                         </div>
@@ -340,6 +340,10 @@ $grouped = $grouped ?? [
     border-radius: 2rem;
     background: #f1f5f9;
     color: #475569;
+    white-space: nowrap;
+    min-width: 105px;
+    text-align: center;
+    display: inline-block;
 }
 
 .core10-badge.completed {
@@ -348,8 +352,8 @@ $grouped = $grouped ?? [
 }
 
 .core10-badge.pending {
-    background: #fff3cd;
-    color: #856404;
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 .record-actions {
@@ -524,6 +528,18 @@ $grouped = $grouped ?? [
     padding: 2rem;
     color: #64748b;
 }
+.component-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    min-width: 105px;
+    text-align: center;
+}
+.component-badge.completed { background: #d1fae5; color: #065f46; }
+.component-badge.pending { background: #fee2e2; color: #991b1b; }
+
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
@@ -614,12 +630,12 @@ function loadPatientSummary(patientId) {
             document.getElementById('viewPatientAdmissionDateTime').innerText = admissionDate;
             document.getElementById('viewPatientDischargeDateTime').innerText = dischargeDate;
 
-            document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission
-                ? '<span class="core10-badge completed">Completed</span>'
-                : '<span class="core10-badge pending">Pending</span>';
-            document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge
-                ? '<span class="core10-badge completed">Completed</span>'
-                : '<span class="core10-badge pending">Pending</span>';
+document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission
+    ? '<span class="core10-badge completed">✓ Completed at Admission</span>'
+    : '<span class="core10-badge pending">✗ Not Completed at Admission</span>';
+document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge
+    ? '<span class="core10-badge completed">✓ Completed at Discharge</span>'
+    : '<span class="core10-badge pending">✗ Not Completed at Discharge</span>';
         })
         .catch(error => console.error('Error loading patient summary:', error));
 }
@@ -640,12 +656,12 @@ function loadAllSessions(patientId) {
                 const date = new Date(s.datetime);
                 const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 html += `<tr>
-                    <td>${formattedDate}</td>
-                    <td class="status-icon">${s.carenotes_completed ? '✅' : '❌'}</td>
-                    <td class="status-icon">${s.tracker_completed ? '✅' : '❌'}</td>
-                    <td class="status-icon">${s.tasks_completed ? '✅' : '❌'}</td>
-                    <td class="notes-cell">${s.notes ? s.notes.substring(0, 50) + (s.notes.length > 50 ? '...' : '') : '-'}</td>
-                </tr>`;
+    <td>${formattedDate}</td>
+    <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
+    <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
+    <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
+    <td class="notes-cell">${s.notes ? s.notes.substring(0, 50) + (s.notes.length > 50 ? '...' : '') : '-'}</td>
+</tr>`;
             });
             html += '</tbody></table>';
             container.innerHTML = html;
@@ -791,8 +807,50 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.ward-tab');
     const sections = document.querySelectorAll('.ward-section');
     const searchInput = document.getElementById('searchInput');
-
     let activeWard = 'All';
+
+    function applySearch() {
+        const term = searchInput.value.toLowerCase().trim();
+        let totalVisible = 0;
+
+        sections.forEach(section => {
+            const ward = section.dataset.ward;
+            const wardVisible = activeWard === 'All' || ward === activeWard;
+
+            if (!wardVisible) {
+                section.style.display = 'none';
+                return;
+            }
+
+            const cards = section.querySelectorAll('.record-card');
+            let sectionVisible = 0;
+
+            cards.forEach(card => {
+                // Only match against the initials, not all card text
+                const initials = card.querySelector('.record-avatar')?.innerText.toLowerCase() || '';
+                const match = term === '' || initials.includes(term);
+                card.style.display = match ? '' : 'none';
+                if (match) sectionVisible++;
+            });
+
+            section.style.display = sectionVisible > 0 ? 'block' : 'none';
+            totalVisible += sectionVisible;
+        });
+
+        let noResults = document.getElementById('globalNoResults');
+        if (!noResults) {
+            noResults = document.createElement('div');
+            noResults.id = 'globalNoResults';
+            noResults.style.cssText = 'text-align:center;padding:3rem;color:#64748b;background:#f8fafc;border-radius:1rem;border:1px dashed #cbd5e1;margin-top:1rem;';
+            document.querySelector('.records-container').appendChild(noResults);
+        }
+        if (term !== '' && totalVisible === 0) {
+            noResults.innerHTML = '<p style="margin:0;font-size:0.9rem;">No patients found matching <strong>"' + term + '"</strong></p>';
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
+    }
 
     function filterByWard() {
         sections.forEach(section => {
@@ -800,30 +858,6 @@ document.addEventListener('DOMContentLoaded', function() {
             section.style.display = (activeWard === 'All' || ward === activeWard) ? 'block' : 'none';
         });
         applySearch();
-    }
-
-    function applySearch() {
-        const term = searchInput.value.toLowerCase().trim();
-        sections.forEach(section => {
-            if (section.style.display === 'none') return;
-            let visibleRows = 0;
-            const cards = section.querySelectorAll('.record-card');
-            cards.forEach(card => {
-                const text = card.innerText.toLowerCase();
-                if (term === '' || text.includes(term)) {
-                    card.style.display = '';
-                    visibleRows++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            if (term !== '') {
-                section.style.display = visibleRows > 0 ? 'block' : 'none';
-            } else {
-                const ward = section.dataset.ward;
-                section.style.display = (activeWard === 'All' || ward === activeWard) ? 'block' : 'none';
-            }
-        });
     }
 
     tabs.forEach(tab => {

@@ -4877,13 +4877,13 @@ chips += `<div class="bp-cal-session-chip gs-chip" style="${chipStyle}" onclick=
             return `<span style="background:${c};color:white;padding:2px 6px;border-radius:0.3rem;font-size:0.7rem;font-weight:600;margin-right:2px;">${w}</span>`;
         }).join('');
 
-        html += `<div class="day-session-item gs-item" onclick="event.stopPropagation(); CalendarWidget.openGroupSession(${gs.id})">
-            <span class="session-initials">👥</span>
-            <span class="session-time">${gs.time.substring(0,5)}</span>
-            <span>${wardBadges}</span>
-            <span class="session-room">${escapeHtml(gs.title)}</span>
-            <span class="session-arrow">→</span>
-        </div>`;
+       html += `<div class="day-session-item gs-item" onclick="event.stopPropagation(); CalendarWidget.openGroupSession(${gs.id})">
+    <span class="session-initials">👥</span>
+   <span class="session-room" style="font-weight:600;">${escapeHtml(gs.title)}</span>
+    <span>${wardBadges}</span>
+    <span class="session-time">${gs.time.substring(0,5)}</span>
+    <span class="session-arrow">→</span>
+</div>`;
     });
 }
                 listContainer.innerHTML = html;

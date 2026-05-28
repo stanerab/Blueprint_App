@@ -3521,7 +3521,19 @@ async function deleteGroupSession(sessionId) {
             return;
         } else { wardSelect.value = ""; wardSelect.setCustomValidity(''); wardSelect.dispatchEvent(new Event('change')); modal.style.display = 'flex'; }
     }
-    function closeSessionModal() { document.getElementById('sessionModal').style.display = 'none'; }
+    function closeSessionModal() {
+    document.getElementById('sessionModal').style.display = 'none';
+    if (modalStack.length > 0) {
+        const previous = modalStack.pop();
+        if (previous && document.getElementById(previous)) {
+            document.getElementById(previous).style.display = 'flex';
+            bringModalToFront(previous);
+            if (previous === 'calDayModal' && window._calDayDate) {
+                CalendarWidget.dayClick(window._calDayDate);
+            }
+        }
+    }
+}
  function editSession(id, patient_id, datetime, carenotes, tracker, tasks, notes) {
     if (document.getElementById('patientDetailsModal').style.display === 'flex') {
         pushModal('patientDetailsModal');
@@ -4161,8 +4173,18 @@ if (currentSingleSession && currentSingleSession.id == document.getElementById('
     }
 
     function closeGroupSessionModal() {
-        document.getElementById('groupSessionModal').style.display = 'none';
+    document.getElementById('groupSessionModal').style.display = 'none';
+    if (modalStack.length > 0) {
+        const previous = modalStack.pop();
+        if (previous && document.getElementById(previous)) {
+            document.getElementById(previous).style.display = 'flex';
+            bringModalToFront(previous);
+            if (previous === 'calDayModal' && window._calDayDate) {
+                CalendarWidget.dayClick(window._calDayDate);
+            }
+        }
     }
+}
 
     async function loadGroupAttendanceTable() {
     const selectedWards = [];
@@ -4890,10 +4912,18 @@ chips += `<div class="bp-cal-session-chip gs-chip" style="${chipStyle}" onclick=
             }
 
             window._calDayDate = dateStr;
-            const addBtn = document.getElementById('calDayAddBtn');
-            if (addBtn) addBtn.onclick = () => { document.getElementById('calDayModal').style.display = 'none'; openSessionModal(null, window._calDayDate); };
-            const groupAddBtn = document.getElementById('calDayAddGroupBtn');
-            if (groupAddBtn) groupAddBtn.onclick = () => { document.getElementById('calDayModal').style.display = 'none'; openGroupSessionModal(null, window._calDayDate); };
+          const addBtn = document.getElementById('calDayAddBtn');
+if (addBtn) addBtn.onclick = () => {
+    pushModal('calDayModal');
+    document.getElementById('calDayModal').style.display = 'none';
+    openSessionModal(null, window._calDayDate);
+};
+const groupAddBtn = document.getElementById('calDayAddGroupBtn');
+if (groupAddBtn) groupAddBtn.onclick = () => {
+    pushModal('calDayModal');
+    document.getElementById('calDayModal').style.display = 'none';
+    openGroupSessionModal(null, window._calDayDate);
+};
             const modal = document.getElementById('calDayModal');
             if (modal) modal.style.display = 'flex';
         },

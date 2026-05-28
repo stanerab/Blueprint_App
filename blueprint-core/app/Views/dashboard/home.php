@@ -4330,18 +4330,49 @@ if (currentSingleSession && currentSingleSession.id == document.getElementById('
         return;
     }
 
-    const attendance = [];
+   const attendance = [];
+const unmarked = [];
+
+rows.forEach(row => {
+    const patientId = row.getAttribute('data-patient-id');
+    const checkedRadio = row.querySelector('input[type="radio"]:checked');
+    const status = isFuture ? 'not_set' : (checkedRadio ? checkedRadio.value : 'not_set');
+    const notesInput = row.querySelector(`input[name="att_notes_${patientId}"]`);
+
+    // For non-future sessions, track patients with no attendance marked
+    if (!isFuture && !checkedRadio) {
+        const patientName = row.querySelector('td:nth-child(3)')?.innerText || 'Unknown';
+        unmarked.push(patientName);
+    }
+
+    attendance.push({
+        patient_id: patientId,
+        status: status,
+        notes: notesInput ? notesInput.value : ''
+    });
+});
+
+// Block submission if any patient has no attendance marked (non-future sessions only)
+if (!isFuture && unmarked.length > 0) {
+    showMessage(`Please mark attendance for all patients before saving.`, true);
+    // Highlight unmarked rows
     rows.forEach(row => {
         const patientId = row.getAttribute('data-patient-id');
         const checkedRadio = row.querySelector('input[type="radio"]:checked');
-        const status = isFuture ? 'not_set' : (checkedRadio ? checkedRadio.value : 'not_set');
-        const notesInput = row.querySelector(`input[name="att_notes_${patientId}"]`);
-        attendance.push({
-            patient_id: patientId,
-            status: status,
-            notes: notesInput ? notesInput.value : ''
-        });
+        if (!checkedRadio) {
+            row.style.background = '#fef2f2';
+            row.style.outline = '1px solid #fca5a5';
+            // Clear highlight when any radio is selected
+            row.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    row.style.background = '';
+                    row.style.outline = '';
+                }, { once: true });
+            });
+        }
     });
+    return;
+}
 
     const wardSnapshot = ['Hope','Lakeside','Manor']
         .filter(w => document.getElementById('filterWard' + w)?.checked)

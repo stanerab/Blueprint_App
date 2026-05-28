@@ -3258,9 +3258,13 @@ select:invalid {
 
     const select = document.getElementById('patientSelect');
     const selectedOpt = select.options[select.selectedIndex];
-    const optLabel = selectedOpt ? selectedOpt.textContent.trim() : '—';
-
-    viewPatientDetails(patientId, optLabel);
+   const optLabel = selectedOpt ? selectedOpt.textContent.trim() : '—';
+const initialsMatch = optLabel.match(/–\s*([A-Z]+)$/);
+const roomMatch = optLabel.match(/Room\s*(\d+)/);
+const initials = initialsMatch ? initialsMatch[1] : optLabel;
+const room = roomMatch ? ', Room ' + roomMatch[1] : '';
+const displayName = initials + room;
+viewPatientDetails(patientId, displayName);
 
     select.value = '';
 }

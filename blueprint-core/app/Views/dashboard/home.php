@@ -3192,7 +3192,7 @@ select:invalid {
 
                 <!-- Notes -->
                 <div class="form-group">
-                    <label for="groupSessionNotes">Group xSession Notes</label>
+                    <label for="groupSessionNotes">Group Session Notes</label>
                     <textarea name="notes" id="groupSessionNotes" rows="4" class="gs-textarea" placeholder="Enter group session notes..."></textarea>
                 </div>
 

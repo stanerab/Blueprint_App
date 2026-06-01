@@ -1,4 +1,4 @@
-</div> <!-- Close your main container div -->
+</div> 
 
 <footer class="app-footer">
     <div class="app-footer-inner">

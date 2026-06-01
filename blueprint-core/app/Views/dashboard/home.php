@@ -1026,13 +1026,33 @@ body.modal-open {
 
 .bp-cal-legend {
     display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.3rem;
+    margin-top: 0.75rem;
     padding-top: 0.75rem;
     border-top: 1px solid var(--clinical-border);
-    font-size: 0.75rem;
-    color: #64748b;
-    flex-wrap: wrap;
+    overflow-x: auto;
+}
+
+.bp-cal-legend::-webkit-scrollbar {
+    display: none;
+}
+
+.bp-cal-legend .ward-filter {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.bp-cal-legend-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .bp-cal-dot {
@@ -2139,37 +2159,31 @@ footer {
     gap: 2px;
 }
 /* ===== CALENDAR LEGEND & FILTERS ===== */
-.bp-cal-legend {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid #f1f5f9;
-}
 
 .bp-cal-legend-label {
     font-size: 0.72rem;
     font-weight: 600;
     color: #94a3b8;
-    text-transform: uppercase;
     letter-spacing: 0.04em;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .bp-cal-leg-item {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    font-size: 0.75rem;
+    gap: 0.2rem;
+    font-size: 0.7rem;
     color: #475569;
     cursor: pointer;
     user-select: none;
-    padding: 0.2rem 0.5rem;
+    padding: 0.15rem 0.35rem;
     border-radius: 2rem;
     border: 1px solid #e2e8f0;
     background: white;
     transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .bp-cal-leg-item:hover {
@@ -2706,11 +2720,12 @@ select:invalid {
                     </h2>
                     <div class="ward-filter-wrapper text-center mt-2">
                         <span class="filter-title">Filter by ward:</span>
-                        <div class="ward-filters d-inline-flex gap-3 mt-1">
-                            <label class="ward-filter"><input type="checkbox" value="hope" checked> Hope</label>
-                            <label class="ward-filter"><input type="checkbox" value="lakeside" checked> Lakeside</label>
-                            <label class="ward-filter"><input type="checkbox" value="manor" checked> Manor</label>
-                        </div>
+                   <div class="ward-filters d-inline-flex gap-3 mt-1">
+    <label class="ward-filter"><input type="checkbox" id="sessionFilterAll" checked onchange="toggleAllSessions(this)"> All</label>
+    <label class="ward-filter"><input type="checkbox" value="hope" onchange="syncSessionAll()"> Hope</label>
+    <label class="ward-filter"><input type="checkbox" value="lakeside" onchange="syncSessionAll()"> Lakeside</label>
+    <label class="ward-filter"><input type="checkbox" value="manor" onchange="syncSessionAll()"> Manor</label>
+</div>
                     </div>
                 </div>
                 <?php if (!empty($todaySessions)): ?>
@@ -2780,29 +2795,25 @@ select:invalid {
 
 <div class="bp-cal-legend">
     <span class="bp-cal-legend-label">Filter by:</span>
-
-    <label class="bp-cal-leg-item">
-        <input type="checkbox" id="calFilterHope" checked onchange="CalendarWidget.handleFilter('hope', this)">
-        Hope
-        <span class="bp-cal-dot" style="background:#eab308;"></span>
+    <label class="ward-filter">
+        <input type="checkbox" id="calFilterAll" checked onchange="CalendarWidget.handleFilter('all', this)">
+        All
     </label>
-
-    <label class="bp-cal-leg-item">
-        <input type="checkbox" id="calFilterLakeside" checked onchange="CalendarWidget.handleFilter('lakeside', this)">
-        Lakeside
-        <span class="bp-cal-dot" style="background:#22c55e;"></span>
+    <label class="ward-filter">
+        <input type="checkbox" id="calFilterHope" onchange="CalendarWidget.handleFilter('hope', this)">
+        Hope<span class="bp-cal-dot" style="background:#eab308;margin-left:3px;"></span>
     </label>
-
-    <label class="bp-cal-leg-item">
-        <input type="checkbox" id="calFilterManor" checked onchange="CalendarWidget.handleFilter('manor', this)">
-        Manor
-        <span class="bp-cal-dot" style="background:#3b82f6;"></span>
+    <label class="ward-filter">
+        <input type="checkbox" id="calFilterLakeside" onchange="CalendarWidget.handleFilter('lakeside', this)">
+        Lakeside<span class="bp-cal-dot" style="background:#22c55e;margin-left:3px;"></span>
     </label>
-
-    <label class="bp-cal-leg-item">
-        <input type="checkbox" id="calFilterGroup" checked onchange="CalendarWidget.handleFilter('group', this)">
-        Group
-        <span class="bp-cal-dot" style="background:#8b5cf6;"></span>
+    <label class="ward-filter">
+        <input type="checkbox" id="calFilterManor" onchange="CalendarWidget.handleFilter('manor', this)">
+        Manor<span class="bp-cal-dot" style="background:#3b82f6;margin-left:3px;"></span>
+    </label>
+    <label class="ward-filter">
+        <input type="checkbox" id="calFilterGroup" onchange="CalendarWidget.handleFilter('group', this)">
+        Group<span class="bp-cal-dot" style="background:#8b5cf6;margin-left:3px;"></span>
     </label>
 </div>
             </div>
@@ -2861,11 +2872,12 @@ select:invalid {
             </div>
             <div class="ward-checkboxes">
                 <label>Filter by ward</label>
-                <div class="checkbox-group">
-                    <label class="ward-option"><input type="checkbox" value="hope" checked> Hope</label>
-                    <label class="ward-option"><input type="checkbox" value="lakeside" checked> Lakeside</label>
-                    <label class="ward-option"><input type="checkbox" value="manor" checked> Manor</label>
-                </div>
+          <div class="checkbox-group">
+    <label class="ward-option"><input type="checkbox" id="patientFilterAll" checked onchange="toggleAllPatients(this)"> All</label>
+    <label class="ward-option"><input type="checkbox" value="hope" onchange="syncPatientAll()"> Hope</label>
+    <label class="ward-option"><input type="checkbox" value="lakeside" onchange="syncPatientAll()"> Lakeside</label>
+    <label class="ward-option"><input type="checkbox" value="manor" onchange="syncPatientAll()"> Manor</label>
+</div>
             </div>
         </div>
     </div>
@@ -3180,7 +3192,7 @@ select:invalid {
 
                 <!-- Notes -->
                 <div class="form-group">
-                    <label for="groupSessionNotes">Session Notes</label>
+                    <label for="groupSessionNotes">Group xSession Notes</label>
                     <textarea name="notes" id="groupSessionNotes" rows="4" class="gs-textarea" placeholder="Enter group session notes..."></textarea>
                 </div>
 
@@ -3229,7 +3241,7 @@ select:invalid {
 
 
 
- <!-- CALENDAR DAY DETAIL MODAL -->
+<!-- CALENDAR DAY DETAIL MODAL -->
 <div id="calDayModal" class="modal" style="z-index:1050;">
     <div class="modal-content" style="max-width:460px;">
         <div class="modal-header">
@@ -3475,6 +3487,43 @@ function closePatientDetailsModal() {
             });
     }
 
+    // ==================== SESSION FILTER ALL ====================
+function toggleAllSessions(allCb) {
+    document.querySelectorAll('.ward-filter input[type="checkbox"]:not(#sessionFilterAll)')
+        .forEach(cb => cb.checked = false);
+    if (!allCb.checked) allCb.checked = true;
+    applyAllFilters();
+}
+
+function syncSessionAll() {
+    const allCb = document.getElementById('sessionFilterAll');
+    if (allCb) allCb.checked = false;
+    const specific = document.querySelectorAll('.ward-filter input[type="checkbox"]:not(#sessionFilterAll)');
+    const anyChecked = Array.from(specific).some(cb => cb.checked);
+    if (!anyChecked) {
+        if (allCb) allCb.checked = true;
+    }
+    applyAllFilters();
+}
+
+function toggleAllPatients(allCb) {
+    document.querySelectorAll('.ward-option input[type="checkbox"]:not(#patientFilterAll)')
+        .forEach(cb => cb.checked = false);
+    if (!allCb.checked) allCb.checked = true;
+    filterPatients();
+}
+
+function syncPatientAll() {
+    const allCb = document.getElementById('patientFilterAll');
+    if (allCb) allCb.checked = false;
+    const specific = document.querySelectorAll('.ward-option input[type="checkbox"]:not(#patientFilterAll)');
+    const anyChecked = Array.from(specific).some(cb => cb.checked);
+    if (!anyChecked) {
+        if (allCb) allCb.checked = true;
+    }
+    filterPatients();
+}
+
 function openSessionModalFromProfile() {
     closePatientDetailsModal();
     setTimeout(() => {
@@ -3562,6 +3611,7 @@ function openSessionModalFromProfile() {
 }
 
 
+
 async function deleteGroupSession(sessionId) {
     if (!confirm('⚠️ Permanently delete this group session and all attendance records? This cannot be undone.')) return;
 
@@ -3591,41 +3641,42 @@ async function deleteGroupSession(sessionId) {
     function resetPatientDropdown() { const patientSelect = document.getElementById('sessionPatient'); Array.from(patientSelect.options).forEach(opt => { opt.style.display = ''; }); document.getElementById('wardFilterMsg').style.display = 'none'; }
 
     // ==================== FILTERS ====================
-    function applyAllFilters() {
-        const activeWards = Array.from(document.querySelectorAll('.ward-filter input:checked')).map(cb => cb.value);
-        const rows = document.querySelectorAll('.session-card');
-        let visible = 0;
-        rows.forEach(card => {
-            const ward = card.dataset.ward;
-            let show = true;
-            if (activeWards.length && !activeWards.includes(ward)) show = false;
-            card.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-        const badge = document.getElementById('sessionCountBadge');
-        if (badge) badge.textContent = visible;
-        const filteredEmpty = document.getElementById('filteredEmpty');
-        if (filteredEmpty) filteredEmpty.style.display = (rows.length && visible === 0) ? '' : 'none';
-    }
-    function filterPatients() {
-        const selectedWards = Array.from(document.querySelectorAll('.ward-option input:checked')).map(cb => cb.value);
-        const select = document.getElementById('patientSelect');
-    
-        // Hide/show individual options
-        Array.from(select.options).forEach((opt, idx) => {
-            if (idx === 0) return; // skip placeholder
-            const ward = opt.getAttribute('data-ward'); // e.g. "hope"
-            const match = selectedWards.length === 0 || selectedWards.includes(ward);
-            opt.style.display = match ? '' : 'none';
-        });
-    
-        // Hide/show entire optgroup labels based on whether any child is visible
-        Array.from(select.querySelectorAll('optgroup')).forEach(group => {
-            const anyVisible = Array.from(group.querySelectorAll('option'))
-                .some(opt => opt.style.display !== 'none');
-            group.style.display = anyVisible ? '' : 'none';
-        });
-    }
+   function applyAllFilters() {
+    const allCb = document.getElementById('sessionFilterAll');
+    const isAll = allCb && allCb.checked;
+    const activeWards = Array.from(document.querySelectorAll('.ward-filter input[type="checkbox"]:not(#sessionFilterAll):checked')).map(cb => cb.value);
+    const rows = document.querySelectorAll('.session-card');
+    let visible = 0;
+    rows.forEach(card => {
+        const ward = card.dataset.ward;
+        const show = isAll || activeWards.includes(ward);
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    const badge = document.getElementById('sessionCountBadge');
+    if (badge) badge.textContent = visible;
+    const filteredEmpty = document.getElementById('filteredEmpty');
+    if (filteredEmpty) filteredEmpty.style.display = (rows.length && visible === 0) ? '' : 'none';
+}
+   function filterPatients() {
+    const allCb = document.getElementById('patientFilterAll');
+    const isAll = allCb && allCb.checked;
+    const selectedWards = Array.from(document.querySelectorAll('.ward-option input[type="checkbox"]:not(#patientFilterAll):checked')).map(cb => cb.value);
+    const select = document.getElementById('patientSelect');
+
+    Array.from(select.options).forEach((opt, idx) => {
+        if (idx === 0) return;
+        const ward = opt.getAttribute('data-ward');
+        const match = isAll || selectedWards.includes(ward);
+        opt.style.display = match ? '' : 'none';
+    });
+
+    Array.from(select.querySelectorAll('optgroup')).forEach(group => {
+        const anyVisible = Array.from(group.querySelectorAll('option'))
+            .some(opt => opt.style.display !== 'none');
+        group.style.display = anyVisible ? '' : 'none';
+    });
+}
     
 
     // ==================== MODAL HELPERS ====================
@@ -4872,8 +4923,7 @@ const CalendarWidget = (() => {
     let month = new Date().getMonth();
   let sessionCache = {};
 let groupCache = {};
-let activeFilters = ['hope', 'lakeside', 'manor', 'group'];
-
+let activeFilters = ['all'];
     function getWardClass(ward) {
         if (!ward) return 'ward-hope';
         const w = ward.toLowerCase();
@@ -4950,11 +5000,11 @@ let activeFilters = ['hope', 'lakeside', 'manor', 'group'];
         // Combine both types, group by day
      let combined = [...indivSessions, ...groupSessions];
 if (!activeFilters.includes('all')) {
-   combined = combined.filter(s => {
-    if (activeFilters.includes('group') && s.type === 'group') return true;
-    if (s.type === 'individual' && activeFilters.includes(s.ward.toLowerCase())) return true;
-    return false;
-});
+    combined = combined.filter(s => {
+        if (activeFilters.includes('group') && s.type === 'group') return true;
+        if (s.type === 'individual' && activeFilters.includes(s.ward.toLowerCase())) return true;
+        return false;
+    });
 }
         const byDay = {};
         combined.forEach(s => {
@@ -5030,34 +5080,27 @@ chips += `<div class="bp-cal-session-chip gs-chip" style="${chipStyle}" onclick=
         nextMonth() { month++; if (month > 11) { month = 0; year++; } load(); },
       refresh() { delete sessionCache[monthKey()]; delete groupCache[monthKey()]; load(); },
 handleFilter(filter, checkbox) {
-    const allCb       = document.getElementById('calFilterAll');
-    const hopeCb      = document.getElementById('calFilterHope');
-    const lakesideCb  = document.getElementById('calFilterLakeside');
-    const manorCb     = document.getElementById('calFilterManor');
-    const groupCb     = document.getElementById('calFilterGroup');
-    const specific    = [hopeCb, lakesideCb, manorCb, groupCb];
+    const allCb    = document.getElementById('calFilterAll');
+    const specific = ['Hope','Lakeside','Manor','Group'];
 
     if (filter === 'all') {
-        // All ticked — untick everything else
-        if (checkbox.checked) {
-            specific.forEach(cb => { if (cb) cb.checked = false; });
-            activeFilters = ['all'];
-        } else {
-            // Prevent unchecking All if nothing else is checked
-            checkbox.checked = true;
-            activeFilters = ['all'];
-        }
+        specific.forEach(f => {
+            const cb = document.getElementById('calFilter' + f);
+            if (cb) cb.checked = false;
+        });
+        if (!checkbox.checked) checkbox.checked = true;
+        activeFilters = ['all'];
     } else {
-        // Untick All when a specific filter is chosen
         if (allCb) allCb.checked = false;
 
-        // Build active filters from checked state
-        activeFilters = [];
-        specific.forEach(cb => {
-            if (cb && cb.checked) activeFilters.push(cb.id.replace('calFilter', '').toLowerCase());
-        });
+        activeFilters = specific
+            .map(f => f.toLowerCase())
+            .filter(f => {
+                const cb = document.getElementById('calFilter' + f.charAt(0).toUpperCase() + f.slice(1));
+                return cb && cb.checked;
+            });
 
-        // If nothing is selected, revert to All
+        // If nothing is checked, revert to All
         if (activeFilters.length === 0) {
             if (allCb) allCb.checked = true;
             activeFilters = ['all'];

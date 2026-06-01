@@ -608,6 +608,23 @@ $grouped = $grouped ?? [
 }
 </style>
 
+<!-- NOTE MODAL -->
+<div id="noteModal" class="modal">
+    <div class="modal-content" style="max-width:560px;">
+        <div class="modal-header">
+            <h3 style="margin:0;font-size:1.1rem;">Session Note</h3>
+            <span class="modal-close" onclick="closeNoteModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="noteModalContent" class="notes-content" style="min-height:80px;max-height:400px;overflow-y:auto;white-space:pre-wrap;line-height:1.6;"></div>
+            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1rem;">
+                <button onclick="copyNoteFromModal()" style="padding:0.5rem 1.2rem;border-radius:2rem;border:1px solid #e2e8f0;background:#f1f5f9;cursor:pointer;font-size:0.85rem;">Copy</button>
+                <button onclick="closeNoteModal()" style="padding:0.5rem 1.2rem;border-radius:2rem;border:none;background:#1e3a8a;color:white;cursor:pointer;font-size:0.85rem;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Store current patient ID
 let currentViewPatientId = null;
@@ -722,8 +739,10 @@ function loadAllSessions(patientId) {
                 container.innerHTML = '<div class="no-notes">No sessions recorded for this patient</div>';
                 return;
             }
-            let html = '<table class="sessions-table"><thead><tr><th>Date & Time</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th></tr></thead><tbody>';
-            data.forEach(s => {
+window._sessionNotes = {};
+let html = '<table class="sessions-table"><thead><tr><th>Date & Time</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th></tr></thead><tbody>';       
+    data.forEach(s => {
+                window._sessionNotes[s.id] = s.notes || '';
                 const date = new Date(s.datetime);
                 const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 html += `<tr>
@@ -731,10 +750,9 @@ function loadAllSessions(patientId) {
     <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
     <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
     <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
-  <td style="color:#64748b;font-size:0.78rem;cursor:pointer;" 
-    title="Click to copy full note"
-    onclick="copyNoteText(this, '${(s.notes || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')"
->${s.notes ? s.notes.substring(0,60)+(s.notes.length>60?'…':'') : '—'}</td>
+<td>
+    <button onclick="openNoteModal(${s.id})" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;color:#2563eb;cursor:pointer;white-space:nowrap;">View</button>
+</td>
 </tr>`;
             });
             html += '</tbody></table>';
@@ -874,6 +892,41 @@ function deletePatient(patientId) {
     });
 }
 
+let _currentNoteText = '';
+
+function openNoteModal(sessionId) {
+    const note = (window._sessionNotes && window._sessionNotes[sessionId]) || '';
+    _currentNoteText = note;
+    const container = document.getElementById('noteModalContent');
+    if (note.trim()) {
+        container.innerText = note;
+        container.style.color = '';
+    } else {
+        container.innerText = 'No notes recorded for this session.';
+        container.style.color = '#94a3b8';
+    }
+    document.getElementById('noteModal').style.display = 'flex';
+}
+
+function closeNoteModal() {
+    document.getElementById('noteModal').style.display = 'none';
+}
+
+function copyNoteFromModal() {
+    navigator.clipboard.writeText(_currentNoteText).then(() => {
+        const btn = document.querySelector('#noteModal button:first-of-type');
+        const prev = btn.textContent;
+        btn.textContent = '✓ Copied';
+        btn.style.background = '#d1fae5';
+        btn.style.color = '#065f46';
+        setTimeout(() => {
+            btn.textContent = prev;
+            btn.style.background = '';
+            btn.style.color = '';
+        }, 1500);
+    }).catch(() => showToast('Could not copy — please copy manually', true));
+}
+
 function showToast(message, isError = false) {
     const toast = document.createElement('div');
     toast.textContent = message;
@@ -964,9 +1017,11 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', applySearch);
     filterByWard();
 
-    window.onclick = function(event) {
-        const modal = document.getElementById('patientDetailsModal');
-        if (event.target == modal) closePatientDetailsModal();
-    };
+   window.onclick = function(event) {
+    const modal = document.getElementById('patientDetailsModal');
+    if (event.target == modal) closePatientDetailsModal();
+    const noteModal = document.getElementById('noteModal');
+    if (event.target == noteModal) closeNoteModal();
+};
 });
 </script>

@@ -222,6 +222,21 @@ $grouped = $grouped ?? [
     border-radius: 2rem;
 }
 
+/* core10 edit */
+.btn-core10-edit {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.3rem;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: all 0.15s;
+}
+.btn-core10-edit:hover { background: #e2e8f0; }
+
+
 .ward-tab {
     padding: 0.5rem 1.2rem;
     border: none;
@@ -629,15 +644,71 @@ function loadPatientSummary(patientId) {
             const dischargeDate = dischargeRaw ? dischargeRaw.split(' ')[0] : 'N/A';
             document.getElementById('viewPatientAdmissionDateTime').innerText = admissionDate;
             document.getElementById('viewPatientDischargeDateTime').innerText = dischargeDate;
-
 document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission
     ? '<span class="core10-badge completed">✓ Completed at Admission</span>'
     : '<span class="core10-badge pending">✗ Not Completed at Admission</span>';
+document.getElementById('viewPatientAdmissionCore').innerHTML +=
+    ` <button class="btn-core10-edit" onclick="editDischargedCore10('admission', ${patientId}, ${data.core10_admission ? 1 : 0})">✎ Edit</button>`;
+
 document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge
     ? '<span class="core10-badge completed">✓ Completed at Discharge</span>'
     : '<span class="core10-badge pending">✗ Not Completed at Discharge</span>';
+document.getElementById('viewPatientDischargeCore').innerHTML +=
+    ` <button class="btn-core10-edit" onclick="editDischargedCore10('discharge', ${patientId}, ${data.core10_discharge ? 1 : 0})">✎ Edit</button>`;
         })
         .catch(error => console.error('Error loading patient summary:', error));
+}
+
+function editDischargedCore10(type, patientId, currentValue) {
+    const spanId = type === 'admission' ? 'viewPatientAdmissionCore' : 'viewPatientDischargeCore';
+    const span = document.getElementById(spanId);
+    const isCompleted = currentValue == 1;
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = isCompleted;
+    checkbox.id = 'dischargedCore10_' + type;
+
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Save';
+    saveBtn.className = 'btn-core10-edit';
+    saveBtn.style.marginLeft = '6px';
+    saveBtn.onclick = async () => {
+        const completed = checkbox.checked ? 1 : 0;
+        const endpoint = type === 'admission'
+            ? '<?= url('patients/update-core10') ?>'
+            : '<?= url('patients/update-discharge-core10') ?>';
+        const body = type === 'admission'
+            ? { patient_id: patientId, core10_admission: completed, csrf_token: '<?= csrf_token() ?>' }
+            : { patient_id: patientId, core10_discharge: completed, csrf_token: '<?= csrf_token() ?>' };
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+            if (data.success) {
+                showToast('CORE-10 updated successfully');
+                loadPatientSummary(patientId);
+            } else {
+                showToast(data.error || 'Failed to update', true);
+            }
+        } catch (err) {
+            showToast('Network error', true);
+        }
+    };
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.className = 'btn-core10-edit';
+    cancelBtn.style.marginLeft = '4px';
+    cancelBtn.onclick = () => loadPatientSummary(patientId);
+
+    span.innerHTML = '';
+    span.appendChild(checkbox);
+    span.appendChild(saveBtn);
+    span.appendChild(cancelBtn);
 }
 
 function loadAllSessions(patientId) {
@@ -660,7 +731,10 @@ function loadAllSessions(patientId) {
     <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
     <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
     <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
-    <td class="notes-cell">${s.notes ? s.notes.substring(0, 50) + (s.notes.length > 50 ? '...' : '') : '-'}</td>
+  <td style="color:#64748b;font-size:0.78rem;cursor:pointer;" 
+    title="Click to copy full note"
+    onclick="copyNoteText(this, '${(s.notes || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')"
+>${s.notes ? s.notes.substring(0,60)+(s.notes.length>60?'…':'') : '—'}</td>
 </tr>`;
             });
             html += '</tbody></table>';
@@ -670,6 +744,24 @@ function loadAllSessions(patientId) {
             console.error('Error loading sessions:', error);
             container.innerHTML = '<div class="error">Error loading sessions</div>';
         });
+}
+
+function copyNoteText(el, fullText) {
+    if (!fullText || fullText === '') return;
+    navigator.clipboard.writeText(fullText).then(() => {
+        const original = el.style.background;
+        el.style.background = '#d1fae5';
+        el.style.color = '#065f46';
+        const prev = el.innerHTML;
+        el.innerHTML = '✓ Note copied';
+        setTimeout(() => {
+            el.style.background = original;
+            el.style.color = '';
+            el.innerHTML = prev;
+        }, 1500);
+    }).catch(() => {
+        showToast('Could not copy — please copy manually', true);
+    });
 }
 
 function loadAdmissionNotes(patientId) {

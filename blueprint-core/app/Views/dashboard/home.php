@@ -2138,6 +2138,105 @@ footer {
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 2px;
 }
+/* ===== CALENDAR LEGEND & FILTERS ===== */
+.bp-cal-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.bp-cal-legend-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.bp-cal-leg-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    transition: all 0.15s;
+}
+
+.bp-cal-leg-item:hover {
+    border-color: #1e3a8a;
+    background: #eff6ff;
+    color: #1e3a8a;
+}
+
+.bp-cal-leg-item input[type="checkbox"] {
+    width: 12px;
+    height: 12px;
+    accent-color: #1e3a8a;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+.bp-cal-leg-item.active { color: #1e3a8a; font-weight: 600; }
+
+.bp-cal-check {
+    display: inline-flex;
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
+    min-height: 11px;
+    border: 1.5px solid #94a3b8;
+    border-radius: 2px;
+    background: white;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    box-sizing: border-box;
+}
+
+.bp-cal-leg-item.active .bp-cal-check {
+    background: #1e3a8a;
+    border-color: #1e3a8a;
+}
+
+.bp-cal-leg-item.active .bp-cal-check::after {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 6px;
+    border: 1.5px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translate(-0.5px, -1px);
+    flex-shrink: 0;
+}
+
+.bp-cal-leg-item.active .bp-cal-check {
+    background: #1e3a8a;
+    border-color: #1e3a8a;
+}
+
+.bp-cal-leg-item.active .bp-cal-check::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 7px;
+    border: 1.5px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translate(-0.5px, -1px);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .patient-attendance-item {
@@ -2438,6 +2537,19 @@ select:invalid {
     padding: 0.5rem 0;
 }
 
+.bp-cal-leg-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bp-cal-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .attendance-cards {
@@ -2665,12 +2777,34 @@ select:invalid {
                     <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
                 </div>
                 <div class="bp-cal-grid" id="calGrid"><div class="bp-cal-loading">Loading calendar...</div></div>
-                <div class="bp-cal-legend">
-                <span><span class="bp-cal-dot" style="background:#eab308;"></span>Hope</span>
-                <span><span class="bp-cal-dot" style="background:#22c55e;"></span>Lakeside</span>
-                <span><span class="bp-cal-dot" style="background:#3b82f6;"></span>Manor</span>
-                <span><span class="bp-cal-dot" style="background:#8b5cf6;"></span>Group</span>
-                </div>
+
+<div class="bp-cal-legend">
+    <span class="bp-cal-legend-label">Filter by:</span>
+
+    <label class="bp-cal-leg-item">
+        <input type="checkbox" id="calFilterHope" checked onchange="CalendarWidget.handleFilter('hope', this)">
+        Hope
+        <span class="bp-cal-dot" style="background:#eab308;"></span>
+    </label>
+
+    <label class="bp-cal-leg-item">
+        <input type="checkbox" id="calFilterLakeside" checked onchange="CalendarWidget.handleFilter('lakeside', this)">
+        Lakeside
+        <span class="bp-cal-dot" style="background:#22c55e;"></span>
+    </label>
+
+    <label class="bp-cal-leg-item">
+        <input type="checkbox" id="calFilterManor" checked onchange="CalendarWidget.handleFilter('manor', this)">
+        Manor
+        <span class="bp-cal-dot" style="background:#3b82f6;"></span>
+    </label>
+
+    <label class="bp-cal-leg-item">
+        <input type="checkbox" id="calFilterGroup" checked onchange="CalendarWidget.handleFilter('group', this)">
+        Group
+        <span class="bp-cal-dot" style="background:#8b5cf6;"></span>
+    </label>
+</div>
             </div>
         </div>
 
@@ -2678,29 +2812,6 @@ select:invalid {
     $ward = strtolower($patient['ward'] ?? '');
     $avatarClass = $ward === 'hope' ? 'avatar-hope' : ($ward === 'manor' ? 'avatar-manor' : ($ward === 'lakeside' ? 'avatar-lakeside' : ''));
     ?>
-
-    <!-- SELECTED PATIENT CARD -->
-    <div id="selectedPatientCard" class="selected-patient-card">
-        <div class="selected-patient-header">
-            <div id="selectedAvatar" class="avatar-circle <?= $avatarClass ?>"><?= isset($patient['name']) ? strtoupper(substr($patient['name'], 0, 2)) : '--' ?></div>
-            <div class="selected-info">
-                <h3 id="selectedName">—</h3>
-                <p id="selectedWardRoom">Ward: — | Room: —</p>
-            </div>
-        </div>
-        <div class="selected-details">
-            <div class="detail-badge"><strong>Last Session:</strong> <span id="lastSession">—</span></div>
-            <div class="detail-badge"><strong>Next Session:</strong> <span id="nextSession">—</span></div>
-            <div class="detail-badge"><strong>Status:</strong> <span id="patientStatus">Active</span></div>
-        </div>
-        <div class="card-actions">
-            <button class="btn-primary" onclick="addSessionForSelectedPatient()">+ Add Session</button>
-            <button class="btn-secondary" onclick="openChangeRoomModal()">Change Room</button>
-            <button class="btn-secondary" onclick="viewPatientDetails(currentSelectedPatientId, selectedPatientName)">View Full Profile</button>
-            <button class="btn-danger" onclick="dischargePatient()">Discharge Patient</button>
-            <button class="clear-patient" onclick="clearSelectedPatient()" title="Clear" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 0 8px;">✕</button>
-        </div>
-    </div>
 
     <!-- PATIENT SELECTION -->
     <div class="patient-section">
@@ -3023,14 +3134,11 @@ select:invalid {
                         <label for="groupType">Group Type</label>
                    <select name="group_type" id="groupType" class="gs-select" onchange="toggleCustomGroupType()">
     <option value="" disabled selected>Select group type…</option>
-    <option value="DBT">DBT</option>
-    <option value="CBT">CBT</option>
-    <option value="Skills">Skills</option>
-    <option value="Mindfulness">Mindfulness</option>
-    <option value="Art Therapy">Art Therapy</option>
-    <option value="Psychoeducation">Psychoeducation</option>
-    <option value="Relaxation">Relaxation</option>
-    <option value="Other">Other</option>
+        <option value="CBT">CBT</option>
+        <option value="DBT">DBT</option>
+        <option value="Music Therapy">Music Therapy</option>
+        <option value="Art Therapy">Art Therapy</option>
+        <option value="Other">Other</option>
 </select>
 
                         <input type="text" id="customGroupType" name="custom_group_type" class="gs-input" placeholder="Enter custom group type" style="display:none; margin-top:10px;">
@@ -3128,7 +3236,25 @@ select:invalid {
             <h2 id="calDayTitle" style="font-size:1.1rem;"><i class="bi bi-calendar-day"></i> Sessions</h2>
             <button class="modal-close" onclick="document.getElementById('calDayModal').style.display='none'">✕</button>
         </div>
-        <div id="calDayList" style="min-height:60px;"></div>
+     
+<div class="cal-day-filters" id="calDayFilters" style="padding:0.5rem 0.75rem;border-bottom:1px solid #e2e8f0;display:flex;gap:0.5rem;flex-wrap:wrap;">
+    <select id="calDayWardFilter" onchange="filterCalDayList()" style="font-size:0.78rem;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:0.4rem;background:white;">
+        <option value="all">All Wards</option>
+        <option value="Hope">Hope</option>
+        <option value="Lakeside">Lakeside</option>
+        <option value="Manor">Manor</option>
+    </select>
+    <select id="calDayGroupFilter" onchange="filterCalDayList()" style="font-size:0.78rem;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:0.4rem;background:white;">
+        <option value="all">All Groups</option>
+        <option value="CBT">CBT</option>
+        <option value="DBT">DBT</option>
+        <option value="Music Therapy">Music Therapy</option>
+        <option value="Art Therapy">Art Therapy</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
+<div id="calDayList" style="min-height:60px;"></div>
+
       <div class="modal-actions" style="margin:0 0.5rem 0.5rem;padding-top:1rem;border-top:1px solid var(--clinical-border);display:flex;gap:0.75rem;flex-shrink:0;position:sticky;bottom:0;background:white;z-index:10;">
     <button onclick="document.getElementById('calDayModal').style.display='none'" style="padding:0.5rem 1.2rem;font-size:0.9rem;border-radius:2rem;border:1px solid #e2e8f0;background:#f1f5f9;cursor:pointer;font-weight:500;">Close</button>
     <button id="calDayAddBtn" style="padding:0.5rem 1.2rem;font-size:0.9rem;border-radius:2rem;border:none;background:var(--clinical-blue);color:white;cursor:pointer;font-weight:500;white-space:nowrap;">+ Add Session</button>
@@ -3538,6 +3664,40 @@ async function deleteGroupSession(sessionId) {
         }
     }
 }
+
+function filterCalDayList() {
+    const wardFilter = document.getElementById('calDayWardFilter')?.value || 'all';
+    const groupFilter = document.getElementById('calDayGroupFilter')?.value || 'all';
+
+    document.querySelectorAll('.day-session-item').forEach(item => {
+        const isGroup = item.classList.contains('gs-item');
+        let show = true;
+
+        if (wardFilter !== 'all') {
+            if (isGroup) {
+                const wardText = item.innerHTML;
+                show = wardText.includes(wardFilter);
+            } else {
+                const wardSpan = item.querySelector('.session-ward');
+                const ward = wardSpan ? wardSpan.className.replace('session-ward ward-', '') : '';
+                show = ward.toLowerCase() === wardFilter.toLowerCase();
+            }
+        }
+
+        if (show && groupFilter !== 'all') {
+            if (isGroup) {
+                const nameSpan = item.querySelector('.session-room');
+                const name = nameSpan ? nameSpan.innerText : '';
+                show = name.toLowerCase().includes(groupFilter.toLowerCase());
+            } else {
+                if (groupFilter !== 'all') show = false;
+            }
+        }
+
+        item.style.display = show ? '' : 'none';
+    });
+}
+
  function editSession(id, patient_id, datetime, carenotes, tracker, tasks, notes) {
     if (document.getElementById('patientDetailsModal').style.display === 'flex') {
         pushModal('patientDetailsModal');
@@ -4710,8 +4870,9 @@ const CalendarWidget = (() => {
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     let year = new Date().getFullYear();
     let month = new Date().getMonth();
-    let sessionCache = {};      // individual sessions by month
-    let groupCache = {};        // group sessions by month
+  let sessionCache = {};
+let groupCache = {};
+let activeFilters = ['hope', 'lakeside', 'manor', 'group'];
 
     function getWardClass(ward) {
         if (!ward) return 'ward-hope';
@@ -4787,7 +4948,14 @@ const CalendarWidget = (() => {
         if (title) title.textContent = MONTHS[month] + ' ' + year;
 
         // Combine both types, group by day
-        const combined = [...indivSessions, ...groupSessions];
+     let combined = [...indivSessions, ...groupSessions];
+if (!activeFilters.includes('all')) {
+   combined = combined.filter(s => {
+    if (activeFilters.includes('group') && s.type === 'group') return true;
+    if (s.type === 'individual' && activeFilters.includes(s.ward.toLowerCase())) return true;
+    return false;
+});
+}
         const byDay = {};
         combined.forEach(s => {
             let day;
@@ -4860,7 +5028,43 @@ chips += `<div class="bp-cal-session-chip gs-chip" style="${chipStyle}" onclick=
     return {
         prevMonth() { month--; if (month < 0) { month = 11; year--; } load(); },
         nextMonth() { month++; if (month > 11) { month = 0; year++; } load(); },
-        refresh() { delete sessionCache[monthKey()]; delete groupCache[monthKey()]; load(); },
+      refresh() { delete sessionCache[monthKey()]; delete groupCache[monthKey()]; load(); },
+handleFilter(filter, checkbox) {
+    const allCb       = document.getElementById('calFilterAll');
+    const hopeCb      = document.getElementById('calFilterHope');
+    const lakesideCb  = document.getElementById('calFilterLakeside');
+    const manorCb     = document.getElementById('calFilterManor');
+    const groupCb     = document.getElementById('calFilterGroup');
+    const specific    = [hopeCb, lakesideCb, manorCb, groupCb];
+
+    if (filter === 'all') {
+        // All ticked — untick everything else
+        if (checkbox.checked) {
+            specific.forEach(cb => { if (cb) cb.checked = false; });
+            activeFilters = ['all'];
+        } else {
+            // Prevent unchecking All if nothing else is checked
+            checkbox.checked = true;
+            activeFilters = ['all'];
+        }
+    } else {
+        // Untick All when a specific filter is chosen
+        if (allCb) allCb.checked = false;
+
+        // Build active filters from checked state
+        activeFilters = [];
+        specific.forEach(cb => {
+            if (cb && cb.checked) activeFilters.push(cb.id.replace('calFilter', '').toLowerCase());
+        });
+
+        // If nothing is selected, revert to All
+        if (activeFilters.length === 0) {
+            if (allCb) allCb.checked = true;
+            activeFilters = ['all'];
+        }
+    }
+    load();
+},
         dayClick: async function(dateStr) {
             // Individual sessions from cache
             const key = monthKey();
@@ -4928,6 +5132,12 @@ if (groupAddBtn) groupAddBtn.onclick = () => {
     document.getElementById('calDayModal').style.display = 'none';
     openGroupSessionModal(null, window._calDayDate);
 };
+         // Reset filters
+            const wardF = document.getElementById('calDayWardFilter');
+            const groupF = document.getElementById('calDayGroupFilter');
+            if (wardF) wardF.value = 'all';
+            if (groupF) groupF.value = 'all';
+
             const modal = document.getElementById('calDayModal');
             if (modal) modal.style.display = 'flex';
         },

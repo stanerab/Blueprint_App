@@ -3,7 +3,7 @@
 <footer class="app-footer">
     <div class="app-footer-inner">
         <span><strong>Blueprint</strong> <span class="muted">-Clinical management system</span></span>
-        <span class="muted">© <?= date('Y') ?> Blueprint · v1.4</span>
+        <span class="muted">© <?= date('Y') ?> Blueprint · v1.4.1</span>
     </div>
 </footer>
 

@@ -4,6 +4,9 @@
 <style>
 /* ===== CLINICAL DASHBOARD STYLES (REFACTORED - CLEAN) ===== */
 
+/* ─────────────────────────────────────────────────────────
+   1. VARIABLES & BASE
+   ───────────────────────────────────────────────────────── */
 :root {
     --clinical-blue: #1e3a8a;
     --clinical-soft: #e8f0fe;
@@ -12,10 +15,13 @@
     --clinical-success: #0d9488;
     --clinical-warning: #b45309;
     --clinical-danger: #b91c1c;
-    /* Ward colour variables */
     --ward-hope: #eab308;
     --ward-lakeside: #22c55e;
     --ward-manor: #3b82f6;
+}
+
+html, body {
+    overflow-x: hidden;
 }
 
 body {
@@ -23,8 +29,11 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* ===== LAYOUT & CONTAINERS ===== */
-.container, .dashboard-wrapper {
+/* ─────────────────────────────────────────────────────────
+   2. LAYOUT & CONTAINERS
+   ───────────────────────────────────────────────────────── */
+.container,
+.dashboard-wrapper {
     padding-top: 10px;
 }
 
@@ -37,7 +46,20 @@ body {
     font-size: 16px;
 }
 
-/* ===== QUICK ACTIONS ===== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+footer {
+    opacity: 0.9;
+    font-size: 13px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   3. QUICK ACTIONS
+   ───────────────────────────────────────────────────────── */
 .quick-action-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -54,14 +76,14 @@ body {
     color: #1e293b;
     border: 1px solid var(--clinical-border);
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     display: block;
 }
 
 .quick-action-card:hover {
     border-color: var(--clinical-blue);
     transform: translateY(-3px);
-    box-shadow: 0 12px 20px -12px rgba(30,58,138,0.3);
+    box-shadow: 0 12px 20px -12px rgba(30, 58, 138, 0.3);
     text-decoration: none;
     color: var(--clinical-blue);
 }
@@ -78,11 +100,30 @@ body {
     font-size: 0.9rem;
 }
 
-/* ===== DROPDOWNS ===== */
+.quick-actions {
+    margin-bottom: 10px;
+}
+
+.quick-actions h6 {
+    font-size: 14px;
+}
+
+.quick-actions .card {
+    padding: 12px 10px;
+}
+
+.quick-actions i {
+    color: #0d6efd;
+    margin-right: 6px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   4. DROPDOWNS
+   ───────────────────────────────────────────────────────── */
 .dropdown-menu {
     border: none;
     border-radius: 0.75rem;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
 }
 
@@ -97,7 +138,9 @@ body {
     padding-left: 1.5rem;
 }
 
-/* ===== STATS & PILLS ===== */
+/* ─────────────────────────────────────────────────────────
+   5. STATS & PILLS
+   ───────────────────────────────────────────────────────── */
 .quick-stats {
     display: flex;
     gap: 1rem;
@@ -113,7 +156,7 @@ body {
     font-size: 0.9rem;
     font-weight: 500;
     color: #334155;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .stat-pill strong {
@@ -121,7 +164,9 @@ body {
     margin-right: 0.25rem;
 }
 
-/* ===== SELECTED PATIENT CARD ===== */
+/* ─────────────────────────────────────────────────────────
+   6. SELECTED PATIENT CARD
+   ───────────────────────────────────────────────────────── */
 .selected-patient-card {
     background: white;
     border-radius: 1rem;
@@ -129,7 +174,7 @@ body {
     margin-bottom: 2rem;
     border: 1px solid var(--clinical-border);
     display: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .selected-patient-card.visible {
@@ -182,13 +227,15 @@ body {
     justify-content: flex-end;
 }
 
-/* ===== TODAY'S SESSIONS SECTION ===== */
+/* ─────────────────────────────────────────────────────────
+   7. TODAY'S SESSIONS SECTION
+   ───────────────────────────────────────────────────────── */
 .today-section {
     background: white;
     border-radius: 1rem;
     padding: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     border: 1px solid var(--clinical-border);
 }
 
@@ -221,7 +268,9 @@ body {
     margin-left: 0.5rem;
 }
 
-/* ===== WARD FILTERS ===== */
+/* ─────────────────────────────────────────────────────────
+   8. WARD FILTERS
+   ───────────────────────────────────────────────────────── */
 .ward-filters {
     display: flex;
     gap: 1rem;
@@ -255,7 +304,9 @@ body {
     margin-top: 5px;
 }
 
-/* ===== SESSIONS LIST ===== */
+/* ─────────────────────────────────────────────────────────
+   9. SESSIONS LIST & CARDS
+   ───────────────────────────────────────────────────────── */
 .sessions-list {
     display: flex;
     flex-direction: column;
@@ -321,14 +372,6 @@ body {
     color: white;
 }
 
-/* ===== WARD COLOURS (UPDATED - Clinical Standards) ===== */
-/* Hope = Yellow (#eab308) */
-.ward-hope { background: var(--ward-hope); }
-/* Lakeside = Green (#22c55e) */
-.ward-lakeside { background: var(--ward-lakeside); }
-/* Manor = Blue (#3b82f6) */
-.ward-manor { background: var(--ward-manor); }
-
 .session-icons {
     display: flex;
     gap: 0.5rem;
@@ -344,6 +387,16 @@ body {
     gap: 0.5rem;
 }
 
+/* ─────────────────────────────────────────────────────────
+   10. WARD COLOURS
+   ───────────────────────────────────────────────────────── */
+.ward-hope { background: var(--ward-hope); }
+.ward-lakeside { background: var(--ward-lakeside); }
+.ward-manor { background: var(--ward-manor); }
+
+/* ─────────────────────────────────────────────────────────
+   11. ACTION ICONS & TOOLTIPS
+   ───────────────────────────────────────────────────────── */
 .action-icon {
     background: white;
     width: 32px;
@@ -371,7 +424,6 @@ body {
     border-color: var(--clinical-danger);
 }
 
-/* Tooltips */
 .action-icon[data-tooltip] {
     position: relative;
 }
@@ -391,7 +443,9 @@ body {
     z-index: 2000;
 }
 
-/* ===== EMPTY STATE ===== */
+/* ─────────────────────────────────────────────────────────
+   12. EMPTY STATE
+   ───────────────────────────────────────────────────────── */
 .empty-sessions {
     text-align: center;
     color: #94a3b8;
@@ -421,7 +475,9 @@ body {
     transform: translateY(-2px);
 }
 
-/* ===== PATIENT SECTION ===== */
+/* ─────────────────────────────────────────────────────────
+   13. PATIENT SECTION
+   ───────────────────────────────────────────────────────── */
 .patient-section {
     background: white;
     border-radius: 1rem;
@@ -521,18 +577,14 @@ body {
     flex: 1 1 auto;
 }
 
-@media (max-width: 480px) {
-    .patient-actions button {
-        width: 100%;
-    }
-}
-
-/* ===== MODALS ===== */
+/* ─────────────────────────────────────────────────────────
+   14. MODALS
+   ───────────────────────────────────────────────────────── */
 .modal {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
@@ -540,7 +592,8 @@ body {
     padding: 20px;
 }
 
-#changeRoomModal, #dischargeModal {
+#changeRoomModal,
+#dischargeModal {
     z-index: 1100;
 }
 
@@ -556,7 +609,7 @@ body.modal-open {
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .modal-lg {
@@ -621,10 +674,29 @@ body.modal-open {
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
 }
 
-/* ===== BUTTONS ===== */
+/* Modal scrollbar hiding (per-modal) */
+#sessionModal .modal-content,
+#admitModal .modal-content,
+#groupSessionModal .modal-content,
+#singleSessionModal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+#sessionModal .modal-content::-webkit-scrollbar,
+#admitModal .modal-content::-webkit-scrollbar,
+#groupSessionModal .modal-content::-webkit-scrollbar,
+#singleSessionModal .modal-content::-webkit-scrollbar,
+#groupSessionDetailsModal .modal-content::-webkit-scrollbar {
+    width: 0px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   15. BUTTONS
+   ───────────────────────────────────────────────────────── */
 .btn-secondary {
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
@@ -663,7 +735,9 @@ body.modal-open {
     transform: translateY(-2px);
 }
 
-/* ===== PATIENT SUMMARY & TABS (MODAL) ===== */
+/* ─────────────────────────────────────────────────────────
+   16. PATIENT DETAILS MODAL - SUMMARY & TABS
+   ───────────────────────────────────────────────────────── */
 .patient-summary {
     background: #f8fafc;
     border-radius: 12px;
@@ -725,7 +799,8 @@ body.modal-open {
     border-collapse: collapse;
 }
 
-.sessions-table th, .sessions-table td {
+.sessions-table th,
+.sessions-table td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
@@ -735,7 +810,9 @@ body.modal-open {
     text-align: center;
 }
 
-.loading, .error, .no-notes {
+.loading,
+.error,
+.no-notes {
     text-align: center;
     padding: 40px;
     color: #94a3b8;
@@ -753,18 +830,9 @@ body.modal-open {
     white-space: pre-wrap;
 }
 
-/* ===== DASHBOARD GRID ===== */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.5rem;
-}
-
-@media (max-width: 900px) {
-    .dashboard-grid { grid-template-columns: 1fr; }
-}
-
-/* ===== ACTION CARDS ===== */
+/* ─────────────────────────────────────────────────────────
+   17. ACTION CARDS
+   ───────────────────────────────────────────────────────── */
 .action-cards {
     display: flex;
     flex-wrap: wrap;
@@ -775,41 +843,9 @@ body.modal-open {
     flex: 1 1 calc(50% - 10px);
 }
 
-@media (max-width: 480px) {
-    .action-card {
-        flex: 1 1 100%;
-    }
-}
-#calDayModal .modal-content {
-    display: flex;
-    flex-direction: column;
-    max-height: 80vh;
-    overflow: hidden;
-    padding-bottom: 0;
-}
-
-#calDayList {
-    overflow-y: auto;
-    flex: 1;
-    padding: 0.5rem 0;
-    min-height: 0;
-}
-.bp-cal-session-chip.gs-chip {
-    background: #8b5cf6;
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
-#calDayList::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
-}
-/* ===== AVATAR SYSTEM (REFACTORED - NO DUPLICATES) ===== */
-/* Base avatar */
+/* ─────────────────────────────────────────────────────────
+   18. AVATAR SYSTEM
+   ───────────────────────────────────────────────────────── */
 .avatar-circle {
     width: 56px;
     height: 56px;
@@ -825,7 +861,6 @@ body.modal-open {
     transition: all 0.2s ease;
 }
 
-/* Navbar avatar (scoped to .app-navbar only) */
 .app-navbar .avatar-circle {
     width: 36px;
     height: 36px;
@@ -834,33 +869,27 @@ body.modal-open {
     color: white;
 }
 
-/* Selected patient avatar (uses ward colours) */
 #selectedAvatar.avatar-circle {
     width: 56px;
     height: 56px;
     font-size: 1.2rem;
 }
 
-/* ===== WARD COLOURS FOR SELECTED AVATAR (UPDATED - Clinical Standards) ===== */
-/* Hope = Yellow (#eab308) */
 #selectedAvatar.avatar-hope {
     background: var(--ward-hope);
     color: white;
 }
 
-/* Lakeside = Green (#22c55e) */
 #selectedAvatar.avatar-lakeside {
     background: var(--ward-lakeside);
     color: white;
 }
 
-/* Manor = Blue (#3b82f6) */
 #selectedAvatar.avatar-manor {
     background: var(--ward-manor);
     color: white;
 }
 
-/* Selected avatar from legacy class (selected-avatar) */
 .selected-avatar {
     width: 56px;
     height: 56px;
@@ -874,13 +903,15 @@ body.modal-open {
     color: white;
 }
 
-/* ===== CALENDAR WIDGET STYLES ===== */
+/* ─────────────────────────────────────────────────────────
+   19. CALENDAR WIDGET
+   ───────────────────────────────────────────────────────── */
 .bp-cal-panel {
     background: white;
     border-radius: 1rem;
     border: 1px solid var(--clinical-border);
     padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     position: sticky;
     top: 1rem;
 }
@@ -937,14 +968,16 @@ body.modal-open {
 
 .bp-cal-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 2px;
 }
 
 .bp-cal-day {
+    min-width: 0;
+    overflow: hidden;
     min-height: 62px;
     border-radius: 0.5rem;
-    padding: 4px;
+    padding: 2px;
     cursor: pointer;
     transition: background 0.15s;
     position: relative;
@@ -996,17 +1029,24 @@ body.modal-open {
 .bp-cal-sessions {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .bp-cal-session-chip {
-    font-size: 0.62rem;
-    font-weight: 500;
-    border-radius: 3px;
-    padding: 1px 4px;
-    white-space: nowrap;
+    display: block;
+    max-width: 100%;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 1px 3px;
+    border-radius: 2px;
+    margin-bottom: 1px;
     color: white;
     cursor: pointer;
     line-height: 1.5;
@@ -1014,6 +1054,16 @@ body.modal-open {
 
 .bp-cal-session-chip:hover {
     opacity: 0.85;
+}
+
+.bp-cal-session-chip.gs-chip {
+    background: #8b5cf6;
+}
+
+.bp-cal-session-chip.ward-hope,
+.bp-cal-session-chip.ward-lakeside,
+.bp-cal-session-chip.ward-manor {
+    color: white;
 }
 
 .bp-cal-more {
@@ -1055,6 +1105,14 @@ body.modal-open {
     white-space: nowrap;
 }
 
+.bp-cal-legend span .bp-cal-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
 .bp-cal-dot {
     display: inline-block;
     width: 8px;
@@ -1064,6 +1122,76 @@ body.modal-open {
     vertical-align: middle;
 }
 
+.bp-cal-leg-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+    padding: 0.15rem 0.35rem;
+    border-radius: 2rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.bp-cal-leg-item:hover {
+    border-color: #1e3a8a;
+    background: #eff6ff;
+    color: #1e3a8a;
+}
+
+.bp-cal-leg-item input[type="checkbox"] {
+    width: 12px;
+    height: 12px;
+    accent-color: #1e3a8a;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.bp-cal-leg-item.active {
+    color: #1e3a8a;
+    font-weight: 600;
+}
+
+.bp-cal-check {
+    display: inline-flex;
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
+    min-height: 11px;
+    border: 1.5px solid #94a3b8;
+    border-radius: 2px;
+    background: white;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    box-sizing: border-box;
+}
+
+.bp-cal-leg-item.active .bp-cal-check {
+    background: #1e3a8a;
+    border-color: #1e3a8a;
+}
+
+.bp-cal-leg-item.active .bp-cal-check::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 7px;
+    border: 1.5px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translate(-0.5px, -1px);
+    flex-shrink: 0;
+}
+
 .bp-cal-loading {
     grid-column: 1/-1;
     text-align: center;
@@ -1071,291 +1199,93 @@ body.modal-open {
     color: #94a3b8;
     font-size: 0.85rem;
 }
-/* Make group session modal wider */
-.gs-modal-container {
-    max-width: 1000px !important;
-    width: 95% !important;
-}
-#groupSessionDetailsModal .modal-content::-webkit-scrollbar {
-    width: 0px;
-}
 
-/* Ensure the attendance table uses full width and has comfortable cell padding */
-.gs-register {
-    width: 100%;
-    table-layout: auto;
-    font-size: 0.85rem;
-}
-
-.gs-register th,
-.gs-register td {
-    padding: 10px 8px;
-    white-space: nowrap;
-}
-
-/* On small screens, allow horizontal scroll */
-.gs-attendance-table-wrapper {
-    overflow-x: auto;
-}
-
-/* Radio cells: give them enough width to not wrap */
-.gs-radio-cell {
-    text-align: center;
-    width: 70px;
-    white-space: nowrap;
-}
-
-/* Ward badge: keep compact */
-.gs-ward-badge {
-    white-space: nowrap;
-}
-
-/* Notes input field: take remaining space */
-.gs-notes-input {
-    width: 100%;
-    min-width: 120px;
-}
-
-/* Two‑column layout inside modal – keep the columns balanced */
-@media (min-width: 768px) {
-    .gs-form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-}
-
-/* On very small screens, stack the two columns */
-@media (max-width: 600px) {
-    .gs-form-row {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    .gs-register th,
-    .gs-register td {
-        white-space: normal;
-        word-break: break-word;
-    }
-}
-/* ===== GROUP SESSION MODAL – PROFESSIONAL CLEANUP ===== */
-.bp-cal-session-chip.gs-chip {
-    background: #8b5cf6;
-}
-/* Modal container – nice and wide but not overwhelming */
-#groupSessionModal .gs-modal-container {
-    max-width: 1100px;
-    width: 95%;
-    padding: 1.5rem;
-}
-
-/* Two‑column layout for Group Type + Ward Filter */
-.gs-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-/* Horizontal checkboxes, tighter spacing */
-.gs-checkbox-group-horizontal {
+/* ─────────────────────────────────────────────────────────
+   20. CALENDAR DAY MODAL
+   ───────────────────────────────────────────────────────── */
+#calDayModal .modal-content {
     display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    align-items: center;
-    margin: 0.25rem 0;
-}
-.gs-checkbox {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    margin: 0;
-}
-.gs-checkbox input {
-    margin: 0;
-    width: 16px;
-    height: 16px;
-    accent-color: var(--clinical-blue);
-}
-.gs-checkbox span {
-    color: #1e293b;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow: hidden;
+    padding-bottom: 0;
 }
 
-/* Reduce modal padding and spacing */
-.gs-modal-container {
-    max-width: 1100px;
-    width: 95%;
-    padding: 1.25rem;
+#calDayList {
+    overflow-y: auto;
+    flex: 1;
+    max-height: 60vh;
+    padding: 0.5rem 0;
+    min-height: 0;
 }
-.gs-form-row {
-    gap: 1rem;
-    margin-bottom: 1rem;
+
+#calDayList::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
 }
-.form-group {
-    margin-bottom: 0.75rem;
-}
-.gs-select, .gs-textarea, .gs-input {
-    padding: 0.5rem 0.75rem;
-}
-.modal-actions {
-    margin-top: 1rem;
-}
-.gs-attendance-table-wrapper {
-    border: 1px solid var(--clinical-border);
+
+.day-session-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
     border-radius: 0.5rem;
-    overflow-x: auto;
-}
-.gs-register th, .gs-register td {
-    padding: 8px 6px;
-}
-
-/* Date & Time input – full width */
-#groupSessionDatetime {
-    width: 100%;
-    padding: 0.7rem 1rem;
     border: 1px solid var(--clinical-border);
-    border-radius: 0.75rem;
-    font-size: 0.9rem;
-    background: white;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
 }
 
-/* Attendance table – clean, compact, professional */
-.gs-attendance-table-wrapper {
-    border: 1px solid var(--clinical-border);
-    border-radius: 0.75rem;
-    overflow-x: auto;
-    background: white;
-    margin-top: 0.5rem;
+.day-session-item:hover {
+    background: var(--clinical-soft);
+    transform: translateX(2px);
 }
 
-.gs-register {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-    min-width: 700px;
+#calDayModal .day-session-item:hover {
+    background: var(--clinical-soft);
+    transform: none;
 }
 
-.gs-register th {
-    background: #f8fafc;
-    padding: 12px 8px;
-    text-align: left;
-    font-weight: 600;
-    color: #1e293b;
-    border-bottom: 2px solid var(--clinical-border);
-}
-
-.gs-register td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #f1f5f9;
-    vertical-align: middle;
-}
-
-/* Ward badge */
-.gs-ward-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 2rem;
-    font-size: 0.7rem;
+.session-initials {
     font-weight: 700;
-    color: white;
-    text-align: center;
-    min-width: 60px;
-}
-
-/* Radio buttons – centred, properly spaced */
-.gs-radio-cell {
-    text-align: center;
-    width: 70px;
-}
-
-.gs-radio-cell input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    accent-color: var(--clinical-blue);
-    cursor: pointer;
-}
-
-/* Notes input */
-.gs-notes-input {
-    width: 100%;
-    min-width: 150px;
-    padding: 6px 10px;
-    border: 1px solid var(--clinical-border);
-    border-radius: 0.5rem;
-    font-size: 0.75rem;
-    background: white;
-}
-
-.gs-notes-input:focus {
-    border-color: var(--clinical-blue);
-    outline: none;
-}
-
-/* Placeholder and loading states */
-.gs-placeholder {
-    color: #94a3b8;
+    color: var(--clinical-blue);
     font-size: 0.85rem;
-    padding: 2rem;
-    text-align: center;
-    margin: 0;
+    min-width: 32px;
 }
 
-.gs-loading {
-    text-align: center;
-    padding: 2rem;
+.session-time {
+    font-size: 0.78rem;
     color: #64748b;
+    background: transparent;
+    padding: 0;
 }
 
-/* Group type select and textarea */
-.gs-select, .gs-textarea {
-    width: 100%;
-    padding: 0.7rem 1rem;
-    border: 1px solid var(--clinical-border);
-    border-radius: 0.75rem;
-    font-size: 0.9rem;
-    background: white;
-}
-
-.gs-textarea {
-    resize: vertical;
-}
-
-/* Small text */
-.form-text.text-muted {
+.day-session-item .session-ward {
     font-size: 0.7rem;
-    color: #64748b;
-    margin-top: 0.4rem;
-    display: block;
+    font-weight: 600;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 2rem;
+    display: inline-block;
 }
 
-/* Responsive: stack on mobile */
-@media (max-width: 768px) {
-    .gs-form-row {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    #groupSessionModal .gs-modal-container {
-        width: 98%;
-        padding: 1rem;
-    }
-    
-    .gs-register th,
-    .gs-register td {
-        padding: 8px 4px;
-    }
-    
-    .gs-radio-cell {
-        width: 50px;
-    }
-    
-    .gs-notes-input {
-        min-width: 100px;
-    }
+.session-room {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
 }
-/* Day modal session row */
+
+.session-arrow {
+    margin-left: auto;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* Day modal session row (alt class) */
 .bp-day-session-row {
     display: flex;
     align-items: center;
@@ -1392,611 +1322,300 @@ body.modal-open {
     border-radius: 2rem;
 }
 
-/* ===== UTILITY CLASSES ===== */
-.subtle-text {
-    color: #94a3b8;
-    font-size: 13px;
+/* ─────────────────────────────────────────────────────────
+   21. GROUP SESSION MODAL & ATTENDANCE TABLE
+   ───────────────────────────────────────────────────────── */
+.gs-modal-container {
+    max-width: 1100px;
+    width: 95%;
+    padding: 1.25rem;
 }
 
-.section-label,
-.filter-label,
-.calendar-hint {
-    font-size: 13px;
-    color: #64748b;
+#groupSessionModal .gs-modal-container {
+    max-width: 1100px;
+    width: 95%;
+    padding: 1.5rem;
 }
 
-.section-label {
-    font-weight: 600;
-    margin-bottom: 10px;
-    padding-left: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.gs-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
-.calendar-hint {
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-.quick-actions {
-    margin-bottom: 10px;
-}
-
-.quick-actions h6 {
-    font-size: 14px;
-}
-
-.quick-actions .card {
-    padding: 12px 10px;
-}
-
-.quick-actions i {
-    color: #0d6efd;
-    margin-right: 6px;
-}
-
-footer {
-    opacity: 0.9;
-    font-size: 13px;
-}
-#sessionModal .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-#sessionModal .modal-content::-webkit-scrollbar {
-    width: 0px;
-}
-#admitModal .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-#admitModal .modal-content::-webkit-scrollbar {
-    width: 0px;
-}
-#groupSessionModal .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-#groupSessionModal .modal-content::-webkit-scrollbar {
-    width: 0px;
-}
-#singleSessionModal .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-#singleSessionModal .modal-content::-webkit-scrollbar {
-    width: 0px;
-}
-/* ===== CALENDAR DAY MODAL SESSION ITEMS ===== */
-.day-session-item {
+.gs-checkbox-group-horizontal {
     display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0.75rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--clinical-border);
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+    margin: 0.25rem 0;
 }
 
-.day-session-item:hover {
-    background: var(--clinical-soft);
-    transform: translateX(2px);
-}
-
-.session-initials {
-    font-weight: 700;
-    color: var(--clinical-blue);
-    font-size: 0.85rem;
-    min-width: 32px;
-}
-
-.session-time {
-    font-size: 0.78rem;
-    color: #64748b;
-    background: transparent;
-    padding: 0;
-}
-
-/* Session ward badge in day modal - uses same colours as rest of system */
-.day-session-item .session-ward {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 2rem;
-    display: inline-block;
-}
-
-.session-room {
-    font-size: 0.7rem;
-    font-weight: 500;
-    color: #64748b;
-    background: #f1f5f9;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 4px;
-}
-
-.session-arrow {
-    margin-left: auto;
-    color: #94a3b8;
-    font-size: 0.9rem;
-}
-
-/* Calendar legend dots - ensure correct colours */
-.bp-cal-legend span .bp-cal-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 4px;
-}
-
-/* Override any inline styles that might be causing issues */
-.bp-cal-session-chip.ward-hope,
-.bp-cal-session-chip.ward-lakeside,
-.bp-cal-session-chip.ward-manor {
-    color: white;
-}
-
-/* ===== RESPONSIVE MEDIA QUERIES (MERGED) ===== */
-@media (max-width: 768px) {
-    .quick-action-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .patient-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .session-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    .session-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-    .selected-details {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .quick-action-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Dashboard grid: stack on tablet and below */
-@media (max-width: 900px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Calendar moves below sessions on mobile — no sticky */
-    .bp-cal-panel {
-        position: static;
-    }
-}
-
-/* ── QUICK ACTIONS ───────────────────────────────────────── */
-
-@media (max-width: 600px) {
-    .quick-action-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-    }
-
-    .quick-action-card {
-        padding: 0.75rem 0.25rem;
-        border-radius: 0.75rem;
-    }
-
-    .quick-action-card i {
-        font-size: 1.4rem;
-        margin-bottom: 0.3rem;
-    }
-
-    .quick-action-card span {
-        font-size: 0.72rem;
-    }
-}
-
-@media (max-width: 380px) {
-    .quick-action-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* ── WARD STATS ──────────────────────────────────────────── */
-
-@media (max-width: 600px) {
-    .quick-stats {
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .stat-pill {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
-    }
-}
-
-/* ── TODAY'S SESSIONS ────────────────────────────────────── */
-
-@media (max-width: 768px) {
-    .today-section {
-        padding: 1rem;
-        border-radius: 0.75rem;
-    }
-
-    .today-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-    }
-
-    .today-header h2 {
-        font-size: 1.05rem;
-    }
-
-    /* Ward filters: wrap tightly on mobile */
-    .ward-filter-wrapper {
-        width: 100%;
-        text-align: left !important;
-    }
-
-    .ward-filters {
-        gap: 0.5rem;
-    }
-
-    .ward-filter {
-        padding: 0.35rem 0.75rem;
-        font-size: 0.78rem;
-    }
-}
-
-/* Session cards: full-width stack on mobile */
-@media (max-width: 600px) {
-    .session-card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        padding: 0.75rem;
-    }
-
-    .session-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.4rem;
-        width: 100%;
-    }
-
-    .session-details {
-        flex-wrap: wrap;
-        gap: 0.4rem;
-    }
-
-    .session-actions {
-        width: 100%;
-        justify-content: flex-end;
-        padding-top: 0.4rem;
-        border-top: 1px solid var(--clinical-border);
-    }
-
-    /* Prevent horizontal scroll on hover transform */
-    .session-card:hover {
-        transform: none;
-    }
-}
-
-.attendance-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-}
-.attendance-table th, .attendance-table td {
-    border-bottom: 1px solid var(--clinical-border);
-    padding: 6px;
-    text-align: left;
-}
-.attendance-table th {
-    background: var(--clinical-gray);
-}
-.text-center {
-    text-align: center;
-}
-
-/* ── PATIENT SECTION ─────────────────────────────────────── */
-
-@media (max-width: 768px) {
-    .patient-section {
-        padding: 1rem;
-        border-radius: 0.75rem;
-    }
-
-    .patient-controls {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .patient-select,
-    .ward-checkboxes {
-        width: 100%;
-        min-width: unset;
-    }
-
-    .checkbox-group {
-        gap: 0.5rem;
-    }
-
-    .ward-option {
-        padding: 0.35rem 0.75rem;
-        font-size: 0.78rem;
-    }
-}
-/* Responsive attendance table in details modal */
-#groupSessionDetailAttendance {
-    overflow-x: auto;
-    margin-top: 0.5rem;
-}
-#groupSessionDetailAttendance .gs-register {
-    min-width: 600px;
-}
-/* ── SELECTED PATIENT CARD ───────────────────────────────── */
-
-@media (max-width: 600px) {
-    .selected-patient-card {
-        padding: 1rem;
-        border-radius: 0.75rem;
-    }
-
-    .selected-patient-header {
-        gap: 0.75rem;
-    }
-
-    .selected-details {
-        flex-direction: column;
-        gap: 0.4rem;
-    }
-
-    .detail-badge {
-        font-size: 0.8rem;
-        padding: 0.35rem 0.75rem;
-    }
-
-    /* Action buttons: wrap into 2 columns on small screens */
-    .card-actions {
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 0.5rem;
-    }
-
-    .card-actions .btn-primary,
-    .card-actions .btn-secondary,
-    .card-actions .btn-danger {
-        flex: 1 1 calc(50% - 0.25rem);
-        text-align: center;
-        font-size: 0.8rem;
-        padding: 0.45rem 0.75rem;
-    }
-
-    .card-actions .clear-patient {
-        flex: 0 0 auto;
-        align-self: center;
-    }
-}
-.bp-cal-session-chip.gs-chip {
-    background: #8b5cf6;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: block;
-}
-
-/* ── CALENDAR ────────────────────────────────────────────── */
-
-@media (max-width: 600px) {
-    .bp-cal-panel {
-        padding: 0.75rem;
-        border-radius: 0.75rem;
-    }
-
-    /* Smaller day cells on mobile */
-    .bp-cal-day {
-        min-height: 44px;
-        padding: 2px;
-    }
-
-    .bp-cal-num {
-        font-size: 0.65rem;
-        width: 18px;
-        height: 18px;
-    }
-
-    .bp-cal-session-chip {
-        font-size: 0.55rem;
-        padding: 1px 2px;
-    }
-
-    .bp-cal-more {
-        font-size: 0.55rem;
-    }
-
-    .bp-cal-weekdays span {
-        font-size: 0.58rem;
-        padding: 2px 0;
-    }
-
-    .bp-cal-legend {
-        gap: 0.5rem;
-        font-size: 0.7rem;
-        flex-wrap: wrap;
-    }
-
-    .bp-cal-title {
-        font-size: 0.85rem;
-    }
-}
-
-/* ── MODALS ──────────────────────────────────────────────── */
-
-@media (max-width: 600px) {
-    .modal {
-        padding: 10px;
-        align-items: flex-end; /* slide up from bottom on mobile */
-    }
-
-    .modal-content {
-        border-radius: 1.25rem 1.25rem 0 0; /* bottom sheet feel */
-        padding: 1.25rem 1rem;
-        max-height: 92vh;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    /* Keep large modals full-screen on mobile */
-    .modal-content.modal-lg {
-        max-width: 100%;
-        border-radius: 1.25rem 1.25rem 0 0;
-    }
-
-    .modal-header h2 {
-        font-size: 1.1rem;
-    }
-
-    .modal-actions {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .modal-actions button {
-        flex: 1 1 calc(50% - 0.25rem);
-        font-size: 0.82rem;
-        padding: 0.5rem 0.75rem;
-        text-align: center;
-    }
-
-    /* Patient details modal: stack header buttons */
-    #patientDetailsModal .modal-header {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    #patientDetailsModal .modal-header h2 {
-        width: 100%;
-        order: -1;
-    }
-
-    #patientDetailsModal .modal-header .btn-secondary,
-    #patientDetailsModal .modal-header .btn-danger {
-        flex: 1;
-        text-align: center;
-        margin: 0 !important;
-        font-size: 0.8rem;
-        padding: 0.4rem 0.6rem;
-    }
-
-    #patientDetailsModal .modal-header .modal-close {
-        order: -2;
-        margin-left: auto;
-    }
-
-    /* Tabs: smaller on mobile */
-    .tabs {
-        gap: 0.4rem;
-        overflow-x: auto;
-        padding-bottom: 8px;
-        flex-wrap: nowrap;
-    }
-
-    .tab-btn {
-        padding: 6px 10px;
-        font-size: 0.78rem;
-        white-space: nowrap;
-        flex-shrink: 0;
-    }
-
-    .gs-checkbox-group-vertical {
+.gs-checkbox-group-vertical {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     margin: 0.25rem 0;
 }
 
-    /* ── GROUP SESSION ATTENDANCE TABLE ── */
-.gs-register {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
+.gs-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 0;
 }
-.gs-register thead tr {
-    background: var(--clinical-soft);
-}
-.gs-register th {
-    padding: 8px 10px;
-    text-align: left;
-    font-weight: 600;
-    color: var(--clinical-blue);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    border-bottom: 2px solid var(--clinical-border);
-}
-.gs-register td {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--clinical-border);
-    vertical-align: middle;
-}
-.gs-register tr:last-child td {
-    border-bottom: none;
-}
-.gs-register tr:hover td {
-    background: #fafbfc;
-}
-/* Radio buttons styled as toggle pills */
-.gs-register td.gs-radio-cell {
-    text-align: center;
-}
-.gs-register input[type="radio"] {
+
+.gs-checkbox input {
+    margin: 0;
     width: 16px;
     height: 16px;
     accent-color: var(--clinical-blue);
+}
+
+.gs-checkbox span {
+    color: #1e293b;
+}
+
+.form-group {
+    margin-bottom: 0.75rem;
+}
+
+.gs-select,
+.gs-textarea,
+.gs-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--clinical-border);
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    background: white;
+}
+
+.gs-textarea {
+    resize: vertical;
+}
+
+#groupSessionDatetime {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--clinical-border);
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    background: white;
+}
+
+.gs-attendance-table-wrapper {
+    border: 1px solid var(--clinical-border);
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    background: white;
+    margin-top: 0.5rem;
+}
+
+.gs-register {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 700px;
+}
+
+.gs-register thead tr {
+    background: var(--clinical-soft);
+}
+
+.gs-register th {
+    background: #f8fafc;
+    padding: 8px 6px;
+    text-align: left;
+    font-weight: 600;
+    color: #1e293b;
+    border-bottom: 2px solid var(--clinical-border);
+    white-space: nowrap;
+}
+
+.gs-register td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.gs-register tr:last-child td {
+    border-bottom: none;
+}
+
+.gs-register tr:hover td {
+    background: #fafbfc;
+}
+
+.gs-register td.gs-radio-cell {
+    text-align: center;
+    width: 70px;
+    white-space: nowrap;
+}
+
+.gs-register input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--clinical-blue);
     cursor: pointer;
 }
-.gs-ward-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 2rem;
-    color: white;
-    display: inline-block;
+
+.gs-radio-cell {
+    text-align: center;
+    width: 70px;
+    white-space: nowrap;
 }
+
+.gs-radio-cell input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--clinical-blue);
+    cursor: pointer;
+}
+
+.gs-ward-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    min-width: 60px;
+    white-space: nowrap;
+}
+
 .gs-notes-input {
     width: 100%;
-    padding: 4px 6px;
+    min-width: 150px;
+    padding: 6px 10px;
     border: 1px solid var(--clinical-border);
-    border-radius: 6px;
-    font-size: 0.78rem;
-    min-width: 80px;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    background: white;
 }
-.gs-loading {
-    text-align: center;
-    padding: 1.5rem;
+
+.gs-notes-input:focus {
+    border-color: var(--clinical-blue);
+    outline: none;
+}
+
+.gs-placeholder {
     color: #94a3b8;
     font-size: 0.85rem;
+    padding: 2rem;
+    text-align: center;
+    margin: 0;
 }
-#/* Grouped Attendance Layout */
+
+.gs-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+}
+
+#groupAttendanceTable {
+    overflow-x: auto;
+    border: 1px solid var(--clinical-border);
+    border-radius: 0.5rem;
+}
+
+#groupSessionDetailAttendance {
+    overflow-x: auto;
+    margin-top: 0.5rem;
+}
+
+#groupSessionDetailAttendance .gs-register {
+    min-width: unset;
+    width: 100%;
+}
+
+.form-text.text-muted {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 0.4rem;
+    display: block;
+}
+
+/* ─────────────────────────────────────────────────────────
+   22. GROUP SESSIONS LIST
+   ───────────────────────────────────────────────────────── */
+.group-sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.group-session-card {
+    background: white;
+    border: 1px solid var(--clinical-border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    transition: all 0.2s;
+}
+
+.group-session-card:hover {
+    border-color: var(--clinical-blue);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.group-session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.group-session-type {
+    font-size: 1rem;
+    color: var(--clinical-blue);
+}
+
+.group-session-datetime {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.group-session-details {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.group-session-wards {
+    font-size: 0.7rem;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 2rem;
+    color: #475569;
+}
+
+.group-session-count {
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+.group-session-notes-preview {
+    font-size: 0.8rem;
+    color: #475569;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────
+   23. GROUPED ATTENDANCE LAYOUT (ward groups)
+   ───────────────────────────────────────────────────────── */
 .attendance-by-ward {
     display: flex;
     flex-direction: column;
@@ -2080,33 +1699,6 @@ footer {
     font-size: 0.9rem;
 }
 
-.attendance-badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 2rem;
-}
-
-.status-attended {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.status-declined {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-dna {
-    background: #fed7aa;
-    color: #92400e;
-}
-
-.status-pending {
-    background: #f1f5f9;
-    color: #64748b;
-}
-
 .attendance-item-notes {
     width: 100%;
     font-size: 0.7rem;
@@ -2121,337 +1713,10 @@ footer {
     padding: 2rem;
     color: #94a3b8;
 }
-/* calendar chips */
 
-.bp-cal-session-chip {
-    display: block;
-    max-width: 100%;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    box-sizing: border-box;
-    font-size: 0.65rem;
-    padding: 1px 3px;
-    border-radius: 2px;
-    margin-bottom: 1px;
-    cursor: pointer;
-}
-
-.bp-cal-day {
-    min-width: 0;
-    overflow: hidden;
-    min-height: 62px;
-    padding: 2px;
-}
-
-.bp-cal-sessions {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.bp-cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 2px;
-}
-/* ===== CALENDAR LEGEND & FILTERS ===== */
-
-.bp-cal-legend-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #94a3b8;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-.bp-cal-leg-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    font-size: 0.7rem;
-    color: #475569;
-    cursor: pointer;
-    user-select: none;
-    padding: 0.15rem 0.35rem;
-    border-radius: 2rem;
-    border: 1px solid #e2e8f0;
-    background: white;
-    transition: all 0.15s;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.bp-cal-leg-item:hover {
-    border-color: #1e3a8a;
-    background: #eff6ff;
-    color: #1e3a8a;
-}
-
-.bp-cal-leg-item input[type="checkbox"] {
-    width: 12px;
-    height: 12px;
-    accent-color: #1e3a8a;
-    cursor: pointer;
-    margin: 0;
-    flex-shrink: 0;
-}
-.bp-cal-leg-item.active { color: #1e3a8a; font-weight: 600; }
-
-.bp-cal-check {
-    display: inline-flex;
-    width: 11px;
-    height: 11px;
-    min-width: 11px;
-    min-height: 11px;
-    border: 1.5px solid #94a3b8;
-    border-radius: 2px;
-    background: white;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    box-sizing: border-box;
-}
-
-.bp-cal-leg-item.active .bp-cal-check {
-    background: #1e3a8a;
-    border-color: #1e3a8a;
-}
-
-.bp-cal-leg-item.active .bp-cal-check::after {
-    content: '';
-    display: block;
-    width: 3px;
-    height: 6px;
-    border: 1.5px solid white;
-    border-top: none;
-    border-left: none;
-    transform: rotate(45deg) translate(-0.5px, -1px);
-    flex-shrink: 0;
-}
-
-.bp-cal-leg-item.active .bp-cal-check {
-    background: #1e3a8a;
-    border-color: #1e3a8a;
-}
-
-.bp-cal-leg-item.active .bp-cal-check::after {
-    content: '';
-    display: block;
-    width: 4px;
-    height: 7px;
-    border: 1.5px solid white;
-    border-top: none;
-    border-left: none;
-    transform: rotate(45deg) translate(-0.5px, -1px);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-    .patient-attendance-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .patient-details {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .attendance-badge {
-        align-self: flex-start;
-    }
-}
- 
-/* Mobile: make table scroll horizontally */
-#groupAttendanceTable {
-    overflow-x: auto;
-    border: 1px solid var(--clinical-border);
-    border-radius: 0.5rem;
-}
-
-.attendance-card {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px;
-    border:1px solid #eee;
-    border-radius:10px;
-    margin-bottom:10px;
-    background:#f8fafc;
-}
-
-.attendance-left small {
-    display:block;
-    color:#64748b;
-    margin-top:4px;
-}
-
-.badge-success {
-    background:#dcfce7;
-    color:#166534;
-    padding:6px 12px;
-    border-radius:20px;
-}
-
-.badge-danger {
-    background:#fee2e2;
-    color:#991b1b;
-    padding:6px 12px;
-    border-radius:20px;
-}
-
-.badge-warning {
-    background:#fef3c7;
-    color:#92400e;
-    padding:6px 12px;
-    border-radius:20px;
-}
-
-.badge-secondary {
-    background:#e2e8f0;
-    color:#475569;
-    padding:6px 12px;
-    border-radius:20px;
-}
- 
-@media (max-width: 600px) {
-    #groupSessionModal .modal-content {
-        /* inherit bottom-sheet from responsive_fixes.css */
-    }
-    /* Stack the two-column row on mobile */
-    #groupSessionForm > div[style*="grid"] {
-        grid-template-columns: 1fr !important;
-    }
-    .gs-register th:last-child,
-    .gs-register td:last-child {
-        display: none; /* hide notes column on very small screens */
-    }
-}
-
-    /* Summary grid: 2 columns on mobile */
-    .summary-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    /* Sessions table: scrollable on mobile */
-    #sessionsList {
-        overflow-x: auto;
-    }
-
-    .sessions-table {
-        min-width: 480px;
-    }
-}
-#calDayModal .day-session-item:hover {
-    background: var(--clinical-soft);
-    transform: none;
-}
-/* Group Sessions List */
-.group-sessions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.group-session-card {
-    background: white;
-    border: 1px solid var(--clinical-border);
-    border-radius: 0.75rem;
-    padding: 1rem;
-    transition: all 0.2s;
-}
-
-.group-session-card:hover {
-    border-color: var(--clinical-blue);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.group-session-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.group-session-type {
-    font-size: 1rem;
-    color: var(--clinical-blue);
-}
-
-.group-session-datetime {
-    font-size: 0.75rem;
-    color: #64748b;
-}
-
-.group-session-details {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-}
-
-.group-session-wards {
-    font-size: 0.7rem;
-    background: #f1f5f9;
-    padding: 2px 8px;
-    border-radius: 2rem;
-    color: #475569;
-}
-
-.group-session-count {
-    font-size: 0.7rem;
-    color: #64748b;
-}
-
-.group-session-notes-preview {
-    font-size: 0.8rem;
-    color: #475569;
-    margin-bottom: 0.75rem;
-    padding: 0.5rem;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-}
-#groupSessionDetailAttendance .gs-register {
-    min-width: unset;
-    width: 100%;
-}
-
-#groupSessionDetailAttendance {
-    overflow-x: auto;
-}
-/* substle badge */
-.status-done {
-    background: #d1fae5;
-    color: #065f46;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 2rem;
-}
-
-.status-pending {
-    color: #94a3b8;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-/* required field */
-select:invalid {
-    box-shadow: none;
-}
-
-#sessionPatient:invalid {
-    border-color: var(--clinical-border);
-}
-/* Attendance Cards Layout */
+/* ─────────────────────────────────────────────────────────
+   24. ATTENDANCE CARDS (separate grid layout)
+   ───────────────────────────────────────────────────────── */
 .attendance-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -2480,6 +1745,28 @@ select:invalid {
     margin-bottom: 0.75rem;
 }
 
+.attendance-card-details {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+
+.attendance-notes {
+    font-size: 0.75rem;
+    color: #475569;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--clinical-border);
+}
+
+.attendance-left small {
+    display: block;
+    color: #64748b;
+    margin-top: 4px;
+}
+
 .patient-name {
     font-size: 1rem;
     color: var(--clinical-blue);
@@ -2492,6 +1779,22 @@ select:invalid {
     border-radius: 2rem;
 }
 
+.ward-badge {
+    padding: 2px 8px;
+    border-radius: 2rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+}
+
+.room-number {
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+/* ─────────────────────────────────────────────────────────
+   25. STATUS BADGES
+   ───────────────────────────────────────────────────────── */
 .status-attended {
     background: #d1fae5;
     color: #065f46;
@@ -2507,77 +1810,502 @@ select:invalid {
     color: #92400e;
 }
 
+.status-pending {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
 .status-not-marked {
     background: #f1f5f9;
     color: #64748b;
 }
 
-.attendance-card-details {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 0.5rem;
-}
-
-.ward-badge {
-    padding: 2px 8px;
-    border-radius: 2rem;
+.status-done {
+    background: #d1fae5;
+    color: #065f46;
     font-size: 0.7rem;
     font-weight: 600;
-    color: white;
+    padding: 2px 8px;
+    border-radius: 2rem;
 }
 
-.ward-hope { background: #eab308; }
-.ward-lakeside { background: #22c55e; }
-.ward-manor { background: #3b82f6; }
+.badge-success {
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
 
-.room-number {
-    font-size: 0.7rem;
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.badge-secondary {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   26. SIMPLE ATTENDANCE TABLE
+   ───────────────────────────────────────────────────────── */
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.attendance-table th,
+.attendance-table td {
+    border-bottom: 1px solid var(--clinical-border);
+    padding: 6px;
+    text-align: left;
+}
+
+.attendance-table th {
+    background: var(--clinical-gray);
+}
+
+/* ─────────────────────────────────────────────────────────
+   27. UTILITIES
+   ───────────────────────────────────────────────────────── */
+.subtle-text {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.section-label,
+.filter-label,
+.calendar-hint {
+    font-size: 13px;
     color: #64748b;
 }
 
-.attendance-notes {
-    font-size: 0.75rem;
-    color: #475569;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--clinical-border);
-}
-#calDayList {
-    overflow-y: auto;
-    flex: 1;
-    max-height: 60vh;
-    padding: 0.5rem 0;
+.section-label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.bp-cal-leg-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+.calendar-hint {
+    margin-bottom: 8px;
+    text-align: center;
 }
 
-.bp-cal-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
+.text-center {
+    text-align: center;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .attendance-cards {
+select:invalid {
+    box-shadow: none;
+}
+
+#sessionPatient:invalid {
+    border-color: var(--clinical-border);
+}
+
+/* ═════════════════════════════════════════════════════════
+   RESPONSIVE OVERRIDES — largest to smallest breakpoint
+   ═════════════════════════════════════════════════════════ */
+
+/* ─── Tablet & below: 900px ─── */
+@media (max-width: 900px) {
+    .dashboard-grid {
         grid-template-columns: 1fr;
     }
-    .group-session-header {
-        flex-direction: column;
-        align-items: flex-start;
+
+    .bp-cal-panel {
+        position: static;
     }
 }
 
-/* ── SINGLE SESSION MODAL ────────────────────────────────── */
+/* ─── Tablet portrait: 768px ─── */
+@media (max-width: 768px) {
+    .quick-action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 
+    .patient-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .session-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .session-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .selected-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .today-section {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    .today-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .today-header h2 {
+        font-size: 1.05rem;
+    }
+
+    .ward-filter-wrapper {
+        width: 100%;
+        text-align: left !important;
+    }
+
+    .ward-filters {
+        gap: 0.5rem;
+    }
+
+    .ward-filter {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.78rem;
+    }
+
+    .patient-section {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    .patient-select,
+    .ward-checkboxes {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .checkbox-group {
+        gap: 0.5rem;
+    }
+
+    .ward-option {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.78rem;
+    }
+
+    .gs-form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    #groupSessionModal .gs-modal-container {
+        width: 98%;
+        padding: 1rem;
+    }
+
+    .gs-register th,
+    .gs-register td {
+        padding: 8px 4px;
+    }
+
+    .gs-radio-cell {
+        width: 50px;
+    }
+
+    .gs-notes-input {
+        min-width: 100px;
+    }
+
+    /* Prevent hover transforms causing horizontal scroll */
+    .quick-action-card:hover {
+        transform: none;
+        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+    }
+
+    .btn-primary:hover,
+    .btn-danger:hover,
+    .btn-secondary:hover {
+        transform: none;
+    }
+
+    .action-icon:hover {
+        transform: none;
+    }
+}
+
+/* ─── Mobile: 600px ─── */
 @media (max-width: 600px) {
+    /* Quick actions */
+    .quick-action-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    .quick-action-card {
+        padding: 0.75rem 0.25rem;
+        border-radius: 0.75rem;
+    }
+
+    .quick-action-card i {
+        font-size: 1.4rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .quick-action-card span {
+        font-size: 0.72rem;
+    }
+
+    /* Ward stats */
+    .quick-stats {
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-pill {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    /* Session cards */
+    .session-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .session-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+        width: 100%;
+    }
+
+    .session-details {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .session-actions {
+        width: 100%;
+        justify-content: flex-end;
+        padding-top: 0.4rem;
+        border-top: 1px solid var(--clinical-border);
+    }
+
+    .session-card:hover {
+        transform: none;
+    }
+
+    /* Selected patient card */
+    .selected-patient-card {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    .selected-patient-header {
+        gap: 0.75rem;
+    }
+
+    .selected-details {
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .detail-badge {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.75rem;
+    }
+
+    .card-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+
+    .card-actions .btn-primary,
+    .card-actions .btn-secondary,
+    .card-actions .btn-danger {
+        flex: 1 1 calc(50% - 0.25rem);
+        text-align: center;
+        font-size: 0.8rem;
+        padding: 0.45rem 0.75rem;
+    }
+
+    .card-actions .clear-patient {
+        flex: 0 0 auto;
+        align-self: center;
+    }
+
+    /* Calendar */
+    .bp-cal-panel {
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+    }
+
+    .bp-cal-day {
+        min-height: 44px;
+        padding: 2px;
+    }
+
+    .bp-cal-num {
+        font-size: 0.65rem;
+        width: 18px;
+        height: 18px;
+    }
+
+    .bp-cal-session-chip {
+        font-size: 0.55rem;
+        padding: 1px 2px;
+    }
+
+    .bp-cal-more {
+        font-size: 0.55rem;
+    }
+
+    .bp-cal-weekdays span {
+        font-size: 0.58rem;
+        padding: 2px 0;
+    }
+
+    .bp-cal-legend {
+        gap: 0.5rem;
+        font-size: 0.7rem;
+        flex-wrap: wrap;
+    }
+
+    .bp-cal-title {
+        font-size: 0.85rem;
+    }
+
+    /* Modals */
+    .modal {
+        padding: 10px;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        border-radius: 1.25rem 1.25rem 0 0;
+        padding: 1.25rem 1rem;
+        max-height: 92vh;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .modal-content.modal-lg {
+        max-width: 100%;
+        border-radius: 1.25rem 1.25rem 0 0;
+    }
+
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .modal-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .modal-actions button {
+        flex: 1 1 calc(50% - 0.25rem);
+        font-size: 0.82rem;
+        padding: 0.5rem 0.75rem;
+        text-align: center;
+    }
+
+    /* Patient details modal */
+    #patientDetailsModal .modal-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    #patientDetailsModal .modal-header h2 {
+        width: 100%;
+        order: -1;
+    }
+
+    #patientDetailsModal .modal-header .btn-secondary,
+    #patientDetailsModal .modal-header .btn-danger {
+        flex: 1;
+        text-align: center;
+        margin: 0 !important;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    #patientDetailsModal .modal-header .modal-close {
+        order: -2;
+        margin-left: auto;
+    }
+
+    /* Tabs */
+    .tabs {
+        gap: 0.4rem;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        flex-wrap: nowrap;
+    }
+
+    .tab-btn {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Group session modal */
+    #groupSessionForm > div[style*="grid"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    .gs-form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .gs-register th,
+    .gs-register td {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .gs-register th:last-child,
+    .gs-register td:last-child {
+        display: none;
+    }
+
+    /* Summary grid */
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    /* Sessions table scroll */
+    #sessionsList {
+        overflow-x: auto;
+    }
+
+    .sessions-table {
+        min-width: 480px;
+    }
+
+    /* Single session modal actions */
     #singleSessionModal .modal-actions {
         flex-direction: column;
         gap: 0.5rem;
@@ -2596,11 +2324,8 @@ select:invalid {
     #singleSessionModal .modal-actions > div button {
         flex: 1;
     }
-}
 
-/* ── CALENDAR DAY MODAL ──────────────────────────────────── */
-
-@media (max-width: 600px) {
+    /* Calendar day modal */
     #calDayModal .modal-content {
         max-width: 100%;
     }
@@ -2611,13 +2336,10 @@ select:invalid {
     }
 
     .session-room {
-        display: none; /* too cramped on very small screens */
+        display: none;
     }
-}
 
-/* ── NOTIFICATION TOAST ──────────────────────────────────── */
-
-@media (max-width: 600px) {
+    /* Notification toast */
     #notification {
         left: 10px;
         right: 10px;
@@ -2625,41 +2347,187 @@ select:invalid {
         text-align: center;
         font-size: 0.82rem;
     }
-}
 
-/* ── SECTION LABEL / HEADER ──────────────────────────────── */
-
-@media (max-width: 600px) {
+    /* Section label */
     .section-label {
         font-size: 0.72rem;
     }
 
-    .container-fluid {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
+    /* Patient attendance items stack */
+    .patient-attendance-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .patient-details {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .attendance-badge {
+        align-self: flex-start;
+    }
+
+    /* Attendance cards stack */
+    .attendance-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .group-session-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
-/* ── PREVENT OVERFLOW GLOBALLY ───────────────────────────── */
-@media (max-width: 768px) {
-    body {
-        overflow-x: hidden;
+/* ─── Small mobile: 480px ─── */
+@media (max-width: 480px) {
+    .quick-action-grid {
+        grid-template-columns: 1fr;
     }
 
-    /* Stop hover transforms causing horizontal scroll */
-    .quick-action-card:hover {
-        transform: none;
-        box-shadow: 0 4px 12px rgba(30,58,138,0.15);
+    .patient-actions button {
+        width: 100%;
     }
 
-    .btn-primary:hover,
-    .btn-danger:hover,
-    .btn-secondary:hover {
-        transform: none;
+    .action-card {
+        flex: 1 1 100%;
+    }
+}
+
+/* ─── Very small mobile: 380px ─── */
+@media (max-width: 380px) {
+    .quick-action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ─── PATIENT DETAILS MODAL - mobile improvements (≤600px) ─── */
+@media (max-width: 600px) {
+   /* Tighten modal padding */
+    #patientDetailsModal .modal-content {
+        padding: 1rem 1rem 1.5rem;
     }
 
-    .action-icon:hover {
-        transform: none;
+    /* Reduce gap between header and summary */
+    #patientDetailsModal .patient-summary {
+        margin-top: 0;
+    }
+
+    /* Compact header — title + close on top row, buttons full-width below */
+    #patientDetailsModal .modal-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "title close"
+            "actions actions";
+        gap: 0.5rem 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--clinical-border);
+    }
+
+    #patientDetailsModal .modal-header h2 {
+        grid-area: title;
+        width: auto !important;
+        order: 0 !important;
+        font-size: 1rem;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    #patientDetailsModal .modal-header .modal-close {
+        grid-area: close;
+        order: 0 !important;
+        margin: 0 !important;
+        align-self: start;
+        font-size: 1.4rem;
+        padding: 0;
+        line-height: 1;
+    }
+/* The wrapping div that holds the 3 action buttons */
+    #patientDetailsModal .modal-header > div {
+        grid-area: actions;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 0.4rem !important;
+        margin: 0 !important;
+        width: 100% !important;
+        align-items: stretch !important;
+    }
+
+   #patientDetailsModal .modal-header .btn-primary,
+    #patientDetailsModal .modal-header .btn-secondary,
+    #patientDetailsModal .modal-header .btn-danger {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0.5rem 0.25rem;
+        font-size: 0.72rem;
+        white-space: normal;
+        line-height: 1.2;
+        border-radius: 0.6rem;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* Compact patient summary */
+    #patientDetailsModal .patient-summary {
+        padding: 0.85rem;
+        margin-bottom: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    #patientDetailsModal .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem 1rem;
+    }
+
+    #patientDetailsModal .summary-item {
+        min-width: 0;
+    }
+
+    #patientDetailsModal .summary-label {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #94a3b8 !important;
+    }
+
+    #patientDetailsModal .summary-value {
+        font-size: 0.95rem !important;
+        line-height: 1.3;
+    }
+
+    /* Edit Core-10 button: smaller and inline */
+    #patientDetailsModal #editCore10Btn,
+    #patientDetailsModal #editDischargeCore10Btn {
+        display: inline-block;
+        margin-left: 0 !important;
+        margin-top: 0.35rem !important;
+        font-size: 0.7rem !important;
+        padding: 2px 10px !important;
+        border-radius: 1rem;
+    }
+
+    /* Tabs visible row */
+    #patientDetailsModal .tabs {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Close button at the bottom — make it the proper full-width primary action */
+    #patientDetailsModal .modal-actions {
+        margin-top: 1rem;
+    }
+
+    #patientDetailsModal .modal-actions .btn-secondary {
+        width: 100%;
+        flex: unset !important;
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
     }
 }
 

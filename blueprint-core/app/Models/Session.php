@@ -36,23 +36,25 @@ public static function find($id)
 public static function update($id, $data)
 {
     $db = \App\Config\Database::getInstance();
-    $stmt = $db->prepare("
-        UPDATE sessions 
-        SET datetime = ?, 
-            carenotes_completed = ?, 
-            tracker_completed = ?, 
-            tasks_completed = ?, 
-            notes = ?
-        WHERE id = ?
-    ");
-    return $stmt->execute([
-        $data['datetime'],
-        $data['carenotes_completed'],
-        $data['tracker_completed'],
-        $data['tasks_completed'],
-        $data['notes'],
-        $id
-    ]);
+   $stmt = $db->prepare("
+    UPDATE sessions 
+    SET datetime = ?, 
+        carenotes_completed = ?, 
+        tracker_completed = ?, 
+        tasks_completed = ?, 
+        notes = ?,
+        status = ?
+    WHERE id = ?
+");
+return $stmt->execute([
+    $data['datetime'],
+    $data['carenotes_completed'],
+    $data['tracker_completed'],
+    $data['tasks_completed'],
+    $data['notes'],
+    $data['status'] ?? 'offered',
+    $id
+]);
 }
     /**
      * Create a new session
@@ -70,23 +72,24 @@ public static function update($id, $data)
     error_log("Session::create - CareNotes: $carenotes, Tracker: $tracker, Tasks: $tasks");
     
     $stmt = $db->prepare("
-        INSERT INTO sessions (ward, room_number, initials, datetime, carenotes_completed, 
-                             tracker_completed, notes, tasks_completed, created_by, patient_id) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    
-    $result = $stmt->execute([
-        $data['ward'],
-        $data['room_number'],
-        strtoupper($data['initials']),
-        $data['datetime'],
-        $carenotes,
-        $tracker,
-        $data['notes'] ?? '',
-        $tasks,
-        $_SESSION['user_id'],
-        $data['patient_id'] ?? null
-    ]);
+    INSERT INTO sessions (ward, room_number, initials, datetime, carenotes_completed, 
+                         tracker_completed, notes, tasks_completed, created_by, patient_id, status) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+");
+
+$result = $stmt->execute([
+    $data['ward'],
+    $data['room_number'],
+    strtoupper($data['initials']),
+    $data['datetime'],
+    $carenotes,
+    $tracker,
+    $data['notes'] ?? '',
+    $tasks,
+    $_SESSION['user_id'],
+    $data['patient_id'] ?? null,
+    $data['status'] ?? 'offered',
+]);
     
     if ($result) {
         error_log("Session created successfully with ID: " . $db->lastInsertId());

@@ -543,15 +543,18 @@ $grouped = $grouped ?? [
     padding: 2rem;
     color: #64748b;
 }
+
 .component-badge {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.2rem 0.4rem;
     border-radius: 0.25rem;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 500;
-    min-width: 105px;
+    min-width: unset;
     text-align: center;
+    white-space: nowrap;
 }
+
 .component-badge.completed { background: #d1fae5; color: #065f46; }
 .component-badge.pending { background: #fee2e2; color: #991b1b; }
 
@@ -654,24 +657,32 @@ function loadPatientSummary(patientId) {
         .then(data => {
             document.getElementById('viewPatientWard').innerText = data.ward || 'N/A';
             document.getElementById('viewPatientRoom').innerText = data.room_number || 'N/A';
-            
+
+            // Always update header with initials + room for consistency
+            const currentName = document.getElementById('viewPatientName').innerText;
+            const initials = currentName.split(',')[0].trim();
+            if (data.room_number) {
+                document.getElementById('viewPatientName').innerText = `${initials}, Room ${data.room_number}`;
+            }
+
             const admissionRaw = data.admission_datetime || data.admission_date || data.admitted || null;
             const dischargeRaw = data.discharge_datetime || data.discharge_date || null;
             const admissionDate = admissionRaw ? admissionRaw.split(' ')[0] : 'N/A';
             const dischargeDate = dischargeRaw ? dischargeRaw.split(' ')[0] : 'N/A';
             document.getElementById('viewPatientAdmissionDateTime').innerText = admissionDate;
             document.getElementById('viewPatientDischargeDateTime').innerText = dischargeDate;
-document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission
-    ? '<span class="core10-badge completed">✓ Completed at Admission</span>'
-    : '<span class="core10-badge pending">✗ Not Completed at Admission</span>';
-document.getElementById('viewPatientAdmissionCore').innerHTML +=
-    ` <button class="btn-core10-edit" onclick="editDischargedCore10('admission', ${patientId}, ${data.core10_admission ? 1 : 0})">✎ Edit</button>`;
 
-document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge
-    ? '<span class="core10-badge completed">✓ Completed at Discharge</span>'
-    : '<span class="core10-badge pending">✗ Not Completed at Discharge</span>';
-document.getElementById('viewPatientDischargeCore').innerHTML +=
-    ` <button class="btn-core10-edit" onclick="editDischargedCore10('discharge', ${patientId}, ${data.core10_discharge ? 1 : 0})">✎ Edit</button>`;
+            document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission
+                ? '<span class="core10-badge completed">✓ Completed at Admission</span>'
+                : '<span class="core10-badge pending">✗ Not Completed at Admission</span>';
+            document.getElementById('viewPatientAdmissionCore').innerHTML +=
+                ` <button class="btn-core10-edit" onclick="editDischargedCore10('admission', ${patientId}, ${data.core10_admission ? 1 : 0})">✎ Edit</button>`;
+
+            document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge
+                ? '<span class="core10-badge completed">✓ Completed at Discharge</span>'
+                : '<span class="core10-badge pending">✗ Not Completed at Discharge</span>';
+            document.getElementById('viewPatientDischargeCore').innerHTML +=
+                ` <button class="btn-core10-edit" onclick="editDischargedCore10('discharge', ${patientId}, ${data.core10_discharge ? 1 : 0})">✎ Edit</button>`;
         })
         .catch(error => console.error('Error loading patient summary:', error));
 }
@@ -739,22 +750,35 @@ function loadAllSessions(patientId) {
                 container.innerHTML = '<div class="no-notes">No sessions recorded for this patient</div>';
                 return;
             }
-window._sessionNotes = {};
-let html = '<table class="sessions-table"><thead><tr><th>Date & Time</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th></tr></thead><tbody>';       
-    data.forEach(s => {
+
+            window._sessionNotes = {};
+            let html = '<table class="sessions-table" style="min-width:700px;"><thead><tr><th>Date & Time</th><th>Session Status</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th></tr></thead><tbody>';
+
+            data.forEach(s => {
                 window._sessionNotes[s.id] = s.notes || '';
                 const date = new Date(s.datetime);
                 const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+                const sessionStatus = (s.status || 'offered').toLowerCase();
+                const statusColours = {
+                    offered:   { bg: '#e0f2fe', color: '#0369a1' },
+                    completed: { bg: '#d1fae5', color: '#065f46' },
+                    declined:  { bg: '#fed7aa', color: '#92400e' },
+                    dna:       { bg: '#fee2e2', color: '#991b1b' }
+                };
+                const sc = statusColours[sessionStatus] || statusColours['offered'];
+                const statusBadge = `<span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:${sc.bg};color:${sc.color};">${sessionStatus.toUpperCase()}</span>`;
+
                 html += `<tr>
-    <td>${formattedDate}</td>
-    <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
-    <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
-    <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
-<td>
-    <button onclick="openNoteModal(${s.id})" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;color:#2563eb;cursor:pointer;white-space:nowrap;">View</button>
-</td>
-</tr>`;
+                    <td style="white-space:nowrap;">${formattedDate}</td>
+                    <td>${statusBadge}</td>
+                    <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
+                    <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
+                    <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
+                    <td>${s.notes ? `<button onclick="openNoteModal(${s.id})" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;color:#2563eb;cursor:pointer;white-space:nowrap;">View</button>` : '<span style="font-size:0.75rem;color:#94a3b8;font-style:italic;">None documented</span>'}</td>
+                </tr>`;
             });
+
             html += '</tbody></table>';
             container.innerHTML = html;
         })

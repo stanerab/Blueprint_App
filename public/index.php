@@ -140,6 +140,15 @@ $router->add('GET', '/wards/{ward}/archived-patients', 'WardController@archivedP
 $router->add('GET', '/wards/{ward}/archived-sessions', 'WardController@archivedSessions');
 $router->add('GET', '/wards/{ward}/discharged-patients', 'WardController@dischargedPatients');
 
+
+/* REPORTS */
+$router->add('GET', '/reports', 'ReportsController@index');
+$router->add('GET', '/reports/individual-json', 'ReportsController@individualJson');
+$router->add('GET', '/reports/group-json', 'ReportsController@groupJson');
+$router->add('GET', '/reports/individual-drilldown', 'ReportsController@individualDrilldown');
+$router->add('GET', '/reports/group-drilldown', 'ReportsController@groupDrilldown');
+$router->add('GET', '/reports/export-csv', 'ReportsController@exportCsv');
+
 /* DISCHARGED + ARCHIVED (GLOBAL ROUTES) */
 $router->add('GET', '/patients/discharged', 'PatientController@discharged');
 $router->add('GET', '/patients/archived', 'PatientController@archived');

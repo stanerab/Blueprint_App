@@ -68,22 +68,23 @@ class SessionController
         $tracker   = isset($_POST['tracker'])   ? (int)$_POST['tracker'] : 0;
         $tasks     = isset($_POST['tasks'])     ? (int)$_POST['tasks'] : 0;
 
-        $data = [
-            'patient_id'          => $patientId,
-            'ward'                => $patient->ward,
-            'room_number'         => $patient->room_number,
-            'initials'            => $patient->initials,
-            'datetime'            => $_POST['datetime'],
-            'carenotes_completed' => $carenotes,
-            'tracker_completed'   => $tracker,
-            'tasks_completed'     => $tasks,
-            'notes'               => trim($_POST['notes'] ?? ''),
-        ];
+      $data = [
+    'patient_id'          => $patientId,
+    'ward'                => $patient->ward,
+    'room_number'         => $patient->room_number,
+    'initials'            => $patient->initials,
+    'datetime'            => $_POST['datetime'],
+    'carenotes_completed' => $carenotes,
+    'tracker_completed'   => $tracker,
+    'tasks_completed'     => $tasks,
+    'notes'               => trim($_POST['notes'] ?? ''),
+    'status'              => $_POST['status'] ?? 'offered',
+];
 
         $sessionId = Session::create($data);
 
         if ($sessionId) {
-            // ✅ LOG: Session created (clean description - no ward, no datetime)
+            //  LOG: Session created (clean description - no ward, no datetime)
             ActivityLog::create([
                 'action_type' => 'session_created',
                 'description' => 'Created session for patient ' . $patient->initials,
@@ -152,18 +153,18 @@ class SessionController
         $tracker   = isset($_POST['tracker'])   ? (int)$_POST['tracker'] : 0;
         $tasks     = isset($_POST['tasks'])     ? (int)$_POST['tasks'] : 0;
 
-        $data = [
-            'datetime' => $_POST['datetime'],
-            'carenotes_completed' => $carenotes,
-            'tracker_completed'   => $tracker,
-            'tasks_completed'     => $tasks,
-            'notes' => trim($_POST['notes'] ?? '')
-        ];
-
+      $data = [
+    'datetime'            => $_POST['datetime'],
+    'carenotes_completed' => $carenotes,
+    'tracker_completed'   => $tracker,
+    'tasks_completed'     => $tasks,
+    'notes'               => trim($_POST['notes'] ?? ''),
+    'status'              => $_POST['status'] ?? 'offered',
+];
         $result = Session::update($id, $data);
 
         if ($result) {
-            // ✅ LOG: Session updated (clean description - no ward, no datetime)
+            // LOG: Session updated (clean description - no ward, no datetime)
             ActivityLog::create([
                 'action_type' => 'session_updated',
                 'description' => 'Updated session for patient ' . ($session->initials ?? 'Unknown'),
@@ -463,17 +464,18 @@ class SessionController
 
             $formatted = [];
             foreach ($sessions as $s) {
-                $formatted[] = [
-                    'id' => (int)$s->id,
-                    'patient_id' => (int)$s->patient_id,
-                    'datetime' => $s->datetime,
-                    'initials' => $s->initials ?? '?',
-                    'ward' => $s->ward ?? 'Hope',
-                    'room_number' => $s->room_number,
-                    'carenotes_completed' => (bool)$s->carenotes_completed,
-                    'tracker_completed' => (bool)$s->tracker_completed,
-                    'tasks_completed' => (bool)$s->tasks_completed
-                ];
+             $formatted[] = [
+    'id'                  => (int)$s->id,
+    'patient_id'          => (int)$s->patient_id,
+    'datetime'            => $s->datetime,
+    'initials'            => $s->initials ?? '?',
+    'ward'                => $s->ward ?? 'Hope',
+    'room_number'         => $s->room_number,
+    'carenotes_completed' => (bool)$s->carenotes_completed,
+    'tracker_completed'   => (bool)$s->tracker_completed,
+    'tasks_completed'     => (bool)$s->tasks_completed,
+    'status'              => $s->status ?? 'offered',
+];
             }
 
             $this->jsonResponse($formatted);
@@ -501,17 +503,18 @@ class SessionController
             $formattedSessions = [];
             
           foreach ($sessions as $session) {
-    $formattedSessions[] = [
-        'id' => (int)$session->id,
-        'patient_id' => (int)$session->patient_id,
-        'datetime' => $session->datetime,
-        'carenotes_completed' => (bool)$session->carenotes_completed,
-        'tracker_completed' => (bool)$session->tracker_completed,
-        'tasks_completed' => (bool)$session->tasks_completed,
-        'notes' => $session->notes ?? '',
-        'ward' => $session->ward ?? '',
-        'room_number' => $session->room_number ?? '?'
-    ];
+   $formattedSessions[] = [
+    'id'                  => (int)$session->id,
+    'patient_id'          => (int)$session->patient_id,
+    'datetime'            => $session->datetime,
+    'carenotes_completed' => (bool)$session->carenotes_completed,
+    'tracker_completed'   => (bool)$session->tracker_completed,
+    'tasks_completed'     => (bool)$session->tasks_completed,
+    'notes'               => $session->notes ?? '',
+    'ward'                => $session->ward ?? '',
+    'room_number'         => $session->room_number ?? '?',
+    'status'              => $session->status ?? 'offered',
+];
 }
             
             $this->jsonResponse($formattedSessions);

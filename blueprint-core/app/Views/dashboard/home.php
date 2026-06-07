@@ -797,8 +797,8 @@ body.modal-open {
 .sessions-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 700px;
 }
-
 .sessions-table th,
 .sessions-table td {
     padding: 12px;
@@ -2557,8 +2557,9 @@ select:invalid {
     </a>
 
         <a href="<?= url('activities') ?>" class="quick-action-card"><i class="bi bi-activity"></i><span>Activity log</span></a>
-        <a href="<?= url('patients/discharged') ?>" class="quick-action-card"><i class="bi bi-box-arrow-right"></i><span>Discharged</span></a>
         <a href="<?= url('sessions/archived') ?>" class="quick-action-card"><i class="bi bi-archive"></i><span>Archived Sessions</span></a>
+        <a href="<?= url('reports') ?>" class="quick-action-card"><i class="bi bi-bar-chart-line"></i><span>Reports</span></a>
+        <a href="<?= url('patients/discharged') ?>" class="quick-action-card"><i class="bi bi-box-arrow-right"></i><span>Discharged</span></a>
         
     </div>
 
@@ -2612,7 +2613,8 @@ select:invalid {
                                 data-session-carenotes="<?= $session->carenotes_completed ? 1 : 0 ?>"
                                 data-session-tracker="<?= $session->tracker_completed ? 1 : 0 ?>"
                                 data-session-tasks="<?= $session->tasks_completed ? 1 : 0 ?>"
-                                data-session-notes="<?= addslashes($session->notes ?? '') ?>">
+                                data-session-notes="<?= addslashes($session->notes ?? '') ?>"
+                                data-session-status="<?= htmlspecialchars($session->status ?? 'offered') ?>">
                                 <div class="session-info">
                                     <span class="session-patient"><?= htmlspecialchars($session->patient_initials ?? '') ?></span>
                                     <div class="session-details">
@@ -2626,7 +2628,7 @@ select:invalid {
                                     </div>
                                 </div>
                                 <div class="session-actions">
-                                    <button type="button" onclick="event.stopPropagation(); editSession(<?= $session->id ?>, <?= $session->patient_id ?>, '<?= htmlspecialchars($session->datetime) ?>', <?= $session->carenotes_completed ? 1 : 0 ?>, <?= $session->tracker_completed ? 1 : 0 ?>, <?= $session->tasks_completed ? 1 : 0 ?>, '<?= addslashes($session->notes) ?>')" class="action-icon" data-tooltip="Edit session"><i class="bi bi-pencil"></i></button>
+                                    <button type="button" onclick="event.stopPropagation(); editSession(<?= $session->id ?>, <?= $session->patient_id ?>, '<?= htmlspecialchars($session->datetime) ?>', <?= $session->carenotes_completed ? 1 : 0 ?>, <?= $session->tracker_completed ? 1 : 0 ?>, <?= $session->tasks_completed ? 1 : 0 ?>, '<?= addslashes($session->notes) ?>', '<?= $session->status ?? 'offered' ?>')" class="action-icon" data-tooltip="Edit session"><i class="bi bi-pencil"></i></button>
                                     <button type="button" onclick="event.stopPropagation(); archiveSession(<?= $session->id ?>, '<?= $session->ward ?>')" class="action-icon archive" data-tooltip="Archive session"><i class="bi bi-archive"></i></button>
                                     <button type="button" onclick="event.stopPropagation(); deleteSession(<?= $session->id ?>, '<?= $session->ward ?>', event)" class="action-icon delete" title="Delete session"><i class="bi bi-trash"></i></button>
                                 </div>
@@ -2804,6 +2806,15 @@ select:invalid {
                 <small id="wardFilterMsg" style="display:none; color:#b45309; font-size:0.75rem;">No active patients in this ward</small>
             </div>
             <div class="form-group"><label>Date & Time</label><input type="datetime-local" name="datetime" id="sessionDatetime" required></div>
+            <div class="form-group">
+    <label>Session Status</label>
+    <select name="status" id="sessionStatus">
+        <option value="offered" selected>Offered</option>
+        <option value="completed">Completed</option>
+        <option value="declined">Declined</option>
+        <option value="dna">DNA</option>
+    </select>
+</div>
             <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" value="1"> <i class="bi bi-journal-text"></i> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" value="1"> <i class="bi bi-graph-up"></i> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" value="1"> <i class="bi bi-check-circle"></i> Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
             <div class="form-group"><label>Session Notes</label><textarea name="notes" rows="3" placeholder="Document session..."></textarea></div>
             <div class="modal-actions"><button type="button" onclick="closeSessionModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Save Session</button></div>
@@ -2818,6 +2829,15 @@ select:invalid {
             <form id="editSessionForm" onsubmit="submitEditSessionForm(event)">
                 <input type="hidden" name="session_id" id="editSessionId"><input type="hidden" name="patient_id" id="editSessionPatientId"><input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                 <div class="form-group"><label>Session Date & Time</label><input type="datetime-local" name="datetime" id="editSessionDatetime" required></div>
+                <div class="form-group">
+    <label>Session Status</label>
+    <select name="status" id="editSessionStatus">
+        <option value="offered">Offered</option>
+        <option value="completed">Completed</option>
+        <option value="declined">Declined</option>
+        <option value="dna">DNA</option>
+    </select>
+</div>
                 <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" id="editSessionCarenotes" value="1"> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" id="editSessionTracker" value="1"> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" id="editSessionTasks" value="1"> Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
                 <div class="form-group"><label>Session Notes</label><textarea name="notes" id="editSessionNotes" rows="4"></textarea></div>
                 <div class="modal-actions"><button type="button" onclick="closeEditSessionModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Update Session</button></div>
@@ -2945,13 +2965,11 @@ select:invalid {
                     Discharge Notes
                 </button>
             </div>
-
-            <div id="sessionsTab" class="tab-pane active">
-                <div id="sessionsList" class="sessions-list">
-                    <div class="loading">Loading sessions...</div>
-                </div>
-            </div>
-
+<div id="sessionsTab" class="tab-pane active">
+    <div id="sessionsList" class="sessions-list" style="overflow-x:auto;">
+        <div class="loading">Loading sessions...</div>
+    </div>
+</div>
             <div id="admissionTab" class="tab-pane">
                 <div id="admissionNotes" class="notes-card">
                     <div class="loading">Loading admission notes...</div>
@@ -2983,6 +3001,7 @@ select:invalid {
                 <div class="detail-group"><label>Ward</label><div class="detail-value" id="sessionDetailWard">—</div></div>
                 <div class="detail-group"><label>Room</label><div class="detail-value" id="sessionDetailRoom">—</div></div>
                 <div class="detail-group"><label>Components Completed</label><div class="detail-value" id="sessionDetailComponents">—</div></div>
+                <div class="detail-group"><label>Session Status</label><div class="detail-value" id="sessionDetailStatus">—</div></div>
                 <div class="detail-group"><label>Session Notes</label><div class="detail-value notes-content" id="sessionDetailNotes">—</div></div>
             </div>
             <div class="modal-actions" style="justify-content: space-between; margin-top: 1.5rem;">
@@ -3016,6 +3035,7 @@ select:invalid {
     <option value="" disabled selected>Select group type…</option>
         <option value="CBT">CBT</option>
         <option value="DBT">DBT</option>
+        <option value="Skills">Skills</option>
         <option value="Music Therapy">Music Therapy</option>
         <option value="Art Therapy">Art Therapy</option>
         <option value="Other">Other</option>
@@ -3071,6 +3091,24 @@ select:invalid {
             </form>
         </div>
     </div>
+
+
+    <!-- PATIENT NOTE MODAL -->
+<div id="patientNoteModal" class="modal" style="z-index:1200;">
+    <div class="modal-content" style="max-width:560px;">
+        <div class="modal-header">
+            <h2 style="font-size:1.1rem;">Session Note</h2>
+            <button class="modal-close" onclick="closePatientNoteModal()">✕</button>
+        </div>
+        <div style="padding:0 0 1rem;">
+            <div id="patientNoteModalContent" class="notes-content" style="background:#f8fafc;padding:1rem;border-radius:0.5rem;border:1px solid #e2e8f0;min-height:80px;max-height:400px;overflow-y:auto;white-space:pre-wrap;line-height:1.6;font-size:0.9rem;"></div>
+            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1rem;">
+                <button id="patientNoteCopyBtn" onclick="copyPatientNote()" style="padding:0.5rem 1.2rem;border-radius:2rem;border:1px solid #e2e8f0;background:#f1f5f9;cursor:pointer;font-size:0.85rem;">Copy</button>
+                <button onclick="closePatientNoteModal()" style="padding:0.5rem 1.2rem;border-radius:2rem;border:none;background:#1e3a8a;color:white;cursor:pointer;font-size:0.85rem;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- VIEW GROUP SESSIONS MODAL -->
     <div id="viewGroupSessionsModal" class="modal">
@@ -3128,6 +3166,7 @@ select:invalid {
         <option value="all">All Groups</option>
         <option value="CBT">CBT</option>
         <option value="DBT">DBT</option>
+         <option value="Skills">Skills</option>
         <option value="Music Therapy">Music Therapy</option>
         <option value="Art Therapy">Art Therapy</option>
         <option value="Other">Other</option>
@@ -3314,16 +3353,24 @@ function closePatientDetailsModal() {
     }
 }
     function loadPatientSummary(patientId) {
-        fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('viewPatientWard').innerText = data.ward || 'N/A';
-                document.getElementById('viewPatientRoom').innerText = data.room_number || 'N/A';
-                document.getElementById('viewPatientAdmission').innerText = data.admission_date || 'N/A';
-                document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission ? '<span class="badge badge-success">Completed</span>' : '<span class="badge badge-warning">Pending</span>';
-                document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge ? '<span class="badge badge-success">Completed</span>' : '<span class="badge badge-warning">Pending</span>';
-            });
-    }
+    fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('viewPatientWard').innerText = data.ward || 'N/A';
+            document.getElementById('viewPatientRoom').innerText = data.room_number || 'N/A';
+            document.getElementById('viewPatientAdmission').innerText = data.admission_date || 'N/A';
+            document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission ? '<span class="badge badge-success">Completed</span>' : '<span class="badge badge-warning">Pending</span>';
+            document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge ? '<span class="badge badge-success">Completed</span>' : '<span class="badge badge-warning">Pending</span>';
+
+            // Always update header with initials + room for consistency
+            const currentName = document.getElementById('viewPatientName').innerText;
+            const initials = currentName.split(',')[0].trim();
+            if (data.room_number) {
+                document.getElementById('viewPatientName').innerText = `${initials}, Room ${data.room_number}`;
+            }
+        });
+}
+
     function loadAllSessions(patientId) {
         const container = document.getElementById('sessionsList');
         container.innerHTML = '<div class="loading">Loading sessions...</div>';
@@ -3331,24 +3378,35 @@ function closePatientDetailsModal() {
             .then(r => r.json())
             .then(data => {
                 if (!data.length) { container.innerHTML = '<div class="no-notes">No sessions recorded for this patient</div>'; return; }
-                let html = '<table class="sessions-table"><thead><tr><th>Date & Time</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th><th>Actions</th></tr></thead><tbody>';
+let html = '<table class="sessions-table"><thead><tr><th>Date & Time</th><th>Session Status</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th><th>Actions</th></tr></thead><tbody>';          
                 data.forEach(s => {
                     const date = new Date(s.datetime);
                     const formatted = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                    const fullNote = s.notes || '-';
+                  const fullNote = s.notes || '';
                     
-                    html += `<tr data-session-id="${s.id}">
-                        <td style="white-space: nowrap;">${formatted}</td>
-                        <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
-                        <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
-                        <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
-                        <td class="notes-cell" title="${escapeHtml(fullNote)}">${escapeHtml(fullNote.length > 60 ? fullNote.substring(0, 60) + '...' : fullNote)}</td>
-                        <td class="session-actions">
-                            <button onclick="event.stopPropagation(); editSession(${s.id}, ${s.patient_id}, '${s.datetime}', ${s.carenotes_completed}, ${s.tracker_completed}, ${s.tasks_completed}, '${(s.notes || '').replace(/'/g, "\\'")}')" class="action-icon" title="Edit session"><i class="bi bi-pencil"></i></button>
-                            <button onclick="event.stopPropagation(); archiveSession(${s.id}, '${s.ward}')" class="action-icon" title="Archive session"><i class="bi bi-archive"></i></button>
-                            <button onclick="event.stopPropagation(); deleteSession(${s.id}, '${s.ward}', event)" class="action-icon" title="Delete session"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>`;
+                 const sessionStatus = (s.status || 'offered').toLowerCase();
+const statusColours = {
+    offered:   { bg: '#e0f2fe', color: '#0369a1' },
+    completed: { bg: '#d1fae5', color: '#065f46' },
+    declined:  { bg: '#fed7aa', color: '#92400e' },
+    dna:       { bg: '#fee2e2', color: '#991b1b' }
+};
+const sc = statusColours[sessionStatus] || statusColours['offered'];
+const statusBadge = `<span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:${sc.bg};color:${sc.color};">${sessionStatus.toUpperCase()}</span>`;
+
+html += `<tr data-session-id="${s.id}">
+    <td style="white-space: nowrap;">${formatted}</td>
+    <td>${statusBadge}</td>
+    <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
+    <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
+    <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
+    <td>${fullNote.trim() ? `<button onclick="openPatientNoteModal(${s.id}, \`${escapeHtml(fullNote).replace(/`/g, '&#96;')}\`)" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;color:#2563eb;cursor:pointer;white-space:nowrap;">View</button>` : '<span style="font-size:0.75rem;color:#94a3b8;font-style:italic;">No notes recorded</span>'}</td>
+    <td class="session-actions">
+        <button onclick="event.stopPropagation(); editSession(${s.id}, ${s.patient_id}, '${s.datetime}', ${s.carenotes_completed}, ${s.tracker_completed}, ${s.tasks_completed}, '${(s.notes || '').replace(/'/g, "\\'")}', '${s.status || 'offered'}')" class="action-icon" title="Edit session"><i class="bi bi-pencil"></i></button>
+        <button onclick="event.stopPropagation(); archiveSession(${s.id}, '${s.ward}')" class="action-icon" title="Archive session"><i class="bi bi-archive"></i></button>
+        <button onclick="event.stopPropagation(); deleteSession(${s.id}, '${s.ward}', event)" class="action-icon" title="Delete session"><i class="bi bi-trash"></i></button>
+    </td>
+</tr>`;
                 });
                 html += '</tbody></table>';
                 container.innerHTML = html;
@@ -3617,7 +3675,7 @@ function filterCalDayList() {
     });
 }
 
- function editSession(id, patient_id, datetime, carenotes, tracker, tasks, notes) {
+function editSession(id, patient_id, datetime, carenotes, tracker, tasks, notes, status) {
     if (document.getElementById('patientDetailsModal').style.display === 'flex') {
         pushModal('patientDetailsModal');
     } else if (document.getElementById('singleSessionModal').style.display === 'flex') {
@@ -3634,6 +3692,7 @@ function filterCalDayList() {
     document.getElementById('editSessionTasks').checked = tasks == 1;
     document.getElementById('editSessionNotes').value = notes || '';
     document.getElementById('editSessionModal').style.display = 'flex';
+    document.getElementById('editSessionStatus').value = status || 'offered';
     bringModalToFront('editSessionModal');
 }
 
@@ -3651,11 +3710,8 @@ function closeEditSessionModal() {
     // ==================== SINGLE SESSION VIEW ====================
     function openSingleSessionModal(sessionId, patientId, patientName) {
         const sessionCard = document.querySelector(`.session-card[data-session-id="${sessionId}"]`);
-        
-        if (sessionCard) {
-            // Decode the notes properly - handle escaped apostrophes
+      if (sessionCard) {
             let notes = sessionCard.dataset.sessionNotes || '';
-            // Replace escaped apostrophes with actual apostrophes
             notes = notes.replace(/\\'/g, "'");
             
             const sessionData = {
@@ -3668,7 +3724,8 @@ function closeEditSessionModal() {
                 carenotes_completed: parseInt(sessionCard.dataset.sessionCarenotes),
                 tracker_completed: parseInt(sessionCard.dataset.sessionTracker),
                 tasks_completed: parseInt(sessionCard.dataset.sessionTasks),
-                notes: notes
+                notes: notes,
+                status: sessionCard.dataset.sessionStatus || 'offered'
             };
             currentSingleSession = sessionData;
             displaySingleSession(sessionData, patientName);
@@ -3725,6 +3782,18 @@ function closeEditSessionModal() {
             componentsHtml += `<span class="component-badge ${comp.completed ? 'completed' : 'pending'}">${comp.name}: ${comp.completed ? '✓ Completed' : '○ Pending'}</span>`;
         });
         document.getElementById('sessionDetailComponents').innerHTML = componentsHtml;
+        const sessionStatus = (session.status || 'offered').toLowerCase();
+const statusColours = {
+    offered:   { bg: '#e0f2fe', color: '#0369a1' },
+    completed: { bg: '#d1fae5', color: '#065f46' },
+    declined:  { bg: '#fed7aa', color: '#92400e' },
+    dna:       { bg: '#fee2e2', color: '#991b1b' }
+};
+const sc = statusColours[sessionStatus] || statusColours['offered'];
+document.getElementById('sessionDetailStatus').innerHTML = `
+    <span style="display:inline-block;padding:3px 12px;border-radius:2rem;font-size:0.78rem;font-weight:600;background:${sc.bg};color:${sc.color};">
+        ${sessionStatus.charAt(0).toUpperCase() + sessionStatus.slice(1)}
+    </span>`;
         
         // Display notes with proper apostrophe handling
         let notes = session.notes || '—';
@@ -3760,15 +3829,16 @@ function closeEditSessionModal() {
         document.getElementById('singleSessionModal').style.display = 'none';
         // Don't null currentSingleSession — we need it if user comes back
         setTimeout(() => {
-            editSession(
-                session.id, 
-                session.patient_id, 
-                session.datetime, 
-                session.carenotes_completed ? 1 : 0, 
-                session.tracker_completed ? 1 : 0, 
-                session.tasks_completed ? 1 : 0, 
-                session.notes || ''
-            );
+          editSession(
+    session.id, 
+    session.patient_id, 
+    session.datetime, 
+    session.carenotes_completed ? 1 : 0, 
+    session.tracker_completed ? 1 : 0, 
+    session.tasks_completed ? 1 : 0, 
+    session.notes || '',
+    session.status || 'offered'
+);
         }, 100);
     }
 }
@@ -3789,7 +3859,17 @@ function closeEditSessionModal() {
     function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
     function makeSessionRowsClickable() { document.querySelectorAll('.session-card').forEach(card => { card.removeEventListener('click', handleSessionCardClick); card.addEventListener('click', handleSessionCardClick); }); }
-    function handleSessionCardClick(event) { if (event.target.closest('.session-actions')) return; const sessionId = this.dataset.sessionId; const patientId = this.dataset.patientId; const patientName = this.dataset.patientName; if (sessionId && patientId && patientName) { openSingleSessionModal(sessionId, patientId, patientName); } }
+   function handleSessionCardClick(event) {
+    if (event.target.closest('.session-actions')) return;
+    const sessionId  = this.dataset.sessionId;
+    const patientId  = this.dataset.patientId;
+    const initials   = this.dataset.patientName;
+    const room       = this.dataset.sessionRoom;
+    const patientName = room ? `${initials}, Room ${room}` : initials;
+    if (sessionId && patientId && patientName) {
+        openSingleSessionModal(sessionId, patientId, patientName);
+    }
+}
 
     // ==================== CHANGE ROOM ====================
     function closeChangeRoomModal() { document.getElementById('changeRoomModal').style.display = 'none'; }
@@ -4105,10 +4185,11 @@ if (initials.length > 3) { showMessage('Initials must be 3 characters or less', 
     async function submitEditSessionForm(event) {
     event.preventDefault();
     const form = document.getElementById('editSessionForm');
-    const formData = new FormData(form);
+   const formData = new FormData(form);
     formData.set('carenotes', form.querySelector('[name="carenotes"]')?.checked ? '1' : '0');
     formData.set('tracker', form.querySelector('[name="tracker"]')?.checked ? '1' : '0');
     formData.set('tasks', form.querySelector('[name="tasks"]')?.checked ? '1' : '0');
+    formData.set('status', document.getElementById('editSessionStatus').value);
     try {
         const response = await fetch('<?= url('sessions/update') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
         const data = await response.json();
@@ -4132,6 +4213,8 @@ if (initials.length > 3) { showMessage('Initials must be 3 characters or less', 
                 sessionCard.dataset.sessionTracker = tracker;
                 sessionCard.dataset.sessionTasks = tasks;
                 sessionCard.dataset.sessionNotes = notes;
+                const status = document.getElementById('editSessionStatus').value;
+sessionCard.dataset.sessionStatus = status;
 
                 const timeEl = sessionCard.querySelector('.session-time');
                 if (timeEl) timeEl.innerHTML = `<i class="bi bi-clock"></i> ${newDatetime.substring(11,16)}`;
@@ -4158,11 +4241,12 @@ if (currentSingleSession && currentSingleSession.id == document.getElementById('
     const tasks = form.querySelector('[name="tasks"]')?.checked ? 1 : 0;
     const notes = document.getElementById('editSessionNotes').value;
 
-    currentSingleSession.datetime = newDatetime;
-    currentSingleSession.carenotes_completed = carenotes;
-    currentSingleSession.tracker_completed = tracker;
-    currentSingleSession.tasks_completed = tasks;
-    currentSingleSession.notes = notes;
+currentSingleSession.datetime = newDatetime;
+currentSingleSession.carenotes_completed = carenotes;
+currentSingleSession.tracker_completed = tracker;
+currentSingleSession.tasks_completed = tasks;
+currentSingleSession.notes = notes;
+currentSingleSession.status = document.getElementById('editSessionStatus').value;
 
     setTimeout(() => {
         if (document.getElementById('singleSessionModal').style.display === 'flex') {
@@ -4784,6 +4868,43 @@ const response = await fetch('<?= url('group-sessions/list-json') ?>');
     }
 }
 
+let _currentPatientNote = '';
+
+function openPatientNoteModal(sessionId, note) {
+    _currentPatientNote = note || '';
+    const container = document.getElementById('patientNoteModalContent');
+    if (_currentPatientNote.trim()) {
+        container.innerText = _currentPatientNote;
+        container.style.color = '';
+    } else {
+        container.innerText = 'No notes recorded for this session.';
+        container.style.color = '#94a3b8';
+    }
+    document.getElementById('patientNoteModal').style.display = 'flex';
+    bringModalToFront('patientNoteModal');
+}
+
+function closePatientNoteModal() {
+    document.getElementById('patientNoteModal').style.display = 'none';
+}
+
+function copyPatientNote() {
+    if (!_currentPatientNote.trim()) return;
+    navigator.clipboard.writeText(_currentPatientNote).then(() => {
+        const btn = document.getElementById('patientNoteCopyBtn');
+        const prev = btn.textContent;
+        btn.textContent = '✓ Copied';
+        btn.style.background = '#d1fae5';
+        btn.style.color = '#065f46';
+        setTimeout(() => {
+            btn.textContent = prev;
+            btn.style.background = '';
+            btn.style.color = '';
+        }, 1500);
+    }).catch(() => showMessage('Could not copy — please copy manually', true));
+}
+
+
 // ==================== CALENDAR WIDGET (shows individual + group sessions) ====================
 const CalendarWidget = (() => {
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5091,6 +5212,7 @@ if (groupAddBtn) groupAddBtn.onclick = () => {
             if (e.target.id === 'dischargeModal') closeDischargeModal();
             if (e.target.id === 'calDayModal') { modalStack.length = 0; document.getElementById('calDayModal').style.display = 'none'; }
             if (e.target.id === 'singleSessionModal') { modalStack.length = 0; closeSingleSessionModal(); }
+            if (e.target.id === 'patientNoteModal') closePatientNoteModal();
             if (e.target.id === 'patientDetailsModal') { modalStack.length = 0; closePatientDetailsModal(); }
         };
 document.addEventListener('keydown', e => { 

@@ -131,3 +131,11 @@ CREATE TABLE group_session_attendance (
         patient_id
     )
 );
+
+
+-- Updates for reports, blueprint_v1.5
+
+ALTER TABLE sessions 
+ADD COLUMN status ENUM('offered','completed','declined','dna') 
+NOT NULL DEFAULT 'offered' 
+AFTER datetime;

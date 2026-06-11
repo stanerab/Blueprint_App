@@ -128,6 +128,7 @@ $grouped = $grouped ?? [
                 <button id="sessionsTabBtn" class="tab-btn active" onclick="switchTab('sessions')">Sessions</button>
                 <button id="admissionTabBtn" class="tab-btn" onclick="switchTab('admission')">Admission Notes</button>
                 <button id="dischargeTabBtn" class="tab-btn" onclick="switchTab('discharge')">Discharge Notes</button>
+                <button id="transferTabBtn" class="tab-btn" onclick="switchTab('transfer')" style="display:none;">Transfer History</button>
             </div>
             <div id="sessionsTab" class="tab-content active">
                 <div id="sessionsList"><div class="loading">Loading sessions...</div></div>
@@ -138,6 +139,11 @@ $grouped = $grouped ?? [
             <div id="dischargeTab" class="tab-content">
                 <div id="dischargeNotes"><div class="loading">Loading discharge notes...</div></div>
             </div>
+            <div id="transferTab" class="tab-content">
+    <div id="transferHistory" style="overflow-x:auto;">
+        <div class="loading">Loading transfer history...</div>
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -642,12 +648,58 @@ function viewPatientDetails(patientId, patientName) {
     loadAllSessions(patientId);
     loadAdmissionNotes(patientId);
     loadDischargeNotes(patientId);
+    loadWardTransferHistory(patientId);
 
     switchTab('sessions');
 }
 
 function closePatientDetailsModal() {
     document.getElementById('patientDetailsModal').style.display = 'none';
+}
+
+function loadWardTransferHistory(patientId) {
+    const container = document.getElementById('transferHistory');
+    const tabBtn    = document.getElementById('transferTabBtn');
+
+    container.innerHTML = '<div class="loading">Loading transfer history...</div>';
+    tabBtn.style.display = 'none';
+
+    fetch('<?= url('patients/ward-history') ?>?id=' + patientId)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.length) {
+                container.innerHTML = '<div class="no-notes">No transfer history for this patient</div>';
+                return;
+            }
+
+            tabBtn.style.display = '';
+            tabBtn.textContent = `Transfer History (${data.length})`;
+
+            const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+
+            let html = '<table class="sessions-table" style="min-width:600px;"><thead><tr><th>Date</th><th>From</th><th>To</th><th>Changed By</th><th>Reason</th></tr></thead><tbody>';
+
+            data.forEach(row => {
+                const date = new Date(row.transferred_at).toLocaleDateString('en-GB') + ' ' +
+                             new Date(row.transferred_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                const fromColour = wardColours[row.from_ward] || '#94a3b8';
+                const toColour   = wardColours[row.to_ward]   || '#94a3b8';
+
+                html += `<tr>
+                    <td style="white-space:nowrap;">${date}</td>
+                    <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:${fromColour};color:white;">${row.from_ward}</span></td>
+                    <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:${toColour};color:white;">${row.to_ward}</span></td>
+                    <td>${row.changed_by}</td>
+                    <td style="color:#64748b;font-style:${row.transfer_reason ? 'normal' : 'italic'};">${row.transfer_reason || 'No reason given'}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        })
+        .catch(() => {
+            container.innerHTML = '<div class="error">Error loading transfer history</div>';
+        });
 }
 
 // ========== DATA LOADING ==========
@@ -701,31 +753,62 @@ function editDischargedCore10(type, patientId, currentValue) {
     saveBtn.textContent = 'Save';
     saveBtn.className = 'btn-core10-edit';
     saveBtn.style.marginLeft = '6px';
-    saveBtn.onclick = async () => {
-        const completed = checkbox.checked ? 1 : 0;
-        const endpoint = type === 'admission'
-            ? '<?= url('patients/update-core10') ?>'
-            : '<?= url('patients/update-discharge-core10') ?>';
-        const body = type === 'admission'
-            ? { patient_id: patientId, core10_admission: completed, csrf_token: '<?= csrf_token() ?>' }
-            : { patient_id: patientId, core10_discharge: completed, csrf_token: '<?= csrf_token() ?>' };
-        try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify(body)
-            });
-            const data = await response.json();
-            if (data.success) {
-                showToast('CORE-10 updated successfully');
-                loadPatientSummary(patientId);
-            } else {
-                showToast(data.error || 'Failed to update', true);
-            }
-        } catch (err) {
-            showToast('Network error', true);
+   saveBtn.onclick = async () => {
+    const completed = checkbox.checked ? 1 : 0;
+    const endpoint = type === 'admission'
+        ? '<?= url('patients/update-core10') ?>'
+        : '<?= url('patients/update-discharge-core10') ?>';
+    const body = type === 'admission'
+        ? { patient_id: patientId, core10_admission: completed, csrf_token: '<?= csrf_token() ?>' }
+        : { patient_id: patientId, core10_discharge: completed, csrf_token: '<?= csrf_token() ?>' };
+
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+     if (data.success) {
+    showToast('CORE-10 updated successfully');
+
+    // Update modal badge immediately
+    const spanId = type === 'admission' ? 'viewPatientAdmissionCore' : 'viewPatientDischargeCore';
+    const span = document.getElementById(spanId);
+    const badgeClass = completed ? 'completed' : 'pending';
+    const badgeText = type === 'admission'
+        ? (completed ? '✓ Completed at Admission' : '✗ Not Completed at Admission')
+        : (completed ? '✓ Completed at Discharge' : '✗ Not Completed at Discharge');
+    span.innerHTML = `<span class="core10-badge ${badgeClass}">${badgeText}</span>
+        <button class="btn-core10-edit" onclick="editDischargedCore10('${type}', ${patientId}, ${completed})">✎ Edit</button>`;
+
+    // Also update the patient card on the page so it reflects immediately without refresh
+    const card = document.querySelector(`.record-card[data-patient-id="${patientId}"]`);
+    if (card) {
+        const cardBadgeClass = completed ? 'completed' : 'pending';
+        const cardBadgeSymbol = completed ? '✓' : '✗';
+        const cardBadgeLabel = type === 'admission' ? 'Admission' : 'Discharge';
+        const existingBadge = Array.from(card.querySelectorAll('.core10-badge'))
+            .find(b => b.textContent.includes(cardBadgeLabel));
+        if (existingBadge) {
+            existingBadge.className = `core10-badge ${cardBadgeClass}`;
+            existingBadge.textContent = `${cardBadgeLabel} ${cardBadgeSymbol}`;
         }
-    };
+    }
+}
+        
+        else {
+            showToast(data.error || 'Failed to update', true);
+            loadPatientSummary(patientId);
+        }
+    } catch (err) {
+        showToast('Network error', true);
+        loadPatientSummary(patientId);
+    }
+};
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = 'Cancel';
@@ -854,26 +937,22 @@ function loadDischargeNotes(patientId) {
 }
 
 function switchTab(tab) {
-    const sessionsTab = document.getElementById('sessionsTab');
+    const sessionsTab  = document.getElementById('sessionsTab');
     const admissionTab = document.getElementById('admissionTab');
     const dischargeTab = document.getElementById('dischargeTab');
-    const sessionsBtn = document.getElementById('sessionsTabBtn');
+    const transferTab  = document.getElementById('transferTab');
+    const sessionsBtn  = document.getElementById('sessionsTabBtn');
     const admissionBtn = document.getElementById('admissionTabBtn');
     const dischargeBtn = document.getElementById('dischargeTabBtn');
+    const transferBtn  = document.getElementById('transferTabBtn');
 
-    [sessionsTab, admissionTab, dischargeTab].forEach(t => t.classList.remove('active'));
-    [sessionsBtn, admissionBtn, dischargeBtn].forEach(b => b.classList.remove('active'));
+    [sessionsTab, admissionTab, dischargeTab, transferTab].forEach(t => { if(t) t.classList.remove('active'); });
+    [sessionsBtn, admissionBtn, dischargeBtn, transferBtn].forEach(b => { if(b) b.classList.remove('active'); });
 
-    if (tab === 'sessions') {
-        sessionsTab.classList.add('active');
-        sessionsBtn.classList.add('active');
-    } else if (tab === 'admission') {
-        admissionTab.classList.add('active');
-        admissionBtn.classList.add('active');
-    } else if (tab === 'discharge') {
-        dischargeTab.classList.add('active');
-        dischargeBtn.classList.add('active');
-    }
+    if (tab === 'sessions')       { sessionsTab.classList.add('active');  sessionsBtn.classList.add('active'); }
+    else if (tab === 'admission') { admissionTab.classList.add('active'); admissionBtn.classList.add('active'); }
+    else if (tab === 'discharge') { dischargeTab.classList.add('active'); dischargeBtn.classList.add('active'); }
+    else if (tab === 'transfer')  { transferTab.classList.add('active');  transferBtn.classList.add('active'); }
 }
 
 // ========== DELETE PATIENT ==========

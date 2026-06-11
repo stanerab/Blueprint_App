@@ -526,7 +526,7 @@
 <div class="reports-page">
 
     <div class="reports-header">
-        <h1><i class="bi bi-bar-chart-line"></i> Clinical Reports</h1>
+        <h1>Clinical Reports <i class="bi bi-bar-chart-line"></i></h1>
         <p>Governance reporting for clinical audit and quality assurance</p>
     </div>
 

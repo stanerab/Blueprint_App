@@ -64,14 +64,16 @@ class GroupSessionController
                 foreach ($attendance as $att) {
                     $patientId = (int)($att['patient_id'] ?? 0);
                     if (!$patientId) continue;
-                    $attStatus = $att['status'] ?? 'not_set';
-                    $attStmt->execute([
-                        $groupSessionId, $patientId,
-                        ($attStatus === 'attended') ? 1 : 0,
-                        ($attStatus === 'declined') ? 1 : 0,
-                        ($attStatus === 'dna')      ? 1 : 0,
-                        trim($att['notes'] ?? '')
-                    ]);
+                  $attStatus = $att['status'] ?? 'attended';
+// For future scheduled sessions keep as not_set, for past default to attended
+if ($status === 'scheduled') $attStatus = $att['status'] ?? 'not_set';
+$attStmt->execute([
+    $groupSessionId, $patientId,
+    ($attStatus === 'attended') ? 1 : 0,
+    ($attStatus === 'declined') ? 1 : 0,
+    ($attStatus === 'dna')      ? 1 : 0,
+    trim($att['notes'] ?? '')
+]);
                 }
             }
 
@@ -169,7 +171,7 @@ public function complete()
         foreach ($attendance as $att) {
             $patientId = (int)($att['patient_id'] ?? 0);
             if (!$patientId) continue;
-            $attStatus = $att['status'] ?? 'not_set';
+            $attStatus = $att['status'] ?? 'attended';
             $attNotes  = trim($att['notes'] ?? '');
 
             // Check if attendance record exists

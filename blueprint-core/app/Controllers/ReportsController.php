@@ -44,13 +44,14 @@ class ReportsController
         $sql = "
             SELECT
                 s.ward,
-                COUNT(*)                                   AS total_offered,
-                SUM(LOWER(TRIM(s.status)) = 'completed')   AS total_completed,
-                SUM(LOWER(TRIM(s.status)) = 'declined')    AS total_declined,
-                SUM(LOWER(TRIM(s.status)) = 'dna')         AS total_dna
+                COUNT(*)                                    AS total_offered,
+                SUM(LOWER(TRIM(s.status)) = 'completed')    AS total_completed,
+                SUM(LOWER(TRIM(s.status)) = 'declined')     AS total_declined,
+                SUM(LOWER(TRIM(s.status)) = 'dna')          AS total_dna
             FROM sessions s
             WHERE DATE(s.datetime) BETWEEN ? AND ?
             AND s.is_archived = 0
+            AND DATE(s.datetime) <= CURDATE()
             $wardClause
             GROUP BY s.ward
             ORDER BY FIELD(s.ward, 'Hope', 'Lakeside', 'Manor')
@@ -69,9 +70,9 @@ class ReportsController
     {
         $this->setJsonHeaders();
 
-        $startDate = $this->sanitiseDate($_GET['start']  ?? date('Y-m-01'));
-        $endDate   = $this->sanitiseDate($_GET['end']    ?? date('Y-m-t'));
-        $ward      = $this->sanitiseWard($_GET['ward']   ?? 'all');
+        $startDate = $this->sanitiseDate($_GET['start']    ?? date('Y-m-01'));
+        $endDate   = $this->sanitiseDate($_GET['end']      ?? date('Y-m-t'));
+        $ward      = $this->sanitiseWard($_GET['ward']     ?? 'all');
         $status    = $this->sanitiseStatus($_GET['status'] ?? 'all');
 
         if (!$startDate || !$endDate) {
@@ -95,16 +96,17 @@ class ReportsController
 
         $sql = "
             SELECT
-                p.initials                          AS patient_name,
-                s.ward                              AS ward,
-                s.datetime                          AS session_date,
-               COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
-                COALESCE(NULLIF(TRIM(s.status), ''), 'offered') AS status
+                p.initials                                              AS patient_name,
+                s.ward                                                  AS ward,
+                s.datetime                                              AS session_date,
+                COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
+                COALESCE(NULLIF(TRIM(s.status), ''), 'offered')        AS status
             FROM sessions s
             LEFT JOIN patients p ON p.id = s.patient_id
-           LEFT JOIN users u ON u.id = s.created_by AND s.created_by > 0
+            LEFT JOIN users u    ON u.id = s.created_by AND s.created_by > 0
             WHERE DATE(s.datetime) BETWEEN ? AND ?
             AND s.is_archived = 0
+            AND DATE(s.datetime) <= CURDATE()
             $wardClause
             $statusClause
             ORDER BY s.datetime DESC
@@ -152,6 +154,8 @@ class ReportsController
             INNER JOIN patients p ON p.id = gsa.patient_id
             WHERE gs.session_date BETWEEN ? AND ?
             AND gs.status = 'completed'
+            AND gs.session_date <= CURDATE()
+            AND (gsa.attended = 1 OR gsa.declined = 1 OR gsa.dna = 1)
             $wardClause
             GROUP BY gs.group_type, p.ward
             ORDER BY gs.group_type ASC, FIELD(p.ward, 'Hope', 'Lakeside', 'Manor')
@@ -170,11 +174,11 @@ class ReportsController
     {
         $this->setJsonHeaders();
 
-        $startDate  = $this->sanitiseDate($_GET['start']       ?? date('Y-m-01'));
-        $endDate    = $this->sanitiseDate($_GET['end']         ?? date('Y-m-t'));
-        $ward       = $this->sanitiseWard($_GET['ward']        ?? 'all');
-        $groupType  = trim($_GET['group_type']                 ?? 'all');
-        $attStatus  = trim($_GET['att_status']                 ?? 'all');
+        $startDate = $this->sanitiseDate($_GET['start']      ?? date('Y-m-01'));
+        $endDate   = $this->sanitiseDate($_GET['end']        ?? date('Y-m-t'));
+        $ward      = $this->sanitiseWard($_GET['ward']       ?? 'all');
+        $groupType = trim($_GET['group_type']                ?? 'all');
+        $attStatus = trim($_GET['att_status']                ?? 'all');
 
         if (!$startDate || !$endDate) {
             echo json_encode(['error' => 'Invalid date range']);
@@ -196,35 +200,36 @@ class ReportsController
             $params[] = $groupType;
         }
 
-        // Attendance status filter
         if ($attStatus === 'attended') {
             $attClause = 'AND gsa.attended = 1';
         } elseif ($attStatus === 'declined') {
             $attClause = 'AND gsa.declined = 1';
         } elseif ($attStatus === 'dna') {
             $attClause = 'AND gsa.dna = 1';
+        } else {
+            // all — only show records that have a marked status
+            $attClause = 'AND (gsa.attended = 1 OR gsa.declined = 1 OR gsa.dna = 1)';
         }
-        // 'all' = no filter — show all attendance records
 
         $sql = "
             SELECT
-                p.initials                                  AS patient_name,
-                p.ward                                      AS ward,
-                gs.session_date                             AS session_date,
-                COALESCE(u.full_name, u.username, 'Unknown') AS clinician,
+                p.initials                                                          AS patient_name,
+                p.ward                                                              AS ward,
+                gs.session_date                                                     AS session_date,
+                COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
                 gs.group_type,
                 CASE
                     WHEN gsa.attended = 1 THEN 'Attended'
                     WHEN gsa.declined = 1 THEN 'Declined'
                     WHEN gsa.dna = 1      THEN 'DNA'
-                    ELSE 'Unknown'
-                END                                         AS attendance_status
+                END AS attendance_status
             FROM group_sessions gs
             INNER JOIN group_session_attendance gsa ON gsa.group_session_id = gs.id
             INNER JOIN patients p ON p.id = gsa.patient_id
-            LEFT JOIN users u ON u.id = gs.created_by
+            LEFT JOIN users u ON u.id = gs.created_by AND gs.created_by > 0
             WHERE gs.session_date BETWEEN ? AND ?
             AND gs.status = 'completed'
+            AND gs.session_date <= CURDATE()
             $wardClause
             $groupTypeClause
             $attClause
@@ -240,110 +245,130 @@ class ReportsController
     }
 
     // ==================== CSV EXPORT ====================
-  public function exportCsv()
-{
-    $type      = trim($_GET['type']   ?? 'individual');
-    $startDate = $this->sanitiseDate($_GET['start'] ?? date('Y-m-01'));
-    $endDate   = $this->sanitiseDate($_GET['end']   ?? date('Y-m-t'));
-    $ward      = $this->sanitiseWard($_GET['ward']  ?? 'all');
+    public function exportCsv()
+    {
+        $type      = trim($_GET['type']  ?? 'individual');
+        $startDate = $this->sanitiseDate($_GET['start'] ?? date('Y-m-01'));
+        $endDate   = $this->sanitiseDate($_GET['end']   ?? date('Y-m-t'));
+        $ward      = $this->sanitiseWard($_GET['ward']  ?? 'all');
 
-    if (!$startDate || !$endDate) {
-        http_response_code(400);
-        echo 'Invalid date range';
+        if (!$startDate || !$endDate) {
+            http_response_code(400);
+            echo 'Invalid date range';
+            exit;
+        }
+
+        if ($type === 'individual') {
+            $status = $this->sanitiseStatus($_GET['status'] ?? 'all');
+            $params = [$startDate, $endDate];
+            $wardClause   = '';
+            $statusClause = '';
+
+            if ($ward !== 'all') {
+                $wardClause = 'AND s.ward = ?';
+                $params[] = $ward;
+            }
+            if ($status !== 'all') {
+                $statusClause = 'AND LOWER(TRIM(s.status)) = LOWER(?)';
+                $params[] = $status;
+            }
+
+            $sql = "
+                SELECT
+                    p.initials                                              AS patient_name,
+                    s.ward                                                  AS ward,
+                    s.datetime                                              AS session_date,
+                    COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
+                    COALESCE(NULLIF(TRIM(s.status), ''), 'offered')        AS status
+                FROM sessions s
+                LEFT JOIN patients p ON p.id = s.patient_id
+                LEFT JOIN users u    ON u.id = s.created_by AND s.created_by > 0
+                WHERE DATE(s.datetime) BETWEEN ? AND ?
+                AND s.is_archived = 0
+                AND DATE(s.datetime) <= CURDATE()
+                $wardClause
+                $statusClause
+                ORDER BY s.datetime DESC
+            ";
+            $headers = ['Patient', 'Ward', 'Session Date', 'Clinician', 'Status'];
+
+        } else {
+            $groupType = trim($_GET['group_type'] ?? 'all');
+            $attStatus = trim($_GET['att_status'] ?? 'all');
+            $params = [$startDate, $endDate];
+            $wardClause      = '';
+            $groupTypeClause = '';
+            $attClause       = '';
+
+            if ($ward !== 'all') {
+                $wardClause = 'AND p.ward = ?';
+                $params[] = $ward;
+            }
+            if ($groupType !== 'all' && $groupType !== '') {
+                $groupTypeClause = 'AND gs.group_type = ?';
+                $params[] = $groupType;
+            }
+            if ($attStatus === 'attended') {
+                $attClause = 'AND gsa.attended = 1';
+            } elseif ($attStatus === 'declined') {
+                $attClause = 'AND gsa.declined = 1';
+            } elseif ($attStatus === 'dna') {
+                $attClause = 'AND gsa.dna = 1';
+            } else {
+                $attClause = 'AND (gsa.attended = 1 OR gsa.declined = 1 OR gsa.dna = 1)';
+            }
+
+            $sql = "
+                SELECT
+                    p.initials                                              AS patient_name,
+                    p.ward                                                  AS ward,
+                    gs.session_date                                         AS session_date,
+                    COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
+                    gs.group_type,
+                    CASE
+                        WHEN gsa.attended = 1 THEN 'Attended'
+                        WHEN gsa.declined = 1 THEN 'Declined'
+                        WHEN gsa.dna = 1      THEN 'DNA'
+                    END AS attendance_status
+                FROM group_sessions gs
+                INNER JOIN group_session_attendance gsa ON gsa.group_session_id = gs.id
+                INNER JOIN patients p ON p.id = gsa.patient_id
+                LEFT JOIN users u ON u.id = gs.created_by AND gs.created_by > 0
+                WHERE gs.session_date BETWEEN ? AND ?
+                AND gs.status = 'completed'
+                AND gs.session_date <= CURDATE()
+                $wardClause
+                $groupTypeClause
+                $attClause
+                ORDER BY gs.session_date DESC
+            ";
+            $headers = ['Patient', 'Ward', 'Session Date', 'Clinician', 'Group Type', 'Attendance Status'];
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $filename = 'blueprint-report-' . $type . '-' . $startDate . '-to-' . $endDate . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $out = fopen('php://output', 'w');
+        fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        fputcsv($out, $headers);
+
+        foreach ($rows as $row) {
+            fputcsv($out, array_values($row));
+        }
+
+        fclose($out);
         exit;
     }
-
-    // Build rows directly without calling drilldown methods
-    if ($type === 'individual') {
-        $status = $this->sanitiseStatus($_GET['status'] ?? 'all');
-        $params = [$startDate, $endDate];
-        $wardClause   = '';
-        $statusClause = '';
-        if ($ward !== 'all') { $wardClause = 'AND s.ward = ?'; $params[] = $ward; }
-        if ($status !== 'all') { $statusClause = 'AND LOWER(TRIM(s.status)) = LOWER(?)'; $params[] = $status; }
-
-        $sql = "
-            SELECT
-                p.initials                                   AS patient_name,
-                s.ward                                       AS ward,
-                s.datetime                                   AS session_date,
-                COALESCE(u.full_name, u.username, 'Unknown') AS clinician,
-                COALESCE(NULLIF(TRIM(s.status), ''), 'offered') AS status
-            FROM sessions s
-            LEFT JOIN patients p ON p.id = s.patient_id
-          LEFT JOIN users u ON u.id = s.created_by AND s.created_by > 0
-            WHERE DATE(s.datetime) BETWEEN ? AND ?
-            AND s.is_archived = 0
-            $wardClause
-            $statusClause
-            ORDER BY s.datetime DESC
-        ";
-        $headers = ['Patient', 'Ward', 'Session Date', 'Clinician', 'Status'];
-
-    } else {
-        $groupType  = trim($_GET['group_type'] ?? 'all');
-        $attStatus  = trim($_GET['att_status'] ?? 'all');
-        $params = [$startDate, $endDate];
-        $wardClause      = '';
-        $groupTypeClause = '';
-        $attClause       = '';
-        if ($ward !== 'all') { $wardClause = 'AND p.ward = ?'; $params[] = $ward; }
-        if ($groupType !== 'all' && $groupType !== '') { $groupTypeClause = 'AND gs.group_type = ?'; $params[] = $groupType; }
-        if ($attStatus === 'attended') $attClause = 'AND gsa.attended = 1';
-        elseif ($attStatus === 'declined') $attClause = 'AND gsa.declined = 1';
-        elseif ($attStatus === 'dna') $attClause = 'AND gsa.dna = 1';
-
-        $sql = "
-            SELECT
-                p.initials                                   AS patient_name,
-                p.ward                                       AS ward,
-                gs.session_date                              AS session_date,
-             COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
-                gs.group_type,
-                CASE
-                    WHEN gsa.attended = 1 THEN 'Attended'
-                    WHEN gsa.declined = 1 THEN 'Declined'
-                    WHEN gsa.dna = 1      THEN 'DNA'
-                    ELSE 'Unknown'
-                END AS attendance_status
-            FROM group_sessions gs
-            INNER JOIN group_session_attendance gsa ON gsa.group_session_id = gs.id
-            INNER JOIN patients p ON p.id = gsa.patient_id
-           LEFT JOIN users u ON u.id = gs.created_by AND gs.created_by > 0
-            WHERE gs.session_date BETWEEN ? AND ?
-            AND gs.status = 'completed'
-            $wardClause
-            $groupTypeClause
-            $attClause
-            ORDER BY gs.session_date DESC
-        ";
-        $headers = ['Patient', 'Ward', 'Session Date', 'Clinician', 'Group Type', 'Attendance Status'];
-    }
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-    $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-    $filename = 'blueprint-report-' . $type . '-' . $startDate . '-to-' . $endDate . '.csv';
-
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Cache-Control: no-cache, no-store, must-revalidate');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-
-    $out = fopen('php://output', 'w');
-    fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM for Excel
-
-    fputcsv($out, $headers);
-
-    foreach ($rows as $row) {
-        fputcsv($out, array_values($row));
-    }
-
-    fclose($out);
-    exit;
-}
 
     // ==================== PRIVATE HELPERS ====================
 

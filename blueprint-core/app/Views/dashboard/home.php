@@ -4591,7 +4591,7 @@ const unmarked = [];
 rows.forEach(row => {
     const patientId = row.getAttribute('data-patient-id');
     const checkedRadio = row.querySelector('input[type="radio"]:checked');
-    const status = isFuture ? 'not_set' : (checkedRadio ? checkedRadio.value : 'not_set');
+    const status = isFuture ? 'not_set' : (checkedRadio ? checkedRadio.value : 'attended');
     const notesInput = row.querySelector(`input[name="att_notes_${patientId}"]`);
 
     // For non-future sessions, track patients with no attendance marked
@@ -4904,7 +4904,7 @@ const response = await fetch('<?= url('group-sessions/list-json') ?>');
         const notesInput = row.querySelector(`input[name="complete_notes_${patientId}"]`);
         attendance.push({
             patient_id: patientId,
-            status: checkedRadio ? checkedRadio.value : 'not_set',
+            status: checkedRadio ? checkedRadio.value : 'attended',
             notes: notesInput ? notesInput.value : ''
         });
     });

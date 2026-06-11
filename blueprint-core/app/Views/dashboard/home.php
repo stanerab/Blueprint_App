@@ -3463,7 +3463,7 @@ html += `<tr data-session-id="${s.id}">
     <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">○ Pending</span>'}</td>
     <td>${fullNote.trim() ? `<button onclick="openPatientNoteModal(${s.id}, \`${escapeHtml(fullNote).replace(/`/g, '&#96;')}\`)" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;color:#2563eb;cursor:pointer;white-space:nowrap;">View</button>` : '<span style="font-size:0.75rem;color:#94a3b8;font-style:italic;">No notes recorded</span>'}</td>
     <td class="session-actions">
-        <button onclick="event.stopPropagation(); editSession(${s.id}, ${s.patient_id}, '${s.datetime}', ${s.carenotes_completed}, ${s.tracker_completed}, ${s.tasks_completed}, '${(s.notes || '').replace(/'/g, "\\'")}', '${s.status || 'offered'}')" class="action-icon" title="Edit session"><i class="bi bi-pencil"></i></button>
+        <button onclick="event.stopPropagation(); editSession(${s.id}, ${s.patient_id}, '${s.datetime}', ${s.carenotes_completed ? 1 : 0}, ${s.tracker_completed ? 1 : 0}, ${s.tasks_completed ? 1 : 0}, '${(s.notes || '').replace(/'/g, "\\'")}', '${s.status || 'offered'}')" class="action-icon" title="Edit session"><i class="bi bi-pencil"></i></button>
         <button onclick="event.stopPropagation(); archiveSession(${s.id}, '${s.ward}')" class="action-icon" title="Archive session"><i class="bi bi-archive"></i></button>
         <button onclick="event.stopPropagation(); deleteSession(${s.id}, '${s.ward}', event)" class="action-icon" title="Delete session"><i class="bi bi-trash"></i></button>
     </td>
@@ -3517,13 +3517,6 @@ function openSessionModalFromProfile() {
         openSessionModal(null, null);
     }, 100);
 }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
     function loadAdmissionNotes(patientId) {
         const container = document.getElementById('admissionNotes');
         container.innerHTML = '<div class="loading">Loading admission notes...</div>';

@@ -271,13 +271,14 @@ $grouped = $grouped ?? [
                     <table class="sessions-table">
                         <thead>
                             <tr>
-                                <th>Patient</th>
-                                <th>Date & Time</th>
-                                <th>Room</th>
-                                <th>CareNotes</th>
-                                <th>Tracker</th>
-                                <th>Tasks</th>
-                                <th>Actions</th>
+                            <th>Patient</th>
+                            <th>Date & Time</th>
+                            <th>Room</th>
+                            <th>Status</th>
+                            <th>CareNotes</th>
+                            <th>Tracker</th>
+                            <th>Tasks</th>
+                            <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -285,9 +286,21 @@ $grouped = $grouped ?? [
                                 <tr class="session-row" data-session-id="<?= $s->id ?>" data-ward="<?= strtolower($s->ward) ?>"
                                     data-search="<?= strtolower($s->initials . ' ' . $s->room_number . ' ' . $s->ward) ?>">
                                     <td><strong><?= e($s->initials) ?></strong></td>
-                                    <td><?= date('d M Y H:i', strtotime($s->datetime)) ?></td>
-                                    <td><?= e($s->room_number) ?></td>
-                                    <td><span class="status-pill <?= $s->carenotes_completed ? 'status-yes' : 'status-no' ?>"><?= $s->carenotes_completed ? 'Completed' : 'Pending' ?></span></td>
+<td><?= date('d M Y H:i', strtotime($s->datetime)) ?></td>
+<td><?= e($s->room_number) ?></td>
+<td><?php
+    $status = strtolower(trim($s->status ?? 'offered'));
+    $statusColours = [
+        'offered'   => ['bg' => '#e0f2fe', 'color' => '#0369a1'],
+        'completed' => ['bg' => '#d1fae5', 'color' => '#065f46'],
+        'declined'  => ['bg' => '#fed7aa', 'color' => '#92400e'],
+        'dna'       => ['bg' => '#fee2e2', 'color' => '#991b1b'],
+    ];
+    $sc = $statusColours[$status] ?? $statusColours['offered'];
+    $label = strtoupper($status);
+?><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:<?= $sc['bg'] ?>;color:<?= $sc['color'] ?>;"><?= $label ?></span></td>
+<td><span class="status-pill <?= $s->carenotes_completed ? 'status-yes' : 'status-no' ?>"><?= $s->carenotes_completed ? 'Completed' : 'Pending' ?></span></td>
+                                    
                                     <td><span class="status-pill <?= $s->tracker_completed ? 'status-yes' : 'status-no' ?>"><?= $s->tracker_completed ? 'Completed' : 'Pending' ?></span></td>
                                     <td><span class="status-pill <?= $s->tasks_completed ? 'status-yes' : 'status-no' ?>"><?= $s->tasks_completed ? 'Completed' : 'Pending' ?></span></td>
                                     <td class="actions">

@@ -2903,6 +2903,7 @@ select:invalid {
             <div style="display:flex; gap:0.5rem; margin-left:auto; align-items:center;">
             <button class="btn-primary" onclick="openSessionModalFromProfile()">+ Add Session</button>
             <button class="btn-secondary" onclick="openChangeRoomModal()">Change Room</button>
+            <button class="btn-secondary" id="changeWardBtn" onclick="openChangeWardModal()" style="display:none;">Change Ward</button>
             <button class="btn-danger" onclick="openDischargeModal()">Discharge Patient</button>
             </div>
         </div>
@@ -2964,6 +2965,9 @@ select:invalid {
                 <button class="tab-btn" onclick="switchTab('discharge')" id="dischargeTabBtn">
                     Discharge Notes
                 </button>
+                <button class="tab-btn" onclick="switchTab('transfer')" id="transferTabBtn" style="display:none;">
+    Transfer History
+</button>
             </div>
 <div id="sessionsTab" class="tab-pane active">
     <div id="sessionsList" class="sessions-list" style="overflow-x:auto;">
@@ -2981,6 +2985,12 @@ select:invalid {
                     <div class="loading">Loading discharge notes...</div>
                 </div>
             </div>
+
+            <div id="transferTab" class="tab-pane">
+    <div id="transferHistory" class="sessions-list" style="overflow-x:auto;">
+        <div class="loading">Loading transfer history...</div>
+    </div>
+</div>
 
             <div class="modal-actions">
                 <button onclick="closePatientDetailsModal()" class="btn-secondary">
@@ -3144,6 +3154,45 @@ select:invalid {
             </div>
         </div>
     </div>
+
+    <!-- CHANGE WARD MODAL -->
+<div id="changeWardModal" class="modal" style="z-index:1100;">
+    <div class="modal-content" style="max-width:480px;">
+        <div class="modal-header">
+            <h2><i class="bi bi-arrow-left-right"></i> Change Patient Ward</h2>
+            <button class="modal-close" onclick="closeChangeWardModal()">✕</button>
+        </div>
+        <form id="changeWardForm" onsubmit="submitWardTransfer(event)">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="patient_id" id="changeWardPatientId">
+            <div class="form-group">
+                <label>Current Ward</label>
+                <input type="text" id="changeWardFrom" readonly style="background:#f8fafc;">
+            </div>
+            <div class="form-group">
+    <label>Transfer To</label>
+    <input type="text" id="changeWardTo" readonly style="background:#f8fafc;font-weight:600;">
+</div>
+<div class="form-group">
+    <label>Available Room in <span id="changeWardToLabel"></span></label>
+    <select name="room_number" id="changeWardRoomSelect" required>
+        <option value="">Loading rooms...</option>
+    </select>
+</div>
+            <div class="form-group">
+                <label>Reason for Transfer <span style="color:#94a3b8;font-weight:400;">(optional)</span></label>
+                <textarea name="reason" id="changeWardReason" rows="3" placeholder="e.g. Clinical transfer, ward move..."></textarea>
+            </div>
+            <div style="background:#fef9c3;padding:0.75rem;border-radius:0.5rem;margin-bottom:1rem;font-size:0.82rem;color:#854d0e;">
+                <i class="bi bi-info-circle"></i> This will transfer the patient to another ward while preserving all clinical records and history.
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeChangeWardModal()" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">Transfer Patient</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 
 
@@ -3324,18 +3373,30 @@ viewPatientDetails(patientId, displayName);
     function addSessionForSelectedPatient() { openSessionModal(null, null); }
 
     // ==================== PATIENT DETAILS MODAL ====================
-    function viewPatientDetails(patientId, patientName) {
-        if (!patientId) return;
-        currentViewPatientId = patientId;
-        document.getElementById('viewPatientName').innerText = patientName;
-        document.getElementById('patientDetailsModal').style.display = 'flex';
-        bringModalToFront('patientDetailsModal');
-        loadPatientSummary(patientId);
-        loadAllSessions(patientId);
-        loadAdmissionNotes(patientId);
-        loadDischargeNotes(patientId);
-        switchTab('sessions');
-    }
+ function viewPatientDetails(patientId, patientName) {
+    if (!patientId) return;
+    currentViewPatientId = patientId;
+    document.getElementById('viewPatientName').innerText = patientName;
+    document.getElementById('patientDetailsModal').style.display = 'flex';
+    bringModalToFront('patientDetailsModal');
+    loadPatientSummary(patientId);
+    loadAllSessions(patientId);
+    loadAdmissionNotes(patientId);
+    loadDischargeNotes(patientId);
+    loadWardTransferHistory(patientId);
+    switchTab('sessions');
+
+    // Show Change Ward button only for Manor/Lakeside
+    fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
+        .then(r => r.json())
+        .then(data => {
+            const btn = document.getElementById('changeWardBtn');
+            if (btn) {
+                btn.style.display = (data.ward === 'Manor' || data.ward === 'Lakeside') ? '' : 'none';
+            }
+        });
+}
+
 function closePatientDetailsModal() {
     currentViewPatientId = null;
     document.getElementById('patientDetailsModal').style.display = 'none';
@@ -3493,15 +3554,19 @@ function openSessionModalFromProfile() {
         const sessionsBtn = document.getElementById('sessionsTabBtn');
         const admissionBtn = document.getElementById('admissionTabBtn');
         const dischargeBtn = document.getElementById('dischargeTabBtn');
-        [sessionsTab, admissionTab, dischargeTab].forEach(t => t.classList.remove('active'));
-        [sessionsBtn, admissionBtn, dischargeBtn].forEach(b => b.classList.remove('active'));
-        if (tab === 'sessions') { sessionsTab.classList.add('active'); sessionsBtn.classList.add('active'); }
-        else if (tab === 'admission') { admissionTab.classList.add('active'); admissionBtn.classList.add('active'); }
-        else if (tab === 'discharge') { dischargeTab.classList.add('active'); dischargeBtn.classList.add('active'); }
+       [sessionsTab, admissionTab, dischargeTab, document.getElementById('transferTab')].forEach(t => { if(t) t.classList.remove('active'); });
+       [sessionsBtn, admissionBtn, dischargeBtn, document.getElementById('transferTabBtn')].forEach(b => { if(b) b.classList.remove('active'); });
+        if (tab === 'sessions')  { sessionsTab.classList.add('active');  sessionsBtn.classList.add('active'); }
+else if (tab === 'admission') { admissionTab.classList.add('active'); admissionBtn.classList.add('active'); }
+else if (tab === 'discharge') { dischargeTab.classList.add('active'); dischargeBtn.classList.add('active'); }
+else if (tab === 'transfer')  {
+            document.getElementById('transferTab').classList.add('active');
+            document.getElementById('transferTabBtn').classList.add('active');
+        }
     }
 
     // ==================== SESSION MODAL: WARD FILTERING ====================
-   function filterPatientsByWard() {
+    function filterPatientsByWard() {
     const wardSelect = document.getElementById('sessionWard');
     const patientSelect = document.getElementById('sessionPatient');
     const msgSpan = document.getElementById('wardFilterMsg');
@@ -3790,9 +3855,10 @@ const statusColours = {
     dna:       { bg: '#fee2e2', color: '#991b1b' }
 };
 const sc = statusColours[sessionStatus] || statusColours['offered'];
+const statusText = sessionStatus === 'dna' ? 'DNA' : sessionStatus.charAt(0).toUpperCase() + sessionStatus.slice(1);
 document.getElementById('sessionDetailStatus').innerHTML = `
     <span style="display:inline-block;padding:3px 12px;border-radius:2rem;font-size:0.78rem;font-weight:600;background:${sc.bg};color:${sc.color};">
-        ${sessionStatus.charAt(0).toUpperCase() + sessionStatus.slice(1)}
+        ${statusText}
     </span>`;
         
         // Display notes with proper apostrophe handling
@@ -3880,8 +3946,8 @@ document.getElementById('sessionDetailStatus').innerHTML = `
         try {
             const response = await fetch('<?= url('patients/change-room') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
             const data = await response.json();
-              if (data.success) {
-    showMessage('Room changed successfully');
+             if (data.success) {
+    showMessage(data.message || 'Patient transferred successfully');
     closeChangeRoomModal();
     // Refresh patient summary in modal if open
     if (currentViewPatientId) {
@@ -4905,6 +4971,144 @@ function copyPatientNote() {
 }
 
 
+// ==================== WARD TRANSFER ====================
+function openChangeWardModal() {
+    const patientId = currentViewPatientId;
+    if (!patientId) { showMessage('No patient selected', true); return; }
+
+    fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
+        .then(r => r.json())
+        .then(data => {
+            const ward = data.ward;
+            if (ward === 'Hope') {
+                showMessage('Hope ward patients cannot be transferred', true);
+                return;
+            }
+            const toWard = ward === 'Manor' ? 'Lakeside' : 'Manor';
+            document.getElementById('changeWardPatientId').value = patientId;
+            document.getElementById('changeWardFrom').value = ward;
+            document.getElementById('changeWardTo').value = toWard;
+            document.getElementById('changeWardToLabel').textContent = toWard + ' Ward';
+            document.getElementById('changeWardReason').value = '';
+
+            // Load available rooms in destination ward
+            const roomSelect = document.getElementById('changeWardRoomSelect');
+            roomSelect.innerHTML = '<option value="">Loading rooms...</option>';
+
+            fetch('<?= url('patients/get-by-ward') ?>?ward=' + encodeURIComponent(toWard))
+                .then(r => r.json())
+                .then(patients => {
+                    const totalRooms = toWard === 'Hope' ? 12 : 10;
+                    const occupiedRooms = patients.map(p => parseInt(p.room_number));
+
+                    roomSelect.innerHTML = '<option value="">Select a room</option>';
+                    for (let i = 1; i <= totalRooms; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        if (occupiedRooms.includes(i)) {
+                            option.textContent = 'Room ' + i + ' (Occupied)';
+                            option.disabled = true;
+                        } else {
+                            option.textContent = 'Room ' + i + ' (Available)';
+                        }
+                        roomSelect.appendChild(option);
+                    }
+                })
+                .catch(() => {
+                    roomSelect.innerHTML = '<option value="">Error loading rooms</option>';
+                });
+
+            document.getElementById('changeWardModal').style.display = 'flex';
+            bringModalToFront('changeWardModal');
+        });
+}
+
+function closeChangeWardModal() {
+    document.getElementById('changeWardModal').style.display = 'none';
+}
+
+async function submitWardTransfer(event) {
+    event.preventDefault();
+    const fromWard = document.getElementById('changeWardFrom').value;
+    const toWard   = document.getElementById('changeWardTo').value;
+
+    if (!confirm(`Transfer this patient from ${fromWard} to ${toWard}? All clinical records will be preserved.`)) return;
+
+    const form     = document.getElementById('changeWardForm');
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('<?= url('patients/transfer-ward') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await response.json();
+        if (data.success) {
+           showMessage(data.message || 'Patient transferred successfully');
+            closeChangeWardModal();
+            if (currentViewPatientId) {
+                setTimeout(() => {
+                    loadPatientSummary(currentViewPatientId);
+                    loadWardTransferHistory(currentViewPatientId);
+                }, 150);
+            }
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showMessage(data.error || 'Failed to transfer patient', true);
+        }
+    } catch (err) {
+        showMessage('Network error', true);
+    }
+}
+
+function loadWardTransferHistory(patientId) {
+    const container = document.getElementById('transferHistory');
+    container.innerHTML = '<div class="loading">Loading transfer history...</div>';
+
+    fetch('<?= url('patients/ward-history') ?>?id=' + patientId)
+        .then(r => r.json())
+        .then(data => {
+            const tabBtn = document.getElementById('transferTabBtn');
+
+            if (!data.length) {
+                tabBtn.style.display = 'none';
+                container.innerHTML = '<div class="no-notes">No transfer history for this patient</div>';
+                return;
+            }
+
+            // Show tab with count badge
+            tabBtn.style.display = '';
+            tabBtn.textContent = `Transfer History (${data.length})`;
+
+            const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+
+            let html = '<table class="sessions-table" style="min-width:600px;"><thead><tr><th>Date</th><th>From</th><th>To</th><th>Changed By</th><th>Reason</th></tr></thead><tbody>';
+
+            data.forEach(row => {
+                const date = new Date(row.transferred_at).toLocaleDateString('en-GB') + ' ' +
+                             new Date(row.transferred_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                const fromColour = wardColours[row.from_ward] || '#94a3b8';
+                const toColour   = wardColours[row.to_ward]   || '#94a3b8';
+
+                html += `<tr>
+                    <td style="white-space:nowrap;">${date}</td>
+                    <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:${fromColour};color:white;">${escapeHtml(row.from_ward)}</span></td>
+                    <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:${toColour};color:white;">${escapeHtml(row.to_ward)}</span></td>
+                    <td>${escapeHtml(row.changed_by)}</td>
+                    <td style="color:#64748b;font-style:${row.transfer_reason ? 'normal' : 'italic'};">${row.transfer_reason ? escapeHtml(row.transfer_reason) : 'No reason given'}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            console.error('Ward history error:', err);
+            container.innerHTML = '<div class="error">Error loading transfer history</div>';
+        });
+}
+
 // ==================== CALENDAR WIDGET (shows individual + group sessions) ====================
 const CalendarWidget = (() => {
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5213,6 +5417,7 @@ if (groupAddBtn) groupAddBtn.onclick = () => {
             if (e.target.id === 'calDayModal') { modalStack.length = 0; document.getElementById('calDayModal').style.display = 'none'; }
             if (e.target.id === 'singleSessionModal') { modalStack.length = 0; closeSingleSessionModal(); }
             if (e.target.id === 'patientNoteModal') closePatientNoteModal();
+            if (e.target.id === 'changeWardModal') closeChangeWardModal();
             if (e.target.id === 'patientDetailsModal') { modalStack.length = 0; closePatientDetailsModal(); }
         };
 document.addEventListener('keydown', e => { 

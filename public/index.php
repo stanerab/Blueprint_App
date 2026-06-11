@@ -157,6 +157,8 @@ $router->add('GET', '/sessions/archived', 'SessionController@archived');
 
 /* General ward route LAST */
 $router->add('GET', '/wards/{ward}', 'WardController@show');
+$router->add('POST', '/patients/transfer-ward', 'PatientController@transferWard');
+$router->add('GET',  '/patients/ward-history',  'PatientController@wardHistoryJson');
 
 
 // Password reset routes

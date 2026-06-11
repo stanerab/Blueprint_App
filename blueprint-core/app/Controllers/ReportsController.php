@@ -98,11 +98,11 @@ class ReportsController
                 p.initials                          AS patient_name,
                 s.ward                              AS ward,
                 s.datetime                          AS session_date,
-                COALESCE(u.full_name, u.username, 'Unknown') AS clinician,
+               COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
                 COALESCE(NULLIF(TRIM(s.status), ''), 'offered') AS status
             FROM sessions s
             LEFT JOIN patients p ON p.id = s.patient_id
-            LEFT JOIN users u    ON u.id = s.created_by
+           LEFT JOIN users u ON u.id = s.created_by AND s.created_by > 0
             WHERE DATE(s.datetime) BETWEEN ? AND ?
             AND s.is_archived = 0
             $wardClause
@@ -271,7 +271,7 @@ class ReportsController
                 COALESCE(NULLIF(TRIM(s.status), ''), 'offered') AS status
             FROM sessions s
             LEFT JOIN patients p ON p.id = s.patient_id
-            LEFT JOIN users u    ON u.id = s.created_by
+          LEFT JOIN users u ON u.id = s.created_by AND s.created_by > 0
             WHERE DATE(s.datetime) BETWEEN ? AND ?
             AND s.is_archived = 0
             $wardClause
@@ -298,7 +298,7 @@ class ReportsController
                 p.initials                                   AS patient_name,
                 p.ward                                       AS ward,
                 gs.session_date                              AS session_date,
-                COALESCE(u.full_name, u.username, 'Unknown') AS clinician,
+             COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
                 gs.group_type,
                 CASE
                     WHEN gsa.attended = 1 THEN 'Attended'
@@ -309,7 +309,7 @@ class ReportsController
             FROM group_sessions gs
             INNER JOIN group_session_attendance gsa ON gsa.group_session_id = gs.id
             INNER JOIN patients p ON p.id = gsa.patient_id
-            LEFT JOIN users u ON u.id = gs.created_by
+           LEFT JOIN users u ON u.id = gs.created_by AND gs.created_by > 0
             WHERE gs.session_date BETWEEN ? AND ?
             AND gs.status = 'completed'
             $wardClause

@@ -238,6 +238,108 @@ protected function isAjax()
         redirect('/wards/' . strtolower($patient->ward));
     }
 
+    // ward transfer and transfer history
+
+    public function transferWard()
+{
+    $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']);
+
+    if (!isset($_POST['csrf_token']) || !verify_csrf($_POST['csrf_token'])) {
+        $this->jsonResponse(false, 'CSRF token validation failed', 403);
+        return;
+    }
+
+ $patientId  = (int)($_POST['patient_id'] ?? 0);
+$reason     = trim($_POST['reason'] ?? '');
+$roomNumber = (int)($_POST['room_number'] ?? 0);
+
+    $patient = Patient::find($patientId);
+    if (!$patient) {
+        $this->jsonResponse(false, 'Patient not found', 404);
+        return;
+    }
+
+    $fromWard = $patient->ward;
+
+    // Enforce transfer rules — Hope is never transferable
+    if ($fromWard === 'Hope') {
+        $this->jsonResponse(false, 'Hope ward patients cannot be transferred', 403);
+        return;
+    }
+
+    $toWard = $fromWard === 'Manor' ? 'Lakeside' : 'Manor';
+
+    $db = \App\Config\Database::getInstance();
+
+    // Update patient ward
+   if (!$roomNumber) {
+    $this->jsonResponse(false, 'Please select a room in the destination ward', 400);
+    return;
+}
+
+// Check room availability in destination ward
+$checkStmt = $db->prepare("SELECT id FROM patients WHERE ward = ? AND room_number = ? AND is_discharged = 0");
+$checkStmt->execute([$toWard, $roomNumber]);
+if ($checkStmt->fetch()) {
+    $this->jsonResponse(false, 'Room ' . $roomNumber . ' is already occupied in ' . $toWard . ' ward', 400);
+    return;
+}
+
+// Update patient ward and room
+$stmt = $db->prepare("UPDATE patients SET ward = ?, room_number = ? WHERE id = ?");
+$result = $stmt->execute([$toWard, $roomNumber, $patientId]);
+    if (!$result) {
+        $this->jsonResponse(false, 'Failed to transfer patient', 500);
+        return;
+    }
+
+    // Record transfer history
+    $stmt = $db->prepare("
+        INSERT INTO patient_ward_history (patient_id, from_ward, to_ward, changed_by, transfer_reason, transferred_at)
+        VALUES (?, ?, ?, ?, ?, NOW())
+    ");
+    $stmt->execute([$patientId, $fromWard, $toWard, $_SESSION['user_id'], $reason ?: null]);
+
+    // Audit log
+    ActivityLog::create([
+        'action_type' => 'ward_transfer',
+        'description' => 'Transferred patient ' . $patient->initials . ' from ' . $fromWard . ' to ' . $toWard . ($reason ? ' — ' . $reason : ''),
+        'patient_id'  => $patientId,
+        'session_id'  => null,
+        'ward'        => $toWard
+    ]);
+
+    $this->jsonResponse(true, 'Patient transferred to ' . $toWard . ' successfully');
+}
+
+public function wardHistoryJson()
+{
+    $patientId = (int)($_GET['id'] ?? 0);
+    if (!$patientId) {
+        $this->jsonResponse([], 'Invalid patient ID', 400);
+        return;
+    }
+
+    $db = \App\Config\Database::getInstance();
+    $stmt = $db->prepare("
+        SELECT 
+            pwh.id,
+            pwh.from_ward,
+            pwh.to_ward,
+            pwh.transfer_reason,
+            pwh.transferred_at,
+            COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS changed_by
+        FROM patient_ward_history pwh
+        LEFT JOIN users u ON u.id = pwh.changed_by AND pwh.changed_by > 0
+        WHERE pwh.patient_id = ?
+        ORDER BY pwh.transferred_at DESC
+    ");
+    $stmt->execute([$patientId]);
+    $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+    $this->jsonResponse($rows);
+}
+
     /**
      * Archive a patient (soft delete)
      */
@@ -858,6 +960,30 @@ public function getByWard()
         }
         view('patients.discharged-patients', ['grouped' => $grouped]);
     }
+
+protected function jsonResponse($data, $errorMessage = null, $statusCode = 200)
+{
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    http_response_code($statusCode);
+    header('Content-Type: application/json; charset=utf-8');
+
+    if (is_array($data) && $errorMessage === null) {
+        echo json_encode($data);
+    } elseif (is_bool($data)) {
+        echo json_encode([
+            'success' => $data,
+            'message' => $errorMessage,
+            'error'   => $data ? null : $errorMessage
+        ]);
+    } else {
+        echo json_encode($data);
+    }
+
+    exit;
+}
 
     /**
      * Get patient discharge notes as JSON for AJAX calls

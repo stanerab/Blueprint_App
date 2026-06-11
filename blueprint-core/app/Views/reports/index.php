@@ -14,6 +14,7 @@
 
 .reports-page { padding: 1.5rem; }
 
+/* ── HEADER ── */
 .reports-header { margin-bottom: 1.5rem; }
 .reports-header h1 {
     font-size: 1.5rem;
@@ -23,6 +24,7 @@
 }
 .reports-header p { color: #64748b; font-size: 0.9rem; margin: 0; }
 
+/* ── FILTERS ── */
 .filters-bar {
     background: white;
     border: 1px solid var(--clinical-border);
@@ -58,6 +60,16 @@
     border-radius: 0.5rem;
     font-size: 0.9rem;
     background: white;
+    width: 100%;
+    color: #475569;
+    cursor: pointer;
+}
+
+.filter-group input[type="date"]:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--clinical-blue);
+    box-shadow: 0 0 0 3px rgba(30,58,138,0.08);
 }
 
 .btn-generate {
@@ -88,181 +100,253 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    text-decoration: none;
 }
 .btn-export:hover { background: #e2e8f0; }
 
-.report-section {
+/* ── GOVERNANCE REPORT CONTAINER ── */
+.governance-report {
     background: white;
     border: 1px solid var(--clinical-border);
     border-radius: 1rem;
-    padding: 1.5rem;
+    overflow: hidden;
     margin-bottom: 1.5rem;
 }
 
-.report-section-header {
+/* ── GOVERNANCE REPORT HEADER ── */
+.gov-report-header {
+    background: var(--clinical-blue);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: 3px solid #1a2f6b;
+}
+
+.gov-report-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: white !important;
+}
+
+.gov-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.gov-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.gov-meta-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    color: white;
+}
+
+.gov-meta-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* ── REPORT BODY ── */
+.gov-report-body {
+    padding: 2rem;
+}
+
+.gov-section-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--clinical-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
 }
 
-.report-section-header h2 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--clinical-blue);
+/* ── WARD GOVERNANCE TABLE ── */
+.ward-gov-block {
+    margin-bottom: 2rem;
+}
+
+.ward-gov-block:last-child { margin-bottom: 0; }
+
+.ward-gov-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.ward-gov-heading h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     margin: 0;
 }
 
-/* Ward block styling — matches Ross's format */
-.ward-report-block {
-    background: #f8fafc;
-    border: 1px solid var(--clinical-border);
-    border-radius: 0.75rem;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
+.ward-colour-bar {
+    height: 3px;
+    border-radius: 2px;
+    margin-bottom: 0.75rem;
 }
 
-.ward-report-block:last-child { margin-bottom: 0; }
+.gov-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
 
-.ward-report-title {
-    font-size: 0.95rem;
+.gov-table thead tr {
+    background: #f1f5f9;
+}
+
+.gov-table th {
+    padding: 0.65rem 1rem;
+    text-align: left;
     font-weight: 700;
-    margin-bottom: 1rem;
+    color: #374151;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+.gov-table th:last-child { text-align: right; }
+
+.gov-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+.gov-table tr:last-child td { border-bottom: none; }
+
+.gov-table tr:hover td { background: #f8fafc; }
+
+.gov-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+}
+
+.gov-metric-label {
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.clickable-num {
+    color: var(--clinical-blue);
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    font-size: 0.95rem;
+}
+.clickable-num:hover { color: #1a2f6b; }
+
+/* ── GROUP GOVERNANCE TABLE ── */
+.group-gov-block {
+    margin-bottom: 2.5rem;
+}
+
+.group-gov-block:last-child { margin-bottom: 0; }
+
+.group-gov-heading {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.ward-dot {
+.group-gov-heading::before {
+    content: '';
     display: inline-block;
     width: 10px;
     height: 10px;
     border-radius: 50%;
+    background: #8b5cf6;
+    flex-shrink: 0;
 }
 
-.ward-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.75rem;
-}
-
-.stat-box {
-    background: white;
-    border: 1px solid var(--clinical-border);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    text-align: center;
-    transition: all 0.15s;
-}
-
-.stat-box.clickable {
-    cursor: pointer;
-}
-
-.stat-box.clickable:hover {
-    border-color: var(--clinical-blue);
-    background: var(--clinical-soft);
-    transform: translateY(-1px);
-}
-
-.stat-box-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 0.35rem;
-}
-
-.stat-box-value {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--clinical-blue);
-    line-height: 1;
-}
-
-.stat-box.clickable:hover .stat-box-value { color: #1a2f6b; }
-
-/* Group report table */
-.report-table {
+.gov-group-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85rem;
+    border: 1px solid #cbd5e1;
+    overflow: hidden;
 }
 
-.report-table th {
-    background: #f8fafc;
+.gov-group-table thead tr {
+    background: #f1f5f9;
+}
+
+.gov-group-table th {
     padding: 0.65rem 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: #475569;
-    font-size: 0.75rem;
+    text-align: center;
+    font-weight: 700;
+    color: #374151;
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    border-bottom: 2px solid var(--clinical-border);
+    border-bottom: 2px solid #cbd5e1;
+    border-right: 1px solid #e2e8f0;
 }
 
-.report-table td {
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid #f1f5f9;
+.gov-group-table th:first-child {
+    text-align: left;
+    border-right: 2px solid #cbd5e1;
+}
+
+.gov-group-table th:last-child { border-right: none; }
+
+.gov-group-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    text-align: center;
     color: #1e293b;
 }
 
-.report-table tr:last-child td { border-bottom: none; }
-.report-table tbody tr:hover td { background: #f8fafc; }
-
-.clickable-num {
-    color: var(--clinical-blue);
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: underline;
-    text-decoration-style: dotted;
-    white-space: nowrap;
-}
-.clickable-num:hover { color: #1a2f6b; }
-
-.group-type-heading {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #1e293b;
-    padding: 0.75rem 0 0.5rem;
-    margin-top: 0.5rem;
-    border-top: 1px solid var(--clinical-border);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.gov-group-table td:first-child {
+    text-align: left;
+    font-weight: 500;
+    color: #374151;
+    border-right: 2px solid #cbd5e1;
+    background: #fafafa;
 }
 
-.group-type-heading:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+.gov-group-table td:last-child { border-right: none; }
+.gov-group-table tr:last-child td { border-bottom: none; }
+.gov-group-table tbody tr:hover td { background: #f8fafc; }
+.gov-group-table tbody tr:hover td:first-child { background: #f1f5f9; }
 
-.ward-badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 2rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: white;
-}
-.ward-hope     { background: var(--ward-hope); }
-.ward-lakeside { background: var(--ward-lakeside); }
-.ward-manor    { background: var(--ward-manor); }
+/* Ward header cells */
+.ward-th-hope     { background: #fef9c3 !important; color: #854d0e !important; }
+.ward-th-lakeside { background: #dcfce7 !important; color: #166534 !important; }
+.ward-th-manor    { background: #dbeafe !important; color: #1e40af !important; }
 
-.status-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 2rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-}
-.status-offered   { background: #e0f2fe; color: #0369a1; }
-.status-completed { background: #d1fae5; color: #065f46; }
-.status-declined  { background: #fee2e2; color: #991b1b; }
-.status-dna       { background: #fed7aa; color: #92400e; }
-.status-attended  { background: #d1fae5; color: #065f46; }
-
+/* ── EMPTY / LOADING ── */
 .empty-report {
     text-align: center;
     padding: 3rem;
@@ -270,14 +354,7 @@
     font-size: 0.9rem;
 }
 
-.period-label {
-    font-size: 0.8rem;
-    color: #64748b;
-    font-weight: 400;
-    margin-left: 0.5rem;
-}
-
-/* Modal */
+/* ── MODAL ── */
 .modal {
     display: none;
     position: fixed;
@@ -310,23 +387,6 @@
     gap: 0.5rem;
 }
 
-.filter-group input[type="date"] {
-    width: 100%;
-    min-width: 140px;
-    color: #475569;
-    cursor: pointer;
-}
-
-.filter-group input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.6;
-}
-
-.filter-group input[type="date"]:focus {
-    outline: none;
-    border-color: var(--clinical-blue);
-    box-shadow: 0 0 0 3px rgba(30,58,138,0.08);
-}
 .modal-header h2 {
     font-size: 1.1rem;
     color: var(--clinical-blue);
@@ -348,31 +408,90 @@
     color: #94a3b8;
 }
 
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+.status-offered   { background: #e0f2fe; color: #0369a1; }
+.status-completed { background: #d1fae5; color: #065f46; }
+.status-declined  { background: #fee2e2; color: #991b1b; }
+.status-dna       { background: #fed7aa; color: #92400e; }
+.status-attended  { background: #d1fae5; color: #065f46; }
+
+.ward-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 2rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: white;
+}
+.ward-hope     { background: var(--ward-hope); }
+.ward-lakeside { background: var(--ward-lakeside); }
+.ward-manor    { background: var(--ward-manor); }
+
+.drilldown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.drilldown-table th {
+    background: #f8fafc;
+    padding: 0.65rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid var(--clinical-border);
+}
+.drilldown-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+}
+.drilldown-table tr:last-child td { border-bottom: none; }
+.drilldown-table tbody tr:hover td { background: #f8fafc; }
+
+/* ── PRINT ── */
+@media print {
+    .filters-bar, .btn-generate, .btn-export, #drilldownModal { display: none !important; }
+    .governance-report { border: none; box-shadow: none; }
+    .gov-report-header { background: #1e3a8a !important; -webkit-print-color-adjust: exact; }
+    .gov-table, .gov-group-table { page-break-inside: avoid; }
+    .ward-gov-block, .group-gov-block { page-break-inside: avoid; }
+}
+
 @media (max-width: 768px) {
     .filters-bar { flex-direction: column; }
     .filter-group { min-width: unset; width: 100%; }
-    .ward-stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .report-table { font-size: 0.75rem; }
-    .report-table th, .report-table td { padding: 0.5rem; }
+    .gov-report-body { padding: 1rem; }
+    .gov-meta-grid { grid-template-columns: repeat(2, 1fr); }
+    .gov-group-table { font-size: 0.75rem; }
+    .gov-group-table th, .gov-group-table td { padding: 0.5rem 0.6rem; }
 }
 </style>
 
 <div class="reports-page">
 
     <div class="reports-header">
-        <h1>Clinical Reports</h1>
-        <p>Session activity by ward and date range for governance and audit purposes</p>
+        <h1><i class="bi bi-bar-chart-line"></i> Clinical Reports</h1>
+        <p>Governance reporting for clinical audit and quality assurance</p>
     </div>
 
     <!-- FILTERS -->
     <div class="filters-bar">
         <div class="filter-group">
             <label>Start Date</label>
-<input type="date" id="reportStart" placeholder="DD/MM/YYYY" style="width:100%;">
+            <input type="date" id="reportStart">
         </div>
         <div class="filter-group">
             <label>End Date</label>
-<input type="date" id="reportEnd" placeholder="DD/MM/YYYY" style="width:100%;">
+            <input type="date" id="reportEnd">
         </div>
         <div class="filter-group">
             <label>Ward</label>
@@ -388,36 +507,66 @@
         </button>
     </div>
 
-    <!-- INDIVIDUAL SESSIONS -->
-    <div class="report-section">
-        <div class="report-section-header">
-            <h2>
-                <i class="bi bi-person"></i> Individual Sessions
-                <span class="period-label" id="individualPeriodLabel"></span>
-            </h2>
-            <button class="btn-export" onclick="exportCsv('individual')">
-                <i class="bi bi-download"></i> Export CSV
-            </button>
-        </div>
-        <div id="individualReportContainer">
-            <div class="empty-report">Set a date range and click Generate Report</div>
+    <!-- GOVERNANCE REPORT OUTPUT -->
+    <div id="governanceReportOutput" style="display:none;">
+
+        <!-- REPORT HEADER -->
+        <div class="governance-report">
+            <div class="gov-report-header">
+                <h2><i class="bi bi-clipboard2-pulse"></i> Clinical Report</h2>
+                <div class="gov-meta-grid">
+                    <div class="gov-meta-item">
+                        <span class="gov-meta-label">Date Range</span>
+                        <span class="gov-meta-value" id="metaDateRange">—</span>
+                    </div>
+                    <div class="gov-meta-item">
+                        <span class="gov-meta-label">Generated</span>
+                        <span class="gov-meta-value" id="metaGenerated">—</span>
+                    </div>
+                    <div class="gov-meta-item">
+                        <span class="gov-meta-label">Generated By</span>
+                        <span class="gov-meta-value"><?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown') ?></span>
+                    </div>
+                    <div class="gov-meta-item">
+                        <span class="gov-meta-label">Ward</span>
+                        <span class="gov-meta-value" id="metaWard">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INDIVIDUAL SESSIONS SECTION -->
+            <div class="gov-report-body">
+                <div class="gov-section-title">
+                    <span><i class="bi bi-person"></i> Individual Sessions — 1:1</span>
+                    <button class="btn-export" onclick="exportCsv('individual')">
+                        <i class="bi bi-download"></i> Export CSV
+                    </button>
+                </div>
+                <div id="individualReportContainer">
+                    <div class="empty-report">Generating...</div>
+                </div>
+            </div>
+
+            <!-- GROUP SESSIONS SECTION -->
+            <div class="gov-report-body" style="border-top: 1px solid var(--clinical-border); padding-top: 2rem;">
+                <div class="gov-section-title">
+                    <span><i class="bi bi-people"></i> Group Sessions</span>
+                    <button class="btn-export" onclick="exportCsv('group')">
+                        <i class="bi bi-download"></i> Export CSV
+                    </button>
+                </div>
+                <div id="groupReportContainer">
+                    <div class="empty-report">Generating...</div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- GROUP SESSIONS -->
-    <div class="report-section">
-        <div class="report-section-header">
-            <h2>
-                <i class="bi bi-people"></i> Group Sessions
-                <span class="period-label" id="groupPeriodLabel"></span>
-            </h2>
-            <button class="btn-export" onclick="exportCsv('group')">
-                <i class="bi bi-download"></i> Export CSV
-            </button>
-        </div>
-        <div id="groupReportContainer">
-            <div class="empty-report">Set a date range and click Generate Report</div>
-        </div>
+    <!-- PLACEHOLDER before generation -->
+    <div id="reportPlaceholder" style="background:white;border:1px solid var(--clinical-border);border-radius:1rem;padding:4rem;text-align:center;color:#94a3b8;">
+        <i class="bi bi-clipboard2-pulse" style="font-size:3rem;opacity:0.3;display:block;margin-bottom:1rem;"></i>
+        <p style="margin:0;font-size:0.95rem;">Select a date range and click <strong>Generate Report</strong> to produce a governance report.</p>
     </div>
 
 </div>
@@ -449,6 +598,12 @@ function formatPeriod(start, end) {
     return s + ' – ' + e;
 }
 
+function formatPeriodShort(start, end) {
+    const s = new Date(start).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const e = new Date(end).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return s + ' – ' + e;
+}
+
 async function generateReports() {
     const start = document.getElementById('reportStart').value;
     const end   = document.getElementById('reportEnd').value;
@@ -459,9 +614,14 @@ async function generateReports() {
 
     _lastReportParams = { start, end, ward };
 
-    const period = formatPeriod(start, end);
-    document.getElementById('individualPeriodLabel').textContent = period;
-    document.getElementById('groupPeriodLabel').textContent = period;
+    // Show report output, hide placeholder
+    document.getElementById('reportPlaceholder').style.display = 'none';
+    document.getElementById('governanceReportOutput').style.display = 'block';
+
+    // Update meta
+    document.getElementById('metaDateRange').textContent = formatPeriodShort(start, end);
+    document.getElementById('metaGenerated').textContent = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('metaWard').textContent = ward === 'all' ? 'All Wards' : ward + ' Ward';
 
     loadIndividualReport(start, end, ward);
     loadGroupReport(start, end, ward);
@@ -475,48 +635,58 @@ async function loadIndividualReport(start, end, ward) {
     const res  = await fetch(`<?= url('reports/individual-json') ?>?start=${start}&end=${end}&ward=${ward}`);
     const data = await res.json();
 
-if (!data.length) {
-    container.innerHTML = `<div class="empty-report">
-        <i class="bi bi-clipboard-x" style="font-size:2rem;opacity:0.4;display:block;margin-bottom:0.75rem;"></i>
-        No sessions recorded for this criteria within the selected period.
-    </div>`;
-    return;
-}
+    if (!data.length) {
+        container.innerHTML = '<div class="empty-report"><i class="bi bi-clipboard-x" style="font-size:2rem;opacity:0.4;display:block;margin-bottom:0.75rem;"></i>No individual sessions recorded for this criteria within the selected period.</div>';
+        return;
+    }
+
+    // Build period label for ward headings
+    const startDate = new Date(start);
+    const periodLabel = startDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
 
     const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
     let html = '';
 
     data.forEach(row => {
-        const colour = wardColours[row.ward] || '#94a3b8';
-        const offered   = parseInt(row.total_offered)   || 0;
+        const colour   = wardColours[row.ward] || '#94a3b8';
+        const offered  = parseInt(row.total_offered)   || 0;
         const completed = parseInt(row.total_completed) || 0;
         const declined  = parseInt(row.total_declined)  || 0;
-        const dna       = parseInt(row.total_dna)       || 0;
+        const dna       = parseInt(row.total_dna)        || 0;
+        const wardUpper = (row.ward || '').toUpperCase();
 
         html += `
-        <div class="ward-report-block">
-            <div class="ward-report-title">
-                <span class="ward-dot" style="background:${colour};"></span>
-                ${escapeHtml(row.ward)} Ward
+        <div class="ward-gov-block">
+            <div class="ward-gov-heading">
+                <h3>${wardUpper} WARD – ${periodLabel}</h3>
             </div>
-            <div class="ward-stats-grid">
-                <div class="stat-box clickable" onclick="openDrilldown('individual','${row.ward}','all','${start}','${end}')">
-                    <div class="stat-box-label">Total 1:1 Offered</div>
-                    <div class="stat-box-value">${offered}</div>
-                </div>
-                <div class="stat-box clickable" onclick="openDrilldown('individual','${row.ward}','completed','${start}','${end}')">
-                    <div class="stat-box-label">Completed</div>
-                    <div class="stat-box-value" style="color:#065f46;">${completed}</div>
-                </div>
-                <div class="stat-box clickable" onclick="openDrilldown('individual','${row.ward}','declined','${start}','${end}')">
-                    <div class="stat-box-label">Declined</div>
-                    <div class="stat-box-value" style="color:#991b1b;">${declined}</div>
-                </div>
-                <div class="stat-box clickable" onclick="openDrilldown('individual','${row.ward}','dna','${start}','${end}')">
-                    <div class="stat-box-label">DNA</div>
-                    <div class="stat-box-value" style="color:#92400e;">${dna}</div>
-                </div>
-            </div>
+            <div class="ward-colour-bar" style="background:${colour};"></div>
+            <table class="gov-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th style="text-align:right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="gov-metric-label">Total 1:1 Sessions Offered</td>
+                        <td><span class="clickable-num" onclick="openDrilldown('individual','${row.ward}','all','${start}','${end}')">${offered}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="gov-metric-label">Total 1:1 Sessions Completed</td>
+                        <td><span class="clickable-num" onclick="openDrilldown('individual','${row.ward}','completed','${start}','${end}')">${completed}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="gov-metric-label">Total 1:1 Sessions Declined</td>
+                        <td><span class="clickable-num" onclick="openDrilldown('individual','${row.ward}','declined','${start}','${end}')">${declined}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="gov-metric-label">Total 1:1 Sessions DNA</td>
+                        <td><span class="clickable-num" onclick="openDrilldown('individual','${row.ward}','dna','${start}','${end}')">${dna}</span></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>`;
     });
 
@@ -532,7 +702,8 @@ async function loadGroupReport(start, end, ward) {
     const data = await res.json();
 
     if (!data.length) {
-container.innerHTML = '<div class="empty-report"><i class="bi bi-clipboard-x" style="font-size:2rem;opacity:0.4;display:block;margin-bottom:0.75rem;"></i>No group sessions recorded for this criteria within the selected period.</div>';        return;
+        container.innerHTML = '<div class="empty-report"><i class="bi bi-clipboard-x" style="font-size:2rem;opacity:0.4;display:block;margin-bottom:0.75rem;"></i>No group sessions recorded for this criteria within the selected period.</div>';
+        return;
     }
 
     // Organise: { groupType: { ward: { offered, accepted, declined, dna } } }
@@ -548,58 +719,62 @@ container.innerHTML = '<div class="empty-report"><i class="bi bi-clipboard-x" st
         byType[type][w].dna      += parseInt(row.dna)      || 0;
     });
 
-    const wardOrder = ['Hope', 'Lakeside', 'Manor'];
+    const wardOrder   = ['Hope', 'Lakeside', 'Manor'];
     const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+    const wardThClass = { Hope: 'ward-th-hope', Lakeside: 'ward-th-lakeside', Manor: 'ward-th-manor' };
 
     let html = '';
 
     Object.entries(byType).forEach(([type, wards]) => {
-        html += `
-        <div class="group-type-heading">
-            <i class="bi bi-people-fill" style="color:#8b5cf6;"></i>
-            ${escapeHtml(type)}
-        </div>
-        <div style="overflow-x:auto;margin-bottom:1rem;">
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th>Ward</th>
-                    <th>Offered</th>
-                    <th>Accepted</th>
-                    <th>Declined</th>
-                    <th>DNA</th>
-                </tr>
-            </thead>
-            <tbody>`;
-
-        // Show wards in fixed order, only those with data
         const wardsToShow = wardOrder.filter(w => wards[w]);
-        // If ward filter is active, only show that ward
-        wardsToShow.forEach(w => {
-            const d = wards[w];
-            const colour = wardColours[w] || '#94a3b8';
-            html += `<tr>
-                <td><span class="ward-badge" style="background:${colour};">${w}</span></td>
-                <td><span class="clickable-num" onclick="openDrilldown('group','${w}','all','${start}','${end}','${escapeHtml(type)}')">${d.offered}</span></td>
-                <td><span class="clickable-num" onclick="openDrilldown('group','${w}','attended','${start}','${end}','${escapeHtml(type)}')">${d.accepted}</span></td>
-                <td><span class="clickable-num" onclick="openDrilldown('group','${w}','declined','${start}','${end}','${escapeHtml(type)}')">${d.declined}</span></td>
-                <td><span class="clickable-num" onclick="openDrilldown('group','${w}','dna','${start}','${end}','${escapeHtml(type)}')">${d.dna}</span></td>
-            </tr>`;
-        });
+        const typeUpper   = type.toUpperCase();
 
-        html += `</tbody></table></div>`;
+        // Ward header cells
+        const wardHeaders = wardsToShow.map(w =>
+            `<th class="${wardThClass[w] || ''}">${w}</th>`
+        ).join('');
+
+        // Row builder
+        const makeRow = (label, metric, attStatus) => {
+            const cells = wardsToShow.map(w => {
+                const val = wards[w][metric] || 0;
+                return `<td><span class="clickable-num" onclick="openDrilldown('group','${w}','${attStatus}','${start}','${end}','${escapeHtml(type)}')">${val}</span></td>`;
+            }).join('');
+            return `<tr><td>${label}</td>${cells}</tr>`;
+        };
+
+        html += `
+        <div class="group-gov-block">
+            <div class="group-gov-heading">${typeUpper} GROUPS</div>
+            <div style="overflow-x:auto;">
+            <table class="gov-group-table">
+                <thead>
+                    <tr>
+                        <th>${escapeHtml(type)} Groups</th>
+                        ${wardHeaders}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${makeRow('Total Offered',  'offered',  'all')}
+                    ${makeRow('Total Accepted', 'accepted', 'attended')}
+                    ${makeRow('Total Declined', 'declined', 'declined')}
+                    ${makeRow('Total DNA',      'dna',      'dna')}
+                </tbody>
+            </table>
+            </div>
+        </div>`;
     });
 
     container.innerHTML = html;
 }
 
-// ===== DRILLDOWN =====
+// ===== DRILLDOWN ===== (unchanged logic)
 async function openDrilldown(type, ward, status, start, end, groupType = 'all') {
     const modal   = document.getElementById('drilldownModal');
     const content = document.getElementById('drilldownContent');
     const title   = document.getElementById('drilldownTitle');
 
-    const statusLabel = status === 'all' ? 'All Sessions' : status.charAt(0).toUpperCase() + status.slice(1);
+    const statusLabel = status === 'all' ? 'All Sessions' : status === 'dna' ? 'DNA' : status.charAt(0).toUpperCase() + status.slice(1);
     const wardLabel   = ward  === 'all' ? 'All Wards' : ward + ' Ward';
     const typeLabel   = groupType !== 'all' ? ` — ${groupType}` : '';
     title.textContent = `${statusLabel} · ${wardLabel}${typeLabel}`;
@@ -614,13 +789,13 @@ async function openDrilldown(type, ward, status, start, end, groupType = 'all') 
         fetchUrl = `<?= url('reports/group-drilldown') ?>?start=${start}&end=${end}&ward=${ward}&group_type=${encodeURIComponent(groupType)}&att_status=${status}`;
     }
 
-   document.getElementById('drilldownExportBtn').onclick = () => {
-    if (!confirm('Download this report as a CSV file?')) return;
-    const base = type === 'individual'
-        ? `<?= url('reports/export-csv') ?>?type=individual&start=${start}&end=${end}&ward=${ward}&status=${status}`
-        : `<?= url('reports/export-csv') ?>?type=group&start=${start}&end=${end}&ward=${ward}&group_type=${encodeURIComponent(groupType)}&att_status=${status}`;
-    window.location.href = base;
-};
+    document.getElementById('drilldownExportBtn').onclick = () => {
+        if (!confirm('Download this report as a CSV file?')) return;
+        const base = type === 'individual'
+            ? `<?= url('reports/export-csv') ?>?type=individual&start=${start}&end=${end}&ward=${ward}&status=${status}`
+            : `<?= url('reports/export-csv') ?>?type=group&start=${start}&end=${end}&ward=${ward}&group_type=${encodeURIComponent(groupType)}&att_status=${status}`;
+        window.location.href = base;
+    };
 
     const res  = await fetch(fetchUrl);
     const data = await res.json();
@@ -630,7 +805,7 @@ async function openDrilldown(type, ward, status, start, end, groupType = 'all') 
         return;
     }
 
-    let html = `<table class="report-table"><thead><tr>
+    let html = `<table class="drilldown-table"><thead><tr>
         <th>Patient</th>
         <th>Ward</th>
         <th>Date</th>
@@ -640,13 +815,15 @@ async function openDrilldown(type, ward, status, start, end, groupType = 'all') 
 
     data.forEach(row => {
         const wardClass  = (row.ward || '').toLowerCase();
-        const dateStr    = new Date(row.session_date).toLocaleDateString('en-GB');
-        const statusKey  = (type === 'individual' ? row.status : row.attendance_status || '').toLowerCase();
-       const statusText = statusKey === 'dna' ? 'DNA' : statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
+        const rawDate    = row.session_date || '';
+        const dateStr    = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : '—';
+        const rawStatus  = (type === 'individual' ? row.status : row.attendance_status) || 'offered';
+        const statusKey  = rawStatus.toLowerCase();
+        const statusText = statusKey === 'dna' ? 'DNA' : statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
 
         html += `<tr>
             <td><strong>${escapeHtml(row.patient_name || '—')}</strong></td>
-            <td><span class="ward-badge ward-${wardClass}">${escapeHtml(row.ward || '—')}</span></td>
+            <td>${wardClass ? `<span class="ward-badge ward-${wardClass}">${escapeHtml(row.ward)}</span>` : '—'}</td>
             <td>${dateStr}</td>
             <td>${escapeHtml(row.clinician || '—')}</td>
             <td><span class="status-badge status-${statusKey}">${statusText}</span></td>

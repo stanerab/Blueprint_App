@@ -53,7 +53,6 @@
     letter-spacing: 0.04em;
 }
 
-.filter-group input,
 .filter-group select {
     padding: 0.5rem 0.75rem;
     border: 1px solid var(--clinical-border);
@@ -65,12 +64,60 @@
     cursor: pointer;
 }
 
-.filter-group input[type="date"]:focus,
+.filter-group .date-picker {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--clinical-border);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    background: white;
+    width: 100%;
+    color: #94a3b8;
+    cursor: pointer;
+    height: 2.5rem;
+    box-sizing: border-box;
+}
+
+.filter-group .date-picker.has-value {
+    color: #1e293b;
+}
+
+.filter-group .date-picker:focus {
+    outline: none;
+    border-color: var(--clinical-blue);
+    box-shadow: 0 0 0 3px rgba(30,58,138,0.08);
+}
+
+.date-input-wrapper input[type="date"] {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--clinical-border);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    font-family: inherit;
+    height: 2.5rem;
+    box-sizing: border-box;
+}
+
+.date-input-wrapper input[type="date"]:focus {
+    outline: none;
+    border-color: var(--clinical-blue);
+    box-shadow: 0 0 0 3px rgba(30,58,138,0.08);
+}
+
+.date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.5;
+}
+
 .filter-group select:focus {
     outline: none;
     border-color: var(--clinical-blue);
     box-shadow: 0 0 0 3px rgba(30,58,138,0.08);
 }
+
 
 .btn-generate {
     background: var(--clinical-blue);
@@ -484,18 +531,18 @@
     </div>
 
     <!-- FILTERS -->
-    <div class="filters-bar">
-        <div class="filter-group">
-            <label>Start Date</label>
-            <input type="date" id="reportStart">
-        </div>
-        <div class="filter-group">
-            <label>End Date</label>
-            <input type="date" id="reportEnd">
-        </div>
-        <div class="filter-group">
-            <label>Ward</label>
-            <select id="reportWard">
+   <div class="filters-bar">
+    <div class="filter-group">
+        <label>Start Date</label>
+        <input type="text" id="reportStart" class="date-picker" placeholder="DD/MM/YYYY" readonly>
+    </div>
+    <div class="filter-group">
+        <label>End Date</label>
+        <input type="text" id="reportEnd" class="date-picker" placeholder="DD/MM/YYYY" readonly>
+    </div>
+    <div class="filter-group">
+        <label>Ward</label>
+        <select id="reportWard">
                 <option value="all">All Wards</option>
                 <option value="Hope">Hope</option>
                 <option value="Lakeside">Lakeside</option>
@@ -641,8 +688,11 @@ async function loadIndividualReport(start, end, ward) {
     }
 
     // Build period label for ward headings
-    const startDate = new Date(start);
-    const periodLabel = startDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
+  const startDate = new Date(start);
+const endDate   = new Date(end);
+const startLabel = startDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
+const endLabel   = endDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
+const periodLabel = startLabel === endLabel ? startLabel : startLabel + ' – ' + endLabel;
 
     const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
     let html = '';
@@ -855,4 +905,181 @@ function escapeHtml(text) {
 window.onclick = e => {
     if (e.target.id === 'drilldownModal') closeDrilldown();
 };
+
+// ===== LIGHTWEIGHT DATE PICKER =====
+(function() {
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DAYS   = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+
+    let activeInput = null;
+    let pickerEl    = null;
+    let pickerYear  = new Date().getFullYear();
+    let pickerMonth = new Date().getMonth();
+
+    // Internal value store (YYYY-MM-DD) separate from display
+    const inputValues = {};
+
+    function getInputValue(input) {
+        return inputValues[input.id] || '';
+    }
+
+    function buildPicker() {
+        const el = document.createElement('div');
+        el.id = 'datePicker';
+        el.style.cssText = `
+            position: fixed;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            padding: 1rem;
+            z-index: 99999;
+            width: 260px;
+            font-family: inherit;
+        `;
+        document.body.appendChild(el);
+        return el;
+    }
+
+    function renderPicker() {
+        if (!pickerEl) return;
+
+        const today = new Date();
+        const firstDay = new Date(pickerYear, pickerMonth, 1);
+        const daysInMonth = new Date(pickerYear, pickerMonth + 1, 0).getDate();
+        let startDow = (firstDay.getDay() + 6) % 7; // Monday = 0
+
+        let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <button onclick="window._dpPrev(event)" style="background:none;border:1px solid #e2e8f0;border-radius:0.4rem;width:28px;height:28px;cursor:pointer;font-size:0.9rem;">‹</button>
+            <strong style="font-size:0.85rem;color:#1e293b;">${MONTHS[pickerMonth]} ${pickerYear}</strong>
+            <button onclick="window._dpNext(event)" style="background:none;border:1px solid #e2e8f0;border-radius:0.4rem;width:28px;height:28px;cursor:pointer;font-size:0.9rem;">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+            ${DAYS.map(d => `<div style="text-align:center;font-size:0.68rem;font-weight:600;color:#94a3b8;padding:2px 0;">${d}</div>`).join('')}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">
+        `;
+
+        for (let i = 0; i < startDow; i++) {
+            html += `<div></div>`;
+        }
+
+        const selectedVal = getInputValue(activeInput);
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${pickerYear}-${String(pickerMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const isToday = today.getFullYear() === pickerYear && today.getMonth() === pickerMonth && today.getDate() === d;
+            const isSelected = selectedVal === dateStr;
+
+            let bg = 'transparent', color = '#1e293b', fw = '400';
+            if (isSelected) { bg = '#1e3a8a'; color = 'white'; fw = '600'; }
+            else if (isToday) { bg = '#e8f0fe'; color = '#1e3a8a'; fw = '600'; }
+
+            html += `<div onclick="window._dpSelect('${dateStr}')" style="text-align:center;padding:5px 2px;border-radius:0.35rem;cursor:pointer;font-size:0.8rem;background:${bg};color:${color};font-weight:${fw};" onmouseover="if('${isSelected}'!='true')this.style.background='#f1f5f9'" onmouseout="if('${isSelected}'!='true')this.style.background='${isSelected?'#1e3a8a':'transparent'}'">${d}</div>`;
+        }
+
+        html += `</div>`;
+        pickerEl.innerHTML = html;
+    }
+
+    function positionPicker() {
+        if (!activeInput || !pickerEl) return;
+        const rect = activeInput.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const pickerH = 300;
+
+        pickerEl.style.left = rect.left + 'px';
+        if (spaceBelow < pickerH && rect.top > pickerH) {
+            pickerEl.style.top = (rect.top - pickerH + window.scrollY) + 'px';
+        } else {
+            pickerEl.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+        }
+    }
+
+    function openPicker(input) {
+        activeInput = input;
+        const val = getInputValue(input);
+        if (val) {
+            const d = new Date(val);
+            pickerYear  = d.getFullYear();
+            pickerMonth = d.getMonth();
+        } else {
+            pickerYear  = new Date().getFullYear();
+            pickerMonth = new Date().getMonth();
+        }
+        if (!pickerEl) pickerEl = buildPicker();
+        pickerEl.style.display = 'block';
+        renderPicker();
+        positionPicker();
+    }
+
+    function closePicker() {
+        if (pickerEl) pickerEl.style.display = 'none';
+        activeInput = null;
+    }
+
+  window._dpPrev = function(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    pickerMonth--;
+    if (pickerMonth < 0) { pickerMonth = 11; pickerYear--; }
+    renderPicker();
+};
+
+window._dpNext = function(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    pickerMonth++;
+    if (pickerMonth > 11) { pickerMonth = 0; pickerYear++; }
+    renderPicker();
+};
+
+    window._dpSelect = function(dateStr) {
+        if (!activeInput) return;
+        inputValues[activeInput.id] = dateStr;
+        const [y, m, d] = dateStr.split('-');
+        activeInput.value = `${d}/${m}/${y}`;
+        activeInput.classList.add('has-value');
+        closePicker();
+    };
+
+    // Patch generateReports to read internal values
+    const _origGenerate = window.generateReports;
+    window.generateReports = function() {
+        const startInput = document.getElementById('reportStart');
+        const endInput   = document.getElementById('reportEnd');
+        const startVal   = inputValues['reportStart'] || '';
+        const endVal     = inputValues['reportEnd']   || '';
+
+        if (!startVal || !endVal) { alert('Please select a start and end date'); return; }
+        if (startVal > endVal)    { alert('Start date must be before end date'); return; }
+
+        _lastReportParams = { start: startVal, end: endVal, ward: document.getElementById('reportWard').value };
+
+        document.getElementById('reportPlaceholder').style.display = 'none';
+        document.getElementById('governanceReportOutput').style.display = 'block';
+
+        document.getElementById('metaDateRange').textContent = formatPeriodShort(startVal, endVal);
+        document.getElementById('metaGenerated').textContent = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('metaWard').textContent = _lastReportParams.ward === 'all' ? 'All Wards' : _lastReportParams.ward + ' Ward';
+
+        loadIndividualReport(startVal, endVal, _lastReportParams.ward);
+        loadGroupReport(startVal, endVal, _lastReportParams.ward);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.date-picker').forEach(input => {
+            input.addEventListener('click', () => openPicker(input));
+        });
+
+document.addEventListener('click', e => {
+    if (!pickerEl || pickerEl.style.display === 'none') return;
+    if (pickerEl.contains(e.target)) return;
+    if (e.target.classList.contains('date-picker')) return;
+    closePicker();
+});
+
+        window.addEventListener('scroll', () => { if (activeInput) positionPicker(); });
+        window.addEventListener('resize', () => { if (activeInput) positionPicker(); });
+    });
+})();
 </script>

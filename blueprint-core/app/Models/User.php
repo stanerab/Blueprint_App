@@ -69,12 +69,12 @@ class User
             VALUES (?, ?, ?, ?, ?)
         ");
         
-        return $stmt->execute([
+      return $stmt->execute([
             $data['username'],
             $data['email'],
             password_hash($data['password'], PASSWORD_DEFAULT),
             $data['full_name'] ?? null,
-            $data['role'] ?? 'Psycologist'
+            !empty($data['role']) ? trim($data['role']) : 'Psychologist'
         ]);
     }
     

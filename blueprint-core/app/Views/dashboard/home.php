@@ -3043,7 +3043,7 @@ select:invalid {
                         <label for="groupType">Group Type</label>
                    <select name="group_type" id="groupType" class="gs-select" onchange="toggleCustomGroupType()">
     <option value="" disabled selected>Select group type…</option>
-        <option value="CBT">CBT</option>
+        <option value="CFT">CFT</option>
         <option value="DBT">DBT</option>
         <option value="Skills">Skills</option>
         <option value="Music Therapy">Music Therapy</option>
@@ -3213,7 +3213,7 @@ select:invalid {
     </select>
     <select id="calDayGroupFilter" onchange="filterCalDayList()" style="font-size:0.78rem;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:0.4rem;background:white;">
         <option value="all">All Groups</option>
-        <option value="CBT">CBT</option>
+        <option value="CFT">CFT</option>
         <option value="DBT">DBT</option>
          <option value="Skills">Skills</option>
         <option value="Music Therapy">Music Therapy</option>
@@ -5078,9 +5078,10 @@ function loadWardTransferHistory(patientId) {
 
             let html = '<table class="sessions-table" style="min-width:600px;"><thead><tr><th>Date</th><th>From</th><th>To</th><th>Changed By</th><th>Reason</th></tr></thead><tbody>';
 
-            data.forEach(row => {
-                const date = new Date(row.transferred_at).toLocaleDateString('en-GB') + ' ' +
-                             new Date(row.transferred_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+          data.forEach(row => {
+                const transferDate = new Date(row.transferred_at.replace(' ', 'T') + 'Z');
+                const date = transferDate.toLocaleDateString('en-GB') + ' ' +
+                             transferDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 const fromColour = wardColours[row.from_ward] || '#94a3b8';
                 const toColour   = wardColours[row.to_ward]   || '#94a3b8';
 

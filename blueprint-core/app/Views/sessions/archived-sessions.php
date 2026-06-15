@@ -1,4 +1,5 @@
 <?php $title = 'Archived Sessions'; ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
 /* ===== MODERN CLINICAL STYLES (matches home page) ===== */
@@ -8,19 +9,50 @@
     --ward-manor: #3b82f6;
 }
 
-.page-header {
+.archived-page { padding: 1.5rem; }
+
+.archived-header {
+    margin-bottom: 1.5rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 1rem;
 }
-.page-header h1 {
-    font-size: 1.8rem;
-    font-weight: 600;
-    color: #1e293b;
+.archived-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e3a8a;
     margin: 0 0 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.archived-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+}
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-back:hover {
+    background: #f8fafc;
+    border-color: #1e3a8a;
+    color: #1e3a8a;
+    transform: translateY(-1px);
+    text-decoration: none;
 }
 .text-muted {
     font-size: 0.9rem;
@@ -222,6 +254,18 @@
 }
 </style>
 
+<div class="archived-page">
+
+<div class="archived-header">
+    <div>
+        <h1><i class="bi bi-archive"></i> Archived Sessions</h1>
+        <p>All wards overview</p>
+    </div>
+    <a href="<?= url('dashboard') ?>" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
 <!-- TOP CONTROLS (search + tabs) -->
 <div class="top-controls">
     <div class="search-box">
@@ -237,20 +281,6 @@
         <button class="ward-tab" data-ward="Lakeside">Lakeside</button>
         <button class="ward-tab" data-ward="Manor">Manor</button>
     </div>
-</div>
-
-<!-- PAGE HEADER (modern) -->
-<div class="page-header">
-    <div>
-        <h1>Archived Sessions</h1>
-        <p class="text-muted">All wards overview</p>
-    </div>
-    <a href="<?= url('dashboard') ?>" class="btn-outline">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-        Back to Dashboard
-    </a>
 </div>
 
 <?php
@@ -319,6 +349,7 @@ $grouped = $grouped ?? [
             <?php endif; ?>
         </div>
     <?php endforeach; ?>
+</div>
 </div>
 
 <script>
@@ -461,32 +492,46 @@ document.addEventListener('DOMContentLoaded', function() {
         applySearch();
     }
 
-    function applySearch() {
+function applySearch() {
         const term = searchInput.value.toLowerCase().trim();
+        let totalVisible = 0;
 
         sections.forEach(section => {
-            if (section.style.display === 'none') return;
+            const ward = section.dataset.ward;
+            const wardVisible = (activeWard === 'All' || ward === activeWard);
+
+            if (!wardVisible) {
+                section.style.display = 'none';
+                return;
+            }
 
             let visibleRows = 0;
             const rows = section.querySelectorAll('.session-row');
 
             rows.forEach(row => {
                 const searchText = row.getAttribute('data-search') || '';
-                if (term === '' || searchText.includes(term)) {
-                    row.style.display = '';
-                    visibleRows++;
-                } else {
-                    row.style.display = 'none';
-                }
+                const match = term === '' || searchText.includes(term);
+                row.style.display = match ? '' : 'none';
+                if (match) visibleRows++;
             });
 
-            if (term !== '') {
-                section.style.display = visibleRows > 0 ? '' : 'none';
-            } else {
-                const ward = section.dataset.ward;
-                section.style.display = (activeWard === 'All' || ward === activeWard) ? '' : 'none';
-            }
+            section.style.display = (term === '' || visibleRows > 0) ? '' : 'none';
+            totalVisible += visibleRows;
         });
+
+        let noResults = document.getElementById('globalNoResults');
+        if (!noResults) {
+            noResults = document.createElement('div');
+            noResults.id = 'globalNoResults';
+            noResults.style.cssText = 'text-align:center;padding:3rem;color:#64748b;background:#f8fafc;border-radius:1rem;border:1px dashed #cbd5e1;margin-top:1rem;';
+            document.querySelector('.sessions-container').appendChild(noResults);
+        }
+        if (term !== '' && totalVisible === 0) {
+            noResults.innerHTML = '<p style="margin:0;font-size:0.9rem;">No sessions found matching <strong>"' + term + '"</strong></p>';
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
     }
 
     tabs.forEach(tab => {

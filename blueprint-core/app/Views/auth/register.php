@@ -59,6 +59,13 @@
                        placeholder="Choose a username"
                        value="<?php echo htmlspecialchars(old('username')); ?>">
             </div>
+
+             <div class="form-group">
+                <label for="role">Role</label>
+                <input type="text" id="role" name="role" maxlength="50"
+                       placeholder="e.g. Psychologist, Art Therapist, Assistant Psychologist"
+                       value="<?php echo htmlspecialchars(old('role')); ?>">
+            </div>
             
             <div class="form-group">
                 <label for="email">Email</label>
@@ -78,6 +85,7 @@
                 <input type="password" id="confirm_password" name="confirm_password" 
                        placeholder="Confirm your password">
             </div>
+
             
             <div class="form-group">
                 <button type="submit" class="btn-primary btn-block">Register</button>
@@ -97,7 +105,8 @@ document.querySelector('.login-form').addEventListener('submit', function(e) {
         { el: document.getElementById('username'), name: 'username' },
         { el: document.getElementById('email'), name: 'email' },
         { el: document.getElementById('password'), name: 'password' },
-        { el: document.getElementById('confirm_password'), name: 'confirm password' }
+        { el: document.getElementById('confirm_password'), name: 'confirm password' },
+        { el: document.getElementById('role'), name: 'role' }
     ];
 
     let valid = true;
@@ -115,4 +124,4 @@ document.querySelector('.login-form').addEventListener('submit', function(e) {
 
     if (!valid) e.preventDefault();
 });
-</script>
+</script> 

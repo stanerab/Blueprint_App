@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Config\Database;
+use App\Models\ActivityLog;
 
 class ReportsController
 {
@@ -61,6 +62,15 @@ class ReportsController
         $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+        $userName  = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown';
+        $wardLabel = $ward === 'all' ? 'All Wards' : $ward . ' Ward';
+        ActivityLog::create([
+            'action_type' => 'report_generated',
+            'description' => "{$userName} generated Individual Session Report for {$wardLabel} (" . date('d/m/Y', strtotime($startDate)) . " - " . date('d/m/Y', strtotime($endDate)) . ")",
+            'patient_id'  => null,
+            'ward'        => $ward === 'all' ? null : $ward
+        ]);
+
         echo json_encode($rows);
         exit;
     }
@@ -98,7 +108,7 @@ class ReportsController
             SELECT
                 p.initials                                              AS patient_name,
                 s.ward                                                  AS ward,
-                s.datetime                                              AS session_date,
+                DATE_FORMAT(s.datetime, '%d/%m/%Y %H:%i')              AS session_date,
                 COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
                 COALESCE(NULLIF(TRIM(s.status), ''), 'offered')        AS status
             FROM sessions s
@@ -115,6 +125,16 @@ class ReportsController
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $userName    = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown';
+        $wardLabel   = $ward === 'all' ? 'All Wards' : $ward . ' Ward';
+        $statusLabel = $status === 'all' ? 'All Sessions' : ($status === 'dna' ? 'DNA' : ucfirst($status));
+        ActivityLog::create([
+            'action_type' => 'report_drilldown_viewed',
+            'description' => "{$userName} viewed {$statusLabel} drill-down for {$wardLabel}",
+            'patient_id'  => null,
+            'ward'        => $ward === 'all' ? null : $ward
+        ]);
 
         echo json_encode($rows);
         exit;
@@ -164,6 +184,15 @@ class ReportsController
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $userName  = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown';
+        $wardLabel = $ward === 'all' ? 'All Wards' : $ward . ' Ward';
+        ActivityLog::create([
+            'action_type' => 'report_generated',
+            'description' => "{$userName} generated Group Session Report for {$wardLabel} (" . date('d/m/Y', strtotime($startDate)) . " - " . date('d/m/Y', strtotime($endDate)) . ")",
+            'patient_id'  => null,
+            'ward'        => $ward === 'all' ? null : $ward
+        ]);
 
         echo json_encode($rows);
         exit;
@@ -215,7 +244,7 @@ class ReportsController
             SELECT
                 p.initials                                                          AS patient_name,
                 p.ward                                                              AS ward,
-                gs.session_date                                                     AS session_date,
+                CONCAT(DATE_FORMAT(gs.session_date,'%d/%m/%Y'), ' ', DATE_FORMAT(gs.session_time,'%H:%i')) AS session_date,
                 COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
                 gs.group_type,
                 CASE
@@ -239,6 +268,16 @@ class ReportsController
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $userName    = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown';
+        $wardLabel   = $ward === 'all' ? 'All Wards' : $ward . ' Ward';
+        $statusLabel = $attStatus === 'all' ? 'All Sessions' : ($attStatus === 'dna' ? 'DNA' : ucfirst($attStatus));
+        ActivityLog::create([
+            'action_type' => 'report_drilldown_viewed',
+            'description' => "{$userName} viewed {$statusLabel} drill-down for {$wardLabel}" . ($groupType !== 'all' && $groupType !== '' ? " ({$groupType})" : ''),
+            'patient_id'  => null,
+            'ward'        => $ward === 'all' ? null : $ward
+        ]);
 
         echo json_encode($rows);
         exit;
@@ -277,7 +316,7 @@ class ReportsController
                 SELECT
                     p.initials                                              AS patient_name,
                     s.ward                                                  AS ward,
-                    s.datetime                                              AS session_date,
+                    DATE_FORMAT(s.datetime, '%d/%m/%Y %H:%i')              AS session_date,
                     COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
                     COALESCE(NULLIF(TRIM(s.status), ''), 'offered')        AS status
                 FROM sessions s
@@ -322,7 +361,7 @@ class ReportsController
                 SELECT
                     p.initials                                              AS patient_name,
                     p.ward                                                  AS ward,
-                    gs.session_date                                         AS session_date,
+                    CONCAT(DATE_FORMAT(gs.session_date,'%d/%m/%Y'), ' ', DATE_FORMAT(gs.session_time,'%H:%i')) AS session_date,
                     COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
                     gs.group_type,
                     CASE
@@ -348,6 +387,26 @@ class ReportsController
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $userName    = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown';
+        $isDrilldown = isset($_GET['status']) || isset($_GET['att_status']);
+        $recordCount = count($rows);
+
+        if ($isDrilldown) {
+            $statusParam = $_GET['status'] ?? $_GET['att_status'] ?? 'all';
+            $statusLabel = $statusParam === 'all' ? 'All Sessions' : ($statusParam === 'dna' ? 'DNA' : ucfirst($statusParam));
+            $description = "{$userName} exported {$statusLabel} drill-down CSV ({$recordCount} records)";
+        } else {
+            $reportLabel = $type === 'individual' ? 'Individual Session Report' : 'Group Session Report';
+            $description = "{$userName} exported {$reportLabel} CSV";
+        }
+
+        ActivityLog::create([
+            'action_type' => 'report_csv_exported',
+            'description' => $description,
+            'patient_id'  => null,
+            'ward'        => $ward === 'all' ? null : $ward
+        ]);
 
         $filename = 'blueprint-report-' . $type . '-' . $startDate . '-to-' . $endDate . '.csv';
 

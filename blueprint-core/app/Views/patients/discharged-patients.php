@@ -1,15 +1,18 @@
 <?php $title = 'Discharged Patients'; ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="discharged-page">
 
 <!-- ===== HEADER ===== -->
 <div class="page-header">
     <div class="page-title-block">
-        <h1>Discharged Patients</h1>
+        <h1><i class="bi bi-box-arrow-right"></i> Discharged Patients</h1>
         <p class="text-muted">Overview across all wards</p>
     </div>
 
     <div class="page-actions">
-        <a href="<?= url('dashboard') ?>" class="btn-outline">
-            ← Back to Dashboard
+        <a href="<?= url('dashboard') ?>" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
         </a>
     </div>
 </div>
@@ -150,21 +153,53 @@ $grouped = $grouped ?? [
 
 <style>
 /* ===== HEADER ===== */
+.discharged-page { padding: 1.5rem; }
+
 .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .page-title-block h1 {
-    font-size: 26px;
-    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 0 0 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .text-muted {
     color: #64748b;
-    font-size: 14px;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-back:hover {
+    background: #f8fafc;
+    border-color: #1e3a8a;
+    color: #1e3a8a;
+    transform: translateY(-1px);
+    text-decoration: none;
 }
 
 /* ===== STATS ===== */
@@ -634,6 +669,9 @@ $grouped = $grouped ?? [
     </div>
 </div>
 
+</div>
+
+
 <script>
 // Store current patient ID
 let currentViewPatientId = null;
@@ -679,9 +717,10 @@ function loadWardTransferHistory(patientId) {
 
             let html = '<table class="sessions-table" style="min-width:600px;"><thead><tr><th>Date</th><th>From</th><th>To</th><th>Changed By</th><th>Reason</th></tr></thead><tbody>';
 
-            data.forEach(row => {
-                const date = new Date(row.transferred_at).toLocaleDateString('en-GB') + ' ' +
-                             new Date(row.transferred_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+         data.forEach(row => {
+                const transferDate = new Date(row.transferred_at.replace(' ', 'T') + 'Z');
+                const date = transferDate.toLocaleDateString('en-GB') + ' ' +
+                             transferDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 const fromColour = wardColours[row.from_ward] || '#94a3b8';
                 const toColour   = wardColours[row.to_ward]   || '#94a3b8';
 
@@ -1081,7 +1120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (match) sectionVisible++;
             });
 
-            section.style.display = sectionVisible > 0 ? 'block' : 'none';
+           section.style.display = (term === '' || sectionVisible > 0) ? 'block' : 'none';
             totalVisible += sectionVisible;
         });
 

@@ -15,7 +15,14 @@
 .reports-page { padding: 1.5rem; }
 
 /* ── HEADER ── */
-.reports-header { margin-bottom: 1.5rem; }
+.reports-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
 .reports-header h1 {
     font-size: 1.5rem;
     font-weight: 700;
@@ -157,6 +164,28 @@
     border-radius: 1rem;
     overflow: hidden;
     margin-bottom: 1.5rem;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border: 1px solid var(--clinical-border);
+    color: #475569;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-back:hover {
+    background: #f8fafc;
+    border-color: var(--clinical-blue);
+    color: var(--clinical-blue);
+    transform: translateY(-1px);
+    text-decoration: none;
 }
 
 /* ── GOVERNANCE REPORT HEADER ── */
@@ -511,6 +540,7 @@
     .gov-report-header { background: #1e3a8a !important; -webkit-print-color-adjust: exact; }
     .gov-table, .gov-group-table { page-break-inside: avoid; }
     .ward-gov-block, .group-gov-block { page-break-inside: avoid; }
+    .btn-back { width: 100%; justify-content: center; } 
 }
 
 @media (max-width: 768px) {
@@ -522,12 +552,16 @@
     .gov-group-table th, .gov-group-table td { padding: 0.5rem 0.6rem; }
 }
 </style>
-
 <div class="reports-page">
 
     <div class="reports-header">
-        <h1>Clinical Reports <i class="bi bi-bar-chart-line"></i></h1>
-        <p>Governance reporting for clinical audit and quality assurance</p>
+        <div>
+           <h1><i class="bi bi-bar-chart-line"></i> Clinical Reports</h1>
+            <p>Governance reporting for clinical audit and quality assurance</p>
+        </div>
+        <a href="<?= url('dashboard') ?>" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
     </div>
 
     <!-- FILTERS -->
@@ -858,16 +892,15 @@ async function openDrilldown(type, ward, status, start, end, groupType = 'all') 
     let html = `<table class="drilldown-table"><thead><tr>
         <th>Patient</th>
         <th>Ward</th>
-        <th>Date</th>
+        <th>Date & Time</th>
         <th>Clinician</th>
         <th>Status</th>
     </tr></thead><tbody>`;
 
-    data.forEach(row => {
-        const wardClass  = (row.ward || '').toLowerCase();
-        const rawDate    = row.session_date || '';
-        const dateStr    = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : '—';
-        const rawStatus  = (type === 'individual' ? row.status : row.attendance_status) || 'offered';
+  data.forEach(row => {
+    const wardClass  = (row.ward || '').toLowerCase();
+    const dateStr    = row.session_date || '—';
+    const rawStatus  = (type === 'individual' ? row.status : row.attendance_status) || 'offered';
         const statusKey  = rawStatus.toLowerCase();
         const statusText = statusKey === 'dna' ? 'DNA' : statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
 

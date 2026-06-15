@@ -161,13 +161,19 @@ class SessionController
     'notes'               => trim($_POST['notes'] ?? ''),
     'status'              => $_POST['status'] ?? 'offered',
 ];
+     $oldStatus = $session->status ?? 'offered';
         $result = Session::update($id, $data);
 
         if ($result) {
             // LOG: Session updated (clean description - no ward, no datetime)
+            $statusNote = '';
+            if (strtolower($oldStatus) !== strtolower($data['status'])) {
+                $statusNote = ' — status changed to ' . ucfirst($data['status']);
+            }
+
             ActivityLog::create([
                 'action_type' => 'session_updated',
-                'description' => 'Updated session for patient ' . ($session->initials ?? 'Unknown'),
+                'description' => 'Updated session for patient ' . ($session->initials ?? 'Unknown') . $statusNote,
                 'patient_id' => $session->patient_id ?? null,
                 'session_id' => $id,
                 'ward' => $session->ward ?? 'Unknown'

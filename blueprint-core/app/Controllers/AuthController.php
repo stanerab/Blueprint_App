@@ -64,6 +64,10 @@ class AuthController
             $errors[] = 'Passwords do not match';
         }
         
+        if (empty($_POST['role']) || trim($_POST['role']) === '') {
+            $errors[] = 'Role is required';
+        }
+        
         if (empty($errors)) {
             if (User::create($_POST)) {
                 header('Location: ' . url('login?registered=1'));

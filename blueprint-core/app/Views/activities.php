@@ -82,12 +82,14 @@
     flex-wrap: wrap;
     gap: 20px;
     margin-bottom: 30px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 }
 
 .page-header h1 {
     font-size: 28px;
     font-weight: 700;
-    color: var(--gray-800);
+    color: #1e3a8a;
     margin: 0 0 5px 0;
     letter-spacing: -0.5px;
     display: flex;
@@ -126,6 +128,28 @@
 
 .btn-outline svg {
     stroke: currentColor;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border: 1px solid var(--gray-200);
+    color: var(--gray-600);
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.btn-back:hover {
+    background: var(--gray-50);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+    text-decoration: none;
 }
 
 /* ===== ACTIVITIES CARD (same as dashboard sections) ===== */
@@ -354,10 +378,13 @@
         width: 100%;
         justify-content: center;
     }
+
+    .btn-back {
+        width: 100%;
+        justify-content: center;
+    }
     
     .activities-full {
-        padding: 20px;
-    }
     
     .activity-full-item {
         flex-direction: column;
@@ -421,41 +448,40 @@
 <!-- PAGE HEADER -->
 <div class="page-header">
     <div>
-        <h1><?= isset($ward) ? $ward . ' Ward Activities' : 'All Activities' ?></h1>
+        <h1><i class="bi bi-activity"></i> <?= isset($ward) ? $ward . ' Ward Activities' : 'All Activities' ?></h1>
         <p class="page-subtitle">Complete activity log</p>
     </div>
-    <a href="<?= url('dashboard') ?>" class="btn-outline">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-        Back to Dashboard
+    <a href="<?= url('dashboard') ?>" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
     </a>
 </div>
 
 <!-- ACTIVITIES TIMELINE -->
 <div class="activities-full">
     <?php if(!empty($activities)): ?>
-        <div class="activities-timeline">
+       <div class="activities-timeline">
             <?php 
             $currentDate = '';
             foreach($activities as $activity): 
-                $activityDate = date('Y-m-d', strtotime($activity->created_at));
+                $createdAtLondon = new \DateTime($activity->created_at, new \DateTimeZone('UTC'));
+                $createdAtLondon->setTimezone(new \DateTimeZone('Europe/London'));
+                $activityDate = $createdAtLondon->format('Y-m-d');
                 if($activityDate != $currentDate):
                     $currentDate = $activityDate;
             ?>
                 <div class="timeline-date">
-                    <?= date('l, d F Y', strtotime($activityDate)) ?>
+                    <?= $createdAtLondon->format('l, d F Y') ?>
                 </div>
             <?php endif; ?>
                 <div class="activity-full-item">
-                    <div class="activity-time"><?= date('H:i', strtotime($activity->created_at)) ?></div>
+                    <div class="activity-time"><?= $createdAtLondon->format('H:i') ?></div>
               <div class="activity-icon-large">
     <?php
     $icon = '•';
     $isBootstrap = false;
     switch($activity->action_type) {
         case 'patient_admitted':        $icon = '+';  break;
-        case 'patient_discharged':      $icon = '→';  break;
+        case 'patient_discharged':      $icon = 'bi-box-arrow-right'; $isBootstrap = true; break;
         case 'patient_archived':        $icon = '↓';  break;
         case 'patient_restored':        $icon = '↺';  break;
         case 'patient_deleted':         $icon = '×';  break;
@@ -465,9 +491,13 @@
         case 'session_deleted':         $icon = '×';  break;
         case 'session_restored':        $icon = '↺';  break;
         case 'room_changed':            $icon = '⇄';  break;
-        case 'group_session_created':   $icon = 'bi-people-fill';    $isBootstrap = true; break;
+        case 'ward_transfer':           $icon = 'bi-arrow-left-right'; $isBootstrap = true; break;
+        case 'core10_updated':          $icon = 'bi-clipboard2-check'; $isBootstrap = true; break;        case 'group_session_created':   $icon = 'bi-people-fill';    $isBootstrap = true; break;
         case 'group_session_scheduled': $icon = 'bi-calendar-event'; $isBootstrap = true; break;
         case 'group_session_deleted':   $icon = '×'; break;
+        case 'report_generated':        $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
+        case 'report_drilldown_viewed': $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
+        case 'report_csv_exported':     $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
     }
     if ($isBootstrap) {
         echo '<i class="bi ' . $icon . '"></i>';

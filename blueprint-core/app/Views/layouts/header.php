@@ -268,7 +268,7 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <span class="dropdown-item-text text-muted" style="font-size:0.78rem;padding:0.4rem 0.75rem;">
-                                <?= ucfirst($_SESSION['role'] ?? 'user'); ?>
+                                <?= ucwords($_SESSION['role'] ?? 'user'); ?>
                             </span>
                         </li>
                         <li><hr class="dropdown-divider"></li>

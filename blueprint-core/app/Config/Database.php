@@ -22,7 +22,7 @@ class Database
     $user   = $_ENV['DB_USER'] ?? '';
     $pass   = $_ENV['DB_PASS'] ?? '';
 
-        try {
+       try {
             $this->conn = new PDO(
                 "mysql:host={$host};dbname={$dbname};charset=utf8mb4",
                 $user,
@@ -33,6 +33,11 @@ class Database
                     PDO::ATTR_EMULATE_PREPARES   => false
                 ]
             );
+
+            // Normalise session timezone to UTC so NOW()/CURRENT_TIMESTAMP
+            // behave consistently across local and live environments,
+            // regardless of each server's SYSTEM timezone setting.
+            $this->conn->exec("SET time_zone = '+00:00'");
         } catch (PDOException $e) {
             die("Connection failed: " . $e->getMessage());
         }

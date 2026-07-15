@@ -601,7 +601,7 @@
                         <span class="gov-meta-value" id="metaDateRange">—</span>
                     </div>
                     <div class="gov-meta-item">
-                        <span class="gov-meta-label">Generated</span>
+                        <span class="gov-meta-label">Generated At</span>
                         <span class="gov-meta-value" id="metaGenerated">—</span>
                     </div>
                     <div class="gov-meta-item">

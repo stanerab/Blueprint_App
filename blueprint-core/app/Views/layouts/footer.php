@@ -2,7 +2,7 @@
 
 <footer class="app-footer">
     <div class="app-footer-inner">
-        <span><strong>Blueprint</strong> <span class="muted">-Clinical management system</span></span>
+        <span><strong>Blueprint</strong> <span class="muted"> - Clinical management system</span></span>
         <span class="muted">© <?= date('Y') ?> Blueprint · v1.5</span>
     </div>
 </footer>

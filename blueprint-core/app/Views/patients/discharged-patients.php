@@ -764,14 +764,14 @@ function loadPatientSummary(patientId) {
             document.getElementById('viewPatientDischargeDateTime').innerText = dischargeDate;
 
             document.getElementById('viewPatientAdmissionCore').innerHTML = data.core10_admission
-                ? '<span class="core10-badge completed">✓ Completed at Admission</span>'
-                : '<span class="core10-badge pending">✗ Not Completed at Admission</span>';
+                ? '<span class="core10-badge completed">✓ Completed </span>'
+                : '<span class="core10-badge pending">✗ Not Completed </span>';
             document.getElementById('viewPatientAdmissionCore').innerHTML +=
                 ` <button class="btn-core10-edit" onclick="editDischargedCore10('admission', ${patientId}, ${data.core10_admission ? 1 : 0})">✎ Edit</button>`;
 
             document.getElementById('viewPatientDischargeCore').innerHTML = data.core10_discharge
-                ? '<span class="core10-badge completed">✓ Completed at Discharge</span>'
-                : '<span class="core10-badge pending">✗ Not Completed at Discharge</span>';
+                ? '<span class="core10-badge completed">✓ Completed </span>'
+                : '<span class="core10-badge pending">✗ Not Completed </span>';
             document.getElementById('viewPatientDischargeCore').innerHTML +=
                 ` <button class="btn-core10-edit" onclick="editDischargedCore10('discharge', ${patientId}, ${data.core10_discharge ? 1 : 0})">✎ Edit</button>`;
         })
@@ -811,16 +811,16 @@ function editDischargedCore10(type, patientId, currentValue) {
             body: JSON.stringify(body)
         });
         const data = await response.json();
-     if (data.success) {
-    showToast('CORE-10 updated successfully');
+    if (data.success) {
+    showToast('CORE-10 updated successfully (Discharged Patients)');
 
     // Update modal badge immediately
     const spanId = type === 'admission' ? 'viewPatientAdmissionCore' : 'viewPatientDischargeCore';
     const span = document.getElementById(spanId);
     const badgeClass = completed ? 'completed' : 'pending';
     const badgeText = type === 'admission'
-        ? (completed ? '✓ Completed at Admission' : '✗ Not Completed at Admission')
-        : (completed ? '✓ Completed at Discharge' : '✗ Not Completed at Discharge');
+        ? (completed ? '✓ Completed ' : '✗ Not Completed ')
+        : (completed ? '✓ Completed ' : '✗ Not Completed ');
     span.innerHTML = `<span class="core10-badge ${badgeClass}">${badgeText}</span>
         <button class="btn-core10-edit" onclick="editDischargedCore10('${type}', ${patientId}, ${completed})">✎ Edit</button>`;
 

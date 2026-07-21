@@ -2864,9 +2864,9 @@ select:invalid {
                 <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                 <input type="hidden" name="patient_id" id="dischargePatientId">
                 
-                <div class="form-group">
+              <div class="form-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" name="core10_discharge" checked> CORE-10 completed at discharge
+                        <input type="checkbox" name="core10_discharge"> CORE-10 completed at discharge
                     </label>
                 </div>
 

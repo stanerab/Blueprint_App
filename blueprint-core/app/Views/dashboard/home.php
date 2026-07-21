@@ -2857,7 +2857,7 @@ select:invalid {
     <!-- CHANGE ROOM MODAL -->
     <div id="changeRoomModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h2><i class="bi bi-door-open"></i> Change Room</h2><button class="modal-close" onclick="closeChangeRoomModal()">✕</button></div>
+            <div class="modal-header"><h2><i class="bi bi-door-open"></i> Transfer Room</h2><button class="modal-close" onclick="closeChangeRoomModal()">✕</button></div>
             <form id="changeRoomForm" onsubmit="submitChangeRoom(event)"><input type="hidden" name="csrf_token" value="<?= csrf_token() ?>"><input type="hidden" name="patient_id" id="changeRoomPatientId"><div class="form-group"><label>Ward</label><input type="text" id="changeRoomWard" readonly></div><div class="form-group"><label>New Room Number</label><select name="room_number" id="changeRoomSelect" required><option value="">Select Room</option></select></div><div class="form-group"><label>Reason (optional)</label><textarea name="reason" rows="2" placeholder="e.g., Clinical need, patient request..."></textarea></div><div class="modal-actions"><button type="button" onclick="closeChangeRoomModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Update Room</button></div></form>
         </div>
     </div>
@@ -2912,7 +2912,7 @@ select:invalid {
             <div style="display:flex; gap:0.5rem; margin-left:auto; align-items:center;">
             <button class="btn-primary" onclick="openSessionModalFromProfile()">+ Add Session</button>
             <button class="btn-secondary" onclick="openChangeRoomModal()">Change Room</button>
-            <button class="btn-secondary" id="changeWardBtn" onclick="openChangeWardModal()" style="display:none;">Change Ward</button>
+            <button class="btn-secondary" id="changeWardBtn" onclick="openChangeWardModal()" style="display:none;">Transfer Ward</button>
             <button class="btn-danger" onclick="openDischargeModal()">Discharge Patient</button>
             </div>
         </div>

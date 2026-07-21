@@ -691,8 +691,16 @@ body.modal-open {
 #groupSessionModal .modal-content::-webkit-scrollbar,
 #singleSessionModal .modal-content::-webkit-scrollbar,
 #groupSessionDetailsModal .modal-content::-webkit-scrollbar,
-#editSessionModal .modal-content::-webkit-scrollbar {
+#editSessionModal .modal-content::-webkit-scrollbar,
+#changeWardModal .modal-content::-webkit-scrollbar {
     display: none;
+}
+
+#changeWardModal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* IE/Edge */
 }
 
 #editSessionModal .modal-content {
@@ -2911,7 +2919,7 @@ select:invalid {
             <button class="modal-close" onclick="closePatientDetailsModal()">✕</button>
             <div style="display:flex; gap:0.5rem; margin-left:auto; align-items:center;">
             <button class="btn-primary" onclick="openSessionModalFromProfile()">+ Add Session</button>
-            <button class="btn-secondary" onclick="openChangeRoomModal()">Change Room</button>
+            <button class="btn-secondary" onclick="openChangeRoomModal()">Transfer Room</button>
             <button class="btn-secondary" id="changeWardBtn" onclick="openChangeWardModal()" style="display:none;">Transfer Ward</button>
             <button class="btn-danger" onclick="openDischargeModal()">Discharge Patient</button>
             </div>
@@ -3210,12 +3218,10 @@ select:invalid {
 </div>
 
     <!-- CHANGE WARD MODAL -->
-
-    <!-- CHANGE WARD MODAL -->
 <div id="changeWardModal" class="modal" style="z-index:1100;">
     <div class="modal-content" style="max-width:480px;">
         <div class="modal-header">
-            <h2><i class="bi bi-arrow-left-right"></i> Change Patient Ward</h2>
+            <h2><i class="bi bi-arrow-left-right"></i> Transfer Patient Ward</h2>
             <button class="modal-close" onclick="closeChangeWardModal()">✕</button>
         </div>
         <form id="changeWardForm" onsubmit="submitWardTransfer(event)">

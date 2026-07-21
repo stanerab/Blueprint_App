@@ -2816,7 +2816,7 @@ select:invalid {
         <option value="dna">DNA</option>
     </select>
 </div>
-            <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" value="1"> <i class="bi bi-journal-text"></i> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" value="1"> <i class="bi bi-graph-up"></i> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" value="1"> <i class="bi bi-check-circle"></i> All Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
+            <div class="form-group"><label>Task List</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" value="1"> <i class="bi bi-journal-text"></i> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" value="1"> <i class="bi bi-graph-up"></i> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" value="1"> <i class="bi bi-check-circle"></i> All Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
             <div class="form-group"><label>Session Notes</label><textarea name="notes" rows="3" placeholder="Document session..."></textarea></div>
             <div class="modal-actions"><button type="button" onclick="closeSessionModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Save Session</button></div>
         </form>
@@ -2839,7 +2839,7 @@ select:invalid {
         <option value="dna">DNA</option>
     </select>
 </div>
-                <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" id="editSessionCarenotes" value="1"> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" id="editSessionTracker" value="1"> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" id="editSessionTasks" value="1"> All Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
+                <div class="form-group"><label>Task List</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" id="editSessionCarenotes" value="1"> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" id="editSessionTracker" value="1"> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" id="editSessionTasks" value="1"> All Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
                 <div class="form-group"><label>Session Notes</label><textarea name="notes" id="editSessionNotes" rows="4"></textarea></div>
                 <div class="modal-actions"><button type="button" onclick="closeEditSessionModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Update Session</button></div>
             </form>
@@ -3011,7 +3011,7 @@ select:invalid {
                 <div class="detail-group"><label>Date & Time</label><div class="detail-value" id="sessionDetailDatetime">—</div></div>
                 <div class="detail-group"><label>Ward</label><div class="detail-value" id="sessionDetailWard">—</div></div>
                 <div class="detail-group"><label>Room</label><div class="detail-value" id="sessionDetailRoom">—</div></div>
-                <div class="detail-group"><label>Components Completed</label><div class="detail-value" id="sessionDetailComponents">—</div></div>
+                <div class="detail-group"><label>Task List Completed</label><div class="detail-value" id="sessionDetailComponents">—</div></div>
                 <div class="detail-group"><label>Session Status</label><div class="detail-value" id="sessionDetailStatus">—</div></div>
                 <div class="detail-group"><label>Session Notes</label><div class="detail-value notes-content" id="sessionDetailNotes">—</div></div>
             </div>

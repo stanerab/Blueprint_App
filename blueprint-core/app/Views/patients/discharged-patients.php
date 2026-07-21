@@ -797,9 +797,9 @@ function editDischargedCore10(type, patientId, currentValue) {
     const endpoint = type === 'admission'
         ? '<?= url('patients/update-core10') ?>'
         : '<?= url('patients/update-discharge-core10') ?>';
-    const body = type === 'admission'
-        ? { patient_id: patientId, core10_admission: completed, csrf_token: '<?= csrf_token() ?>' }
-        : { patient_id: patientId, core10_discharge: completed, csrf_token: '<?= csrf_token() ?>' };
+ const body = type === 'admission'
+        ? { patient_id: patientId, core10_admission: completed, csrf_token: '<?= csrf_token() ?>', source: 'discharged' }
+        : { patient_id: patientId, core10_discharge: completed, csrf_token: '<?= csrf_token() ?>', source: 'discharged' };
 
     saveBtn.textContent = 'Saving...';
     saveBtn.disabled = true;

@@ -314,7 +314,7 @@ $grouped = $grouped ?? [
                         <tbody>
                             <?php foreach ($sessionsList as $s): ?>
                                 <tr class="session-row" data-session-id="<?= $s->id ?>" data-ward="<?= strtolower($s->ward) ?>"
-                                    data-search="<?= strtolower($s->initials . ' ' . $s->room_number . ' ' . $s->ward) ?>">
+                                    data-search="<?= strtolower($s->initials) ?>">
                                     <td><strong><?= e($s->initials) ?></strong></td>
 <td><?= date('d M Y H:i', strtotime($s->datetime)) ?></td>
 <td><?= e($s->room_number) ?></td>
@@ -402,19 +402,22 @@ function restoreSession(sessionId, ward) {
         if (data.success) {
             const row = document.querySelector(`.session-row[data-session-id="${sessionId}"]`);
             if (row) {
+                const section = row.closest('.ward-section');
                 row.remove();
-                const tbody = row.closest('tbody');
-                if (tbody && tbody.children.length === 0) {
-                    const section = row.closest('.ward-section');
+
+                const tbody = section.querySelector('tbody');
+                if (tbody && tbody.querySelectorAll('.session-row').length === 0) {
                     const card = section.querySelector('.sessions-card');
+                    if (card) card.remove();
                     const emptyDiv = document.createElement('div');
                     emptyDiv.className = 'empty-state';
-                    emptyDiv.innerHTML = '<p>No archived sessions in ' + section.dataset.ward + '</p>';
-                    card.remove();
+                    emptyDiv.innerHTML = '<p>No archived sessions in ' + section.dataset.ward + ' ward</p>';
                     section.appendChild(emptyDiv);
                 }
             }
-            showToast('Session restored successfully', false);
+            showToast('Session restored successfully');
+            // Re-run search so counts and visibility stay accurate
+            document.getElementById('searchInput').dispatchEvent(new Event('input'));
         } else {
             showToast(data.error || 'Failed to restore session', true);
         }
@@ -453,19 +456,22 @@ function deleteSession(sessionId, ward) {
         if (data.success) {
             const row = document.querySelector(`.session-row[data-session-id="${sessionId}"]`);
             if (row) {
+                const section = row.closest('.ward-section');
                 row.remove();
-                const tbody = row.closest('tbody');
-                if (tbody && tbody.children.length === 0) {
-                    const section = row.closest('.ward-section');
+
+                const tbody = section.querySelector('tbody');
+                if (tbody && tbody.querySelectorAll('.session-row').length === 0) {
                     const card = section.querySelector('.sessions-card');
+                    if (card) card.remove();
                     const emptyDiv = document.createElement('div');
                     emptyDiv.className = 'empty-state';
-                    emptyDiv.innerHTML = '<p>No archived sessions in ' + section.dataset.ward + '</p>';
-                    card.remove();
+                    emptyDiv.innerHTML = '<p>No archived sessions in ' + section.dataset.ward + ' ward</p>';
                     section.appendChild(emptyDiv);
                 }
             }
-            showToast('Session permanently deleted', false);
+            showToast('Session permanently deleted');
+            // Re-run search so counts and visibility stay accurate
+            document.getElementById('searchInput').dispatchEvent(new Event('input'));
         } else {
             showToast(data.error || 'Failed to delete session', true);
         }
@@ -484,21 +490,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let activeWard = 'All';
 
-    function filterByWard() {
-        sections.forEach(section => {
-            const ward = section.dataset.ward;
-            section.style.display = (activeWard === 'All' || ward === activeWard) ? '' : 'none';
-        });
-        applySearch();
-    }
-
-function applySearch() {
+    function applySearch() {
         const term = searchInput.value.toLowerCase().trim();
         let totalVisible = 0;
 
         sections.forEach(section => {
             const ward = section.dataset.ward;
-            const wardVisible = (activeWard === 'All' || ward === activeWard);
+            const wardVisible = activeWard === 'All' || ward === activeWard;
 
             if (!wardVisible) {
                 section.style.display = 'none';
@@ -508,9 +506,9 @@ function applySearch() {
             let visibleRows = 0;
             const rows = section.querySelectorAll('.session-row');
 
-            rows.forEach(row => {
-                const searchText = row.getAttribute('data-search') || '';
-                const match = term === '' || searchText.includes(term);
+         rows.forEach(row => {
+                const initials = row.getAttribute('data-search') || '';
+                const match = term === '' || initials === term || initials.startsWith(term);
                 row.style.display = match ? '' : 'none';
                 if (match) visibleRows++;
             });
@@ -532,6 +530,14 @@ function applySearch() {
         } else {
             noResults.style.display = 'none';
         }
+    }
+
+    function filterByWard() {
+        sections.forEach(section => {
+            const ward = section.dataset.ward;
+            section.style.display = (activeWard === 'All' || ward === activeWard) ? '' : 'none';
+        });
+        applySearch();
     }
 
     tabs.forEach(tab => {

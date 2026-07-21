@@ -722,16 +722,18 @@ public function discharge()
         $stmt = $db->prepare("UPDATE patients SET core10_admission = ? WHERE id = ?");
         $result = $stmt->execute([$core10Admission, $patientId]);
 
-        if ($result) {
-       ActivityLog::create([
-    'action_type' => 'core10_updated',
- 'description' => 'Updated CORE-10 admission status for patient '
-    . $patient->initials .
-    ' to ' .
-    ($core10Admission ? 'Completed' : 'Pending'),
-    'patient_id' => $patient->id,
-    'ward' => $patient->ward
-]);
+    if ($result) {
+            $source = trim($input['source'] ?? '');
+            $prefix = $source === 'discharged' ? 'Discharged Patients: ' : '';
+            ActivityLog::create([
+                'action_type' => 'core10_updated',
+                'description' => $prefix . 'Updated CORE-10 admission status for patient '
+                    . $patient->initials
+                    . ' to '
+                    . ($core10Admission ? 'Completed' : 'Pending'),
+                'patient_id'  => $patient->id,
+                'ward'        => $patient->ward
+            ]);
 
             if ($isAjax) {
                 header('Content-Type: application/json');
@@ -791,16 +793,18 @@ public function updateDischargeCore10()
     $stmt = $db->prepare("UPDATE patients SET core10_discharge = ? WHERE id = ?");
     $result = $stmt->execute([$core10Discharge, $patientId]);
 
-    if ($result) {
-    ActivityLog::create([
-    'action_type' => 'core10_updated',
- 'description' => 'Updated CORE-10 discharge status for patient '
-    . $patient->initials .
-    ' to ' .
-    ($core10Discharge ? 'Completed' : 'Pending'),
-    'patient_id' => $patientId,
-    'ward' => $patient->ward
-]);
+  if ($result) {
+        $source = trim($input['source'] ?? '');
+        $prefix = $source === 'discharged' ? 'Discharged Patients: ' : '';
+        ActivityLog::create([
+            'action_type' => 'core10_updated',
+            'description' => $prefix . 'Updated CORE-10 discharge status for patient '
+                . $patient->initials
+                . ' to '
+                . ($core10Discharge ? 'Completed' : 'Pending'),
+            'patient_id'  => $patientId,
+            'ward'        => $patient->ward
+        ]);
 
         if ($isAjax) {
             header('Content-Type: application/json');

@@ -2613,7 +2613,7 @@ select:invalid {
                                 data-session-carenotes="<?= $session->carenotes_completed ? 1 : 0 ?>"
                                 data-session-tracker="<?= $session->tracker_completed ? 1 : 0 ?>"
                                 data-session-tasks="<?= $session->tasks_completed ? 1 : 0 ?>"
-                                data-session-notes="<?= addslashes($session->notes ?? '') ?>"
+                                data-session-notes="<?= htmlspecialchars($session->notes ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                 data-session-status="<?= htmlspecialchars($session->status ?? 'offered') ?>">
                                 <div class="session-info">
                                     <span class="session-patient"><?= htmlspecialchars($session->patient_initials ?? '') ?></span>
@@ -4427,11 +4427,11 @@ currentSingleSession.status = document.getElementById('editSessionStatus').value
 
     container.innerHTML = '<div class="gs-loading"><i class="bi bi-arrow-repeat"></i> Loading patients...</div>';
 
-    // Detect if session date is in the future
+ // Detect if session datetime is in the future (compare full datetime, not just date)
     const selectedDatetime = document.getElementById('groupSessionDatetime').value;
-    const selectedDate = selectedDatetime ? selectedDatetime.substring(0, 10) : '';
-    const today = new Date().toISOString().substring(0, 10);
-    const isFuture = selectedDate > today;
+    const selectedMoment = selectedDatetime ? new Date(selectedDatetime) : null;
+    const now = new Date();
+    const isFuture = selectedMoment ? selectedMoment > now : false;
 
     try {
         const results = await Promise.all(
@@ -4471,10 +4471,10 @@ currentSingleSession.status = document.getElementById('editSessionStatus').value
                         <th style="width: 15%">Ward</th>
                         <th style="width: 10%">Room</th>
                         <th style="width: 15%">Patient</th>
-                        ${isFuture ? 
-                            '<th colspan="3" style="text-align:center;color:#94a3b8;font-style:italic;font-weight:400;">Attendance available on session day</th>' : 
-                            '<th style="width: 12%; text-align:center;">Attended</th><th style="width: 12%; text-align:center;">Declined</th><th style="width: 12%; text-align:center;">DNA</th>'
-                        }
+                      ${isFuture ? 
+            '<th colspan="3" style="text-align:center;color:#94a3b8;font-style:italic;font-weight:400;">Attendance can be marked at scheduled time</th>' : 
+            '<th style="width: 12%; text-align:center;">Attended</th><th style="width: 12%; text-align:center;">Declined</th><th style="width: 12%; text-align:center;">DNA</th>'
+        }
                         <th style="width: 24%">Notes</th>
                     </tr>
                 </thead>
@@ -4566,9 +4566,9 @@ currentSingleSession.status = document.getElementById('editSessionStatus').value
     if (!selectedGroupType) { showMessage('Please select a group type', true); return; }
     if (!datetime) { showMessage('Please select a date and time', true); return; }
 
-    const selectedDate = datetime.substring(0, 10);
-    const today = new Date().toISOString().substring(0, 10);
-    const isFuture = selectedDate > today;
+const selectedMoment = datetime ? new Date(datetime) : null;
+    const now = new Date();
+    const isFuture = selectedMoment ? selectedMoment > now : false;
 
     await new Promise(r => setTimeout(r, 50));
 
@@ -4677,15 +4677,17 @@ const response = await fetch('<?= url('group-sessions/list-json') ?>');
             const sessionDate = new Date(s.session_date + 'T' + s.session_time);
             const formattedDate = sessionDate.toLocaleDateString('en-GB');
             const formattedTime = sessionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
+            console.log('GROUP SESSION DEBUG:', { id: s.id, status: s.status, date: s.session_date, time: s.session_time });
             html += `
                 <div class="group-session-card" data-id="${s.id}">
                     <div class="group-session-header">
     <strong class="group-session-type">${escapeHtml(s.group_type)}</strong>
     <div style="display:flex;align-items:center;gap:0.5rem;">
-        ${s.status === 'scheduled' ? 
+      ${s.status === 'scheduled' ? 
             '<span style="background:#ede9fe;color:#6d28d9;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:2rem;">Scheduled</span>' : 
-            '<span style="background:#d1fae5;color:#065f46;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:2rem;">Completed</span>'
+            s.status === 'completed' ?
+            '<span style="background:#d1fae5;color:#065f46;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:2rem;">Completed</span>' :
+            '<span style="background:#f1f5f9;color:#64748b;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:2rem;">Pending</span>'
         }
         <span class="group-session-datetime">${formattedDate} ${formattedTime}</span>
     </div>
@@ -4752,13 +4754,23 @@ async function viewGroupSessionDetails(sessionId) {
 
 const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
 const sessionDate = data.session_date;
-const today = new Date().toISOString().substring(0, 10);
+const sessionTime = data.session_time || '00:00:00';
+const sessionMoment = new Date(sessionDate + 'T' + sessionTime);
+const now = new Date();
 const isScheduled = data.status === 'scheduled';
-const canComplete = isScheduled && sessionDate <= today;
+const canComplete = isScheduled && sessionMoment <= now;
+console.log('DETAILS DEBUG:', { status: data.status, sessionMoment: sessionMoment.toString(), now: now.toString(), isScheduled, canComplete });
 
 if (isScheduled && !canComplete) {
     // Future scheduled session — show patient list without attendance
-    let attHtml = '<table class="gs-register"><thead><tr><th>Ward</th><th>Room</th><th>Patient</th><th>Status</th></tr></thead><tbody>';
+    const sessionTimeFormatted = sessionMoment.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const sessionDateFormatted = sessionMoment.toLocaleDateString('en-GB');
+    let attHtml = `
+        <div style="background:#ede9fe;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;color:#6d28d9;">
+            <i class="bi bi-clock"></i> Attendance can be marked at the scheduled time — ${sessionDateFormatted} at ${sessionTimeFormatted}
+        </div>
+    `;
+    attHtml += '<table class="gs-register"><thead><tr><th>Ward</th><th>Room</th><th>Patient</th><th>Status</th></tr></thead><tbody>';
     (data.attendance || []).forEach(a => {
         const colour = wardColour[a.ward] || '#94a3b8';
         attHtml += `
@@ -4766,7 +4778,7 @@ if (isScheduled && !canComplete) {
                 <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
                 <td>Bed ${a.room_number}</td>
                 <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
-                <td style="color:#94a3b8;font-size:0.8rem;">Attendance available on session day</td>
+                <td style="color:#94a3b8;font-size:0.8rem;">Pending</td>
             </tr>
         `;
     });

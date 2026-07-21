@@ -9,12 +9,12 @@ echo "<h1>Blueprint Setup</h1>";
 
 try {
     $db = Database::getInstance();
-    echo "✅ Database connected<br>";
+    echo " Database connected<br>";
     
     // Check if users table exists
     $stmt = $db->query("SHOW TABLES LIKE 'users'");
     if ($stmt->rowCount() == 0) {
-        echo "❌ Users table not found. Running schema...<br>";
+        echo " Users table not found. Running schema...<br>";
         
         // Read schema file
         $schema = file_get_contents('../database/schema.sql');
@@ -27,9 +27,9 @@ try {
                 $db->exec($query);
             }
         }
-        echo "✅ Schema executed<br>";
+        echo " Schema executed<br>";
     } else {
-        echo "✅ Users table exists<br>";
+        echo " Users table exists<br>";
     }
     
     // Check for admin user
@@ -37,7 +37,7 @@ try {
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$admin) {
-        echo "❌ Admin user not found. Creating admin user...<br>";
+        echo " Admin user not found. Creating admin user...<br>";
         
         // Create admin user
         $hash = password_hash('admin123', PASSWORD_DEFAULT);
@@ -49,20 +49,20 @@ try {
         $result = $stmt->execute(['admin', 'admin@blueprint.app', $hash, 'Administrator', 'admin']);
         
         if ($result) {
-            echo "✅ Admin user created successfully!<br>";
+            echo " Admin user created successfully!<br>";
             echo "Username: admin<br>";
             echo "Password: admin123<br>";
         } else {
             echo "❌ Failed to create admin user<br>";
         }
     } else {
-        echo "✅ Admin user exists<br>";
+        echo " Admin user exists<br>";
         
         // Reset password just in case
         $hash = password_hash('admin123', PASSWORD_DEFAULT);
         $stmt = $db->prepare("UPDATE users SET password_hash = ? WHERE username = 'admin'");
         $stmt->execute([$hash]);
-        echo "✅ Admin password reset to 'admin123'<br>";
+        echo " Admin password reset to 'admin123'<br>";
     }
     
     // Show all users
@@ -90,6 +90,6 @@ try {
     echo '<a href="' . url('login') . '">Go to Login Page</a>';
     
 } catch (Exception $e) {
-    echo "❌ Error: " . $e->getMessage() . "<br>";
+    echo " Error: " . $e->getMessage() . "<br>";
     echo "Check your database configuration in app/config/Database.php";
 }

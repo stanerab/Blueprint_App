@@ -722,11 +722,11 @@ async function loadIndividualReport(start, end, ward) {
     }
 
     // Build period label for ward headings
-  const startDate = new Date(start);
-const endDate   = new Date(end);
-const startLabel = startDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
-const endLabel   = endDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
-const periodLabel = startLabel === endLabel ? startLabel : startLabel + ' – ' + endLabel;
+const startDate  = new Date(start);
+    const endDate    = new Date(end);
+    const startFmt   = startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const endFmt     = endDate.toLocaleDateString('en-GB',   { day: 'numeric', month: 'long', year: 'numeric' });
+    const periodLabel = startFmt === endFmt ? startFmt : startFmt + ' – ' + endFmt;
 
     const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
     let html = '';
@@ -1005,11 +1005,14 @@ window.onclick = e => {
             const isToday = today.getFullYear() === pickerYear && today.getMonth() === pickerMonth && today.getDate() === d;
             const isSelected = selectedVal === dateStr;
 
+        const todayStr = new Date().toISOString().substring(0, 10);
+            const isFuture = dateStr > todayStr;
             let bg = 'transparent', color = '#1e293b', fw = '400';
-            if (isSelected) { bg = '#1e3a8a'; color = 'white'; fw = '600'; }
+            if (isFuture) { color = '#cbd5e1'; }
+            else if (isSelected) { bg = '#1e3a8a'; color = 'white'; fw = '600'; }
             else if (isToday) { bg = '#e8f0fe'; color = '#1e3a8a'; fw = '600'; }
 
-            html += `<div onclick="window._dpSelect('${dateStr}')" style="text-align:center;padding:5px 2px;border-radius:0.35rem;cursor:pointer;font-size:0.8rem;background:${bg};color:${color};font-weight:${fw};" onmouseover="if('${isSelected}'!='true')this.style.background='#f1f5f9'" onmouseout="if('${isSelected}'!='true')this.style.background='${isSelected?'#1e3a8a':'transparent'}'">${d}</div>`;
+            html += `<div onclick="window._dpSelect('${dateStr}')" style="text-align:center;padding:5px 2px;border-radius:0.35rem;cursor:${isFuture ? 'not-allowed' : 'pointer'};font-size:0.8rem;background:${bg};color:${color};font-weight:${fw};opacity:${isFuture ? '0.4' : '1'};" ${!isFuture ? `onmouseover="if('${isSelected}'!='true')this.style.background='#f1f5f9'" onmouseout="if('${isSelected}'!='true')this.style.background='${isSelected?'#1e3a8a':'transparent'}'"` : ''}>${d}</div>`;
         }
 
         html += `</div>`;
@@ -1066,8 +1069,10 @@ window._dpNext = function(e) {
     renderPicker();
 };
 
-    window._dpSelect = function(dateStr) {
+window._dpSelect = function(dateStr) {
         if (!activeInput) return;
+        const today = new Date().toISOString().substring(0, 10);
+        if (dateStr > today) return; // block future dates silently
         inputValues[activeInput.id] = dateStr;
         const [y, m, d] = dateStr.split('-');
         activeInput.value = `${d}/${m}/${y}`;

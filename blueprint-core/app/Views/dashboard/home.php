@@ -2628,7 +2628,7 @@ select:invalid {
                                     </div>
                                 </div>
                                 <div class="session-actions">
-                                    <button type="button" onclick="event.stopPropagation(); editSession(<?= $session->id ?>, <?= $session->patient_id ?>, '<?= htmlspecialchars($session->datetime) ?>', <?= $session->carenotes_completed ? 1 : 0 ?>, <?= $session->tracker_completed ? 1 : 0 ?>, <?= $session->tasks_completed ? 1 : 0 ?>, '<?= addslashes($session->notes) ?>', '<?= $session->status ?? 'offered' ?>')" class="action-icon" data-tooltip="Edit session"><i class="bi bi-pencil"></i></button>
+<button type="button" onclick="event.stopPropagation(); editSessionFromCard(this)" class="action-icon" data-tooltip="Edit session"><i class="bi bi-pencil"></i></button>
                                     <button type="button" onclick="event.stopPropagation(); archiveSession(<?= $session->id ?>, '<?= $session->ward ?>')" class="action-icon archive" data-tooltip="Archive session"><i class="bi bi-archive"></i></button>
                                     <button type="button" onclick="event.stopPropagation(); deleteSession(<?= $session->id ?>, '<?= $session->ward ?>', event)" class="action-icon delete" title="Delete session"><i class="bi bi-trash"></i></button>
                                 </div>
@@ -3780,6 +3780,20 @@ function filterCalDayList() {
     });
 }
 
+function editSessionFromCard(btn) {
+    const card = btn.closest('.session-card');
+    if (!card) return;
+    const id       = card.dataset.sessionId;
+    const patientId = card.dataset.patientId;
+    const datetime  = card.dataset.sessionDatetime;
+    const carenotes = parseInt(card.dataset.sessionCarenotes);
+    const tracker   = parseInt(card.dataset.sessionTracker);
+    const tasks     = parseInt(card.dataset.sessionTasks);
+    const notes     = card.dataset.sessionNotes || '';
+    const status    = card.dataset.sessionStatus || 'offered';
+    editSession(id, patientId, datetime, carenotes, tracker, tasks, notes, status);
+}
+
 function editSession(id, patient_id, datetime, carenotes, tracker, tasks, notes, status) {
     if (document.getElementById('patientDetailsModal').style.display === 'flex') {
         pushModal('patientDetailsModal');
@@ -3987,13 +4001,37 @@ document.getElementById('sessionDetailStatus').innerHTML = `
             const response = await fetch('<?= url('patients/change-room') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
             const data = await response.json();
              if (data.success) {
-    showMessage(data.message || 'Patient transferred successfully');
-    closeChangeRoomModal();
-    // Refresh patient summary in modal if open
-    if (currentViewPatientId) {
-        setTimeout(() => loadPatientSummary(currentViewPatientId), 150);
-    }
-}          
+                showMessage(data.message || 'Room updated successfully');
+                closeChangeRoomModal();
+
+                // Refresh patient summary in modal
+                if (currentViewPatientId) {
+                    setTimeout(() => loadPatientSummary(currentViewPatientId), 150);
+                }
+
+                // Update patient dropdown option label live
+                const newRoom = formData.get('room_number');
+                const patientId = document.getElementById('changeRoomPatientId').value;
+                const opt = document.querySelector(`#patientSelect option[value="${patientId}"]`);
+                if (opt && newRoom) {
+                    const initialsMatch = opt.textContent.match(/–\s*([A-Z]+)$/);
+                    const initials = initialsMatch ? initialsMatch[1] : opt.textContent;
+                    opt.textContent = `Room ${newRoom} – ${initials}`;
+                    opt.setAttribute('value', patientId);
+                }
+// Update allActivePatients room number
+                const ap = allActivePatients.find(p => p.id == patientId);
+                if (ap && newRoom) ap.room_number = parseInt(newRoom);
+
+                // Update currentSingleSession room if it belongs to this patient
+                if (currentSingleSession && currentSingleSession.patient_id == patientId && newRoom) {
+                    currentSingleSession.room_number = newRoom;
+                    // If single session modal is open, refresh its display
+                    if (document.getElementById('singleSessionModal').style.display === 'flex') {
+                        displaySingleSession(currentSingleSession, currentSingleSession.initials);
+                    }
+                }
+            }        
             else showMessage(data.error || 'Failed to change room', true);
         } catch (err) { showMessage('Network error', true); console.error(err); }
     }
@@ -5222,16 +5260,106 @@ async function submitWardTransfer(event) {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         const data = await response.json();
-        if (data.success) {
-           showMessage(data.message || 'Patient transferred successfully');
+      if (data.success) {
+            showMessage(data.message || 'Patient transferred successfully');
             closeChangeWardModal();
+
             if (currentViewPatientId) {
                 setTimeout(() => {
                     loadPatientSummary(currentViewPatientId);
                     loadWardTransferHistory(currentViewPatientId);
                 }, 150);
             }
-            setTimeout(() => location.reload(), 800);
+
+            // Move patient option to correct ward optgroup in dropdown
+            const patientId  = document.getElementById('changeWardPatientId').value;
+            const fromWard   = document.getElementById('changeWardFrom').value;
+            const toWard     = document.getElementById('changeWardTo').value;
+            const newRoom    = formData.get('room_number');
+            const select     = document.getElementById('patientSelect');
+            const opt        = select.querySelector(`option[value="${patientId}"]`);
+
+            if (opt && toWard && newRoom) {
+                // Update label
+                const initialsMatch = opt.textContent.match(/–\s*([A-Z]+)$/);
+                const initials = initialsMatch ? initialsMatch[1] : opt.textContent;
+                opt.textContent = `Room ${newRoom} – ${initials}`;
+                opt.setAttribute('data-ward', toWard.toLowerCase());
+
+                // Move to correct optgroup
+                const targetGroup = Array.from(select.querySelectorAll('optgroup'))
+                    .find(g => g.label === `${toWard} Ward`);
+                if (targetGroup) {
+                    targetGroup.appendChild(opt);
+                } else {
+                    // Optgroup doesn't exist yet (ward had no patients) — create it
+                    const newGroup = document.createElement('optgroup');
+                    newGroup.label = `${toWard} Ward`;
+                    newGroup.appendChild(opt);
+                    select.appendChild(newGroup);
+                }
+
+                // Remove empty optgroup
+                const fromGroup = Array.from(select.querySelectorAll('optgroup'))
+                    .find(g => g.label === `${fromWard} Ward`);
+                if (fromGroup && fromGroup.querySelectorAll('option').length === 0) {
+                    fromGroup.remove();
+                }
+            }
+
+            // Update stat pills
+            if (fromWard && toWard) {
+                const pills = document.querySelectorAll('.stat-pill');
+                pills.forEach(pill => {
+                    const text = pill.innerText;
+                    if (text.includes(fromWard)) {
+                        const count = parseInt(text.match(/\d+/)?.[0] || 0);
+                        if (count > 0) pill.innerHTML = pill.innerHTML.replace(/\d+/, count - 1);
+                    }
+                    if (text.includes(toWard)) {
+                        const count = parseInt(text.match(/\d+/)?.[0] || 0);
+                        pill.innerHTML = pill.innerHTML.replace(/\d+/, count + 1);
+                    }
+                });
+            }
+
+          // Update allActivePatients ward + room
+            const ap = allActivePatients.find(p => p.id == patientId);
+            if (ap) {
+                ap.ward = toWard;
+                if (newRoom) ap.room_number = parseInt(newRoom);
+            }
+
+            // Update currentSingleSession if it belongs to this patient
+            if (currentSingleSession && currentSingleSession.patient_id == patientId) {
+                currentSingleSession.ward = toWard;
+                if (newRoom) currentSingleSession.room_number = newRoom;
+                if (document.getElementById('singleSessionModal').style.display === 'flex') {
+                    displaySingleSession(currentSingleSession, currentSingleSession.initials);
+                }
+            }
+
+            // Update today's session cards in DOM for this patient
+            document.querySelectorAll(`.session-card[data-patient-id="${patientId}"]`).forEach(card => {
+                card.dataset.sessionWard = toWard;
+                card.dataset.sessionRoom = newRoom || card.dataset.sessionRoom;
+                card.setAttribute('data-ward', toWard.toLowerCase());
+
+                // Update ward pill colour
+                const wardSpan = card.querySelector('.session-ward');
+                if (wardSpan) {
+                    wardSpan.className = `session-ward ward-${toWard.toLowerCase()}`;
+                    wardSpan.textContent = toWard;
+                }
+            });
+
+            // Hide Change Ward button if patient is now in a ward that can't transfer further
+            fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
+                .then(r => r.json())
+                .then(d => {
+                    const btn = document.getElementById('changeWardBtn');
+                    if (btn) btn.style.display = (d.ward === 'Manor' || d.ward === 'Lakeside') ? '' : 'none';
+                });
         } else {
             showMessage(data.error || 'Failed to transfer patient', true);
         }

@@ -2546,7 +2546,7 @@ select:invalid {
 
         <!-- Add Session – direct link (no dropdown) -->
         <a href="#" class="quick-action-card" onclick="openSessionModal(null, null); return false;">
-            <i class="bi bi-calendar-plus"></i><span>Add Single Session</span>
+            <i class="bi bi-calendar-plus"></i><span>Add 1:1 Session</span>
         </a>
 
     <a href="#" class="quick-action-card" onclick="openGroupSessionModal(); return false;">
@@ -2556,10 +2556,11 @@ select:invalid {
         <i class="bi bi-table"></i><span>View Group Sessions</span>
     </a>
 
-        <a href="<?= url('activities') ?>" class="quick-action-card"><i class="bi bi-activity"></i><span>Activity log</span></a>
         <a href="<?= url('sessions/archived') ?>" class="quick-action-card"><i class="bi bi-archive"></i><span>Archived Sessions</span></a>
+         <a href="<?= url('patients/discharged') ?>" class="quick-action-card"><i class="bi bi-box-arrow-right"></i><span>Discharged</span></a>
         <a href="<?= url('reports') ?>" class="quick-action-card"><i class="bi bi-bar-chart-line"></i><span>Reports</span></a>
-        <a href="<?= url('patients/discharged') ?>" class="quick-action-card"><i class="bi bi-box-arrow-right"></i><span>Discharged</span></a>
+         <a href="<?= url('activities') ?>" class="quick-action-card"><i class="bi bi-activity"></i><span>Activity log</span></a>
+       
         
     </div>
 
@@ -4934,8 +4935,46 @@ if (isScheduled && !canComplete) {
     document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x:auto;">${attHtml}</div>`;
 }
 
-   // Store for edit modal
+ // Store for edit modal
         _editGroupSessionData = data;
+
+        // Show or hide edit button based on whether scheduled time has passed
+      const editBtn = document.getElementById('editGroupSessionBtn');
+
+if (editBtn) {
+
+    const sessionMoment = new Date(
+        data.session_date + 'T' + (data.session_time || '00:00:00')
+    );
+
+    const now = new Date();
+
+    const scheduledTimeReached = sessionMoment <= now;
+
+    const attendanceCompleted =
+        Array.isArray(data.attendance) &&
+        data.attendance.length > 0 &&
+        data.attendance.every(a =>
+            a.attended || a.declined || a.dna
+        );
+
+    if (!scheduledTimeReached) {
+
+        // Future session
+        editBtn.style.display = 'none';
+
+    } else if (!attendanceCompleted) {
+
+        // Waiting for attendance
+        editBtn.style.display = 'none';
+
+    } else {
+
+        // Attendance completed
+        editBtn.style.display = '';
+
+    }
+}
 
         modal.style.display = 'flex';
         bringModalToFront('groupSessionDetailsModal');
@@ -4988,18 +5027,36 @@ const response = await fetch('<?= url('group-sessions/list-json') ?>');
 }
 
     async function completeGroupSession(sessionId) {
-    const rows = document.querySelectorAll('#completeAttendanceTable tbody tr[data-patient-id]');
-    const attendance = [];
-    rows.forEach(row => {
-        const patientId = row.getAttribute('data-patient-id');
-        const checkedRadio = row.querySelector(`input[name="complete_att_${patientId}"]:checked`);
-        const notesInput = row.querySelector(`input[name="complete_notes_${patientId}"]`);
-        attendance.push({
-            patient_id: patientId,
-            status: checkedRadio ? checkedRadio.value : 'attended',
-            notes: notesInput ? notesInput.value : ''
-        });
+ const rows = document.querySelectorAll('#completeAttendanceTable tbody tr[data-patient-id]');
+const attendance = [];
+let hasMissingAttendance = false;
+
+rows.forEach(row => {
+
+    const patientId = row.getAttribute('data-patient-id');
+    const checkedRadio = row.querySelector(`input[name="complete_att_${patientId}"]:checked`);
+    const notesInput = row.querySelector(`input[name="complete_notes_${patientId}"]`);
+
+    if (!checkedRadio) {
+        hasMissingAttendance = true;
+        return;
+    }
+
+    attendance.push({
+        patient_id: patientId,
+        status: checkedRadio.value,
+        notes: notesInput ? notesInput.value : ''
     });
+
+});
+
+if (hasMissingAttendance) {
+    showMessage(
+        'Please record attendance for every patient before submitting.',
+        true
+    );
+    return;
+}
 
     const formData = new FormData();
     formData.append('id', sessionId);
@@ -5069,6 +5126,18 @@ let _editGroupSessionData = null;
 function openEditGroupSessionModal() {
     if (!_editGroupSessionData) return;
     const data = _editGroupSessionData;
+
+    // Block editing if session is scheduled and time has not yet arrived
+    if (data.status === 'scheduled') {
+        const sessionMoment = new Date(data.session_date + 'T' + (data.session_time || '00:00:00'));
+        const now = new Date();
+        if (sessionMoment > now) {
+            const sessionTimeFormatted = sessionMoment.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            const sessionDateFormatted = sessionMoment.toLocaleDateString('en-GB');
+            showMessage(`This session cannot be edited until its scheduled time — ${sessionDateFormatted} at ${sessionTimeFormatted}`, true);
+            return;
+        }
+    }
 
     document.getElementById('editGroupSessionId').value = data.id;
     document.getElementById('editGroupType').value = data.group_type || '';

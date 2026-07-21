@@ -123,13 +123,30 @@ exit;
                 exit;
             }
 
-            $dt          = new \DateTime($rawDatetime);
+           $dt          = new \DateTime($rawDatetime);
             $sessionDate = $dt->format('Y-m-d');
             $sessionTime = $dt->format('H:i:s');
             $now         = new \DateTime();
             $status      = ($dt > $now) ? 'scheduled' : 'completed';
 
             $db = Database::getInstance();
+
+            // Block editing if session is still in the future
+            $existingStmt = $db->prepare('SELECT status, session_date, session_time FROM group_sessions WHERE id = ?');
+            $existingStmt->execute([$id]);
+            $existing = $existingStmt->fetch(\PDO::FETCH_OBJ);
+
+            if ($existing && $existing->status === 'scheduled') {
+                $existingMoment = new \DateTime($existing->session_date . 'T' . $existing->session_time);
+                if ($existingMoment > $now) {
+                    echo json_encode([
+                        'success' => false,
+                        'error'   => 'This session cannot be edited until its scheduled time — ' .
+                                     $existingMoment->format('d/m/Y') . ' at ' . $existingMoment->format('H:i')
+                    ]);
+                    exit;
+                }
+            }
 
             // Update session
             $db->prepare(

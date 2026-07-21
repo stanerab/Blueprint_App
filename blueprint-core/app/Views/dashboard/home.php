@@ -2624,7 +2624,7 @@ select:invalid {
                                         <span class="session-icons">
                                             <?= !empty($session->carenotes_completed) ? '<i class="bi bi-journal-text" title="CareNotes completed"></i>' : '' ?>
                                             <?= !empty($session->tracker_completed) ? '<i class="bi bi-graph-up" title="Tracker completed"></i>' : '' ?>
-                                            <?= !empty($session->tasks_completed) ? '<i class="bi bi-check-circle" title="Tasks completed"></i>' : '' ?>
+                                            <?= !empty($session->tasks_completed) ? '<i class="bi bi-check-circle" title="All Tasks completed"></i>' : '' ?>
                                         </span>
                                     </div>
                                 </div>
@@ -2816,7 +2816,7 @@ select:invalid {
         <option value="dna">DNA</option>
     </select>
 </div>
-            <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" value="1"> <i class="bi bi-journal-text"></i> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" value="1"> <i class="bi bi-graph-up"></i> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" value="1"> <i class="bi bi-check-circle"></i> Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
+            <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" value="1"> <i class="bi bi-journal-text"></i> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" value="1"> <i class="bi bi-graph-up"></i> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" value="1"> <i class="bi bi-check-circle"></i> All Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
             <div class="form-group"><label>Session Notes</label><textarea name="notes" rows="3" placeholder="Document session..."></textarea></div>
             <div class="modal-actions"><button type="button" onclick="closeSessionModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Save Session</button></div>
         </form>
@@ -2839,7 +2839,7 @@ select:invalid {
         <option value="dna">DNA</option>
     </select>
 </div>
-                <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" id="editSessionCarenotes" value="1"> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" id="editSessionTracker" value="1"> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" id="editSessionTasks" value="1"> Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
+                <div class="form-group"><label>Components</label><div style="display: flex; gap: 1rem;"><label class="checkbox-label"><input type="checkbox" name="carenotes" id="editSessionCarenotes" value="1"> CareNotes</label><label class="checkbox-label"><input type="checkbox" name="tracker" id="editSessionTracker" value="1"> Tracker</label><label class="checkbox-label"><input type="checkbox" name="tasks" id="editSessionTasks" value="1"> All Tasks</label></div><input type="hidden" name="carenotes" value="0"><input type="hidden" name="tracker" value="0"><input type="hidden" name="tasks" value="0"></div>
                 <div class="form-group"><label>Session Notes</label><textarea name="notes" id="editSessionNotes" rows="4"></textarea></div>
                 <div class="modal-actions"><button type="button" onclick="closeEditSessionModal()" class="btn-secondary">Cancel</button><button type="submit" class="btn-primary">Update Session</button></div>
             </form>
@@ -3487,7 +3487,7 @@ function closePatientDetailsModal() {
             .then(r => r.json())
             .then(data => {
                 if (!data.length) { container.innerHTML = '<div class="no-notes">No sessions recorded for this patient</div>'; return; }
-let html = '<table class="sessions-table"><thead><tr><th>Date & Time</th><th>Session Status</th><th>CareNotes</th><th>Tracker</th><th>Tasks</th><th>Notes</th><th>Actions</th></tr></thead><tbody>';          
+let html = '<table class="sessions-table"><thead><tr><th>Date & Time</th><th>Session Status</th><th>CareNotes</th><th>Tracker</th><th>All Tasks</th><th>Notes</th><th>Actions</th></tr></thead><tbody>';          
                 data.forEach(s => {
                     const date = new Date(s.datetime);
                     const formatted = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -3896,7 +3896,7 @@ function closeEditSessionModal() {
         const components = [
             { name: 'CareNotes', completed: session.carenotes_completed },
             { name: 'Tracker', completed: session.tracker_completed },
-            { name: 'Tasks', completed: session.tasks_completed }
+            { name: 'All Tasks', completed: session.tasks_completed }
         ];
         components.forEach(comp => {
             componentsHtml += `<span class="component-badge ${comp.completed ? 'completed' : 'pending'}">${comp.name}: ${comp.completed ? '✓ Completed' : '○ Pending'}</span>`;
@@ -4369,7 +4369,7 @@ sessionCard.dataset.sessionStatus = status;
                     iconsEl.innerHTML =
                         (carenotes ? '<i class="bi bi-journal-text" title="CareNotes completed"></i>' : '') +
                         (tracker ? '<i class="bi bi-graph-up" title="Tracker completed"></i>' : '') +
-                        (tasks ? '<i class="bi bi-check-circle" title="Tasks completed"></i>' : '');
+                        (tasks ? '<i class="bi bi-check-circle" title="All Tasks completed"></i>' : '');
                 }
             }
 

@@ -4073,6 +4073,9 @@ document.getElementById('sessionDetailStatus').innerHTML = `
         if (dateInput) {
             dateInput.value = new Date().toISOString().slice(0, 10);
         }
+
+    document.querySelector('input[name="core10_discharge"]').checked =
+    document.getElementById('viewPatientDischargeCore').textContent.includes('Completed');
         
         document.getElementById('dischargeModal').style.display = 'flex';
         bringModalToFront('dischargeModal');

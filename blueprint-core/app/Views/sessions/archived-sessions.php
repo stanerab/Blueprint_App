@@ -302,7 +302,7 @@ $grouped = $grouped ?? [
                         <thead>
                             <tr>
                             <th>Patient</th>
-                            <th>Date & Time</th>
+                            <th> Session Date & Time</th>
                             <th>Room</th>
                             <th>Status</th>
                             <th>CareNotes</th>

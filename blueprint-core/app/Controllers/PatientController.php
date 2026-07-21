@@ -725,7 +725,7 @@ public function discharge()
         if ($result) {
        ActivityLog::create([
     'action_type' => 'core10_updated',
-   'description' => 'Discharged Patients: Updated CORE-10 admission status for patient '
+ 'description' => 'Updated CORE-10 admission status for patient '
     . $patient->initials .
     ' to ' .
     ($core10Admission ? 'Completed' : 'Pending'),
@@ -794,10 +794,10 @@ public function updateDischargeCore10()
     if ($result) {
     ActivityLog::create([
     'action_type' => 'core10_updated',
-    'description' => 'Discharged Patients: Updated CORE-10 discharge status for patient '
-        . $patient->initials .
-        ' to ' .
-        ($core10Discharge ? 'Completed' : 'Pending'),
+ 'description' => 'Updated CORE-10 discharge status for patient '
+    . $patient->initials .
+    ' to ' .
+    ($core10Discharge ? 'Completed' : 'Pending'),
     'patient_id' => $patientId,
     'ward' => $patient->ward
 ]);

@@ -692,8 +692,16 @@ body.modal-open {
 #singleSessionModal .modal-content::-webkit-scrollbar,
 #groupSessionDetailsModal .modal-content::-webkit-scrollbar,
 #editSessionModal .modal-content::-webkit-scrollbar,
-#changeWardModal .modal-content::-webkit-scrollbar {
+#changeWardModal .modal-content::-webkit-scrollbar,
+#editGroupSessionModal .modal-content::-webkit-scrollbar {
     display: none;
+}
+
+#editGroupSessionModal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* IE/Edge */
 }
 
 #changeWardModal .modal-content {
@@ -2573,7 +2581,7 @@ select:invalid {
     </a>
 
         <a href="<?= url('sessions/archived') ?>" class="quick-action-card"><i class="bi bi-archive"></i><span>Archived Sessions</span></a>
-         <a href="<?= url('patients/discharged') ?>" class="quick-action-card"><i class="bi bi-box-arrow-right"></i><span>Discharged</span></a>
+         <a href="<?= url('patients/discharged') ?>" class="quick-action-card"><i class="bi bi-box-arrow-right"></i><span>Discharged Patients</span></a>
         <a href="<?= url('reports') ?>" class="quick-action-card"><i class="bi bi-bar-chart-line"></i><span>Reports</span></a>
          <a href="<?= url('activities') ?>" class="quick-action-card"><i class="bi bi-activity"></i><span>Activity log</span></a>
        

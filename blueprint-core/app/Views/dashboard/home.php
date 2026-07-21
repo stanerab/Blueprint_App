@@ -690,8 +690,16 @@ body.modal-open {
 #admitModal .modal-content::-webkit-scrollbar,
 #groupSessionModal .modal-content::-webkit-scrollbar,
 #singleSessionModal .modal-content::-webkit-scrollbar,
-#groupSessionDetailsModal .modal-content::-webkit-scrollbar {
-    width: 0px;
+#groupSessionDetailsModal .modal-content::-webkit-scrollbar,
+#editSessionModal .modal-content::-webkit-scrollbar {
+    display: none;
+}
+
+#editSessionModal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* IE/Edge */
 }
 
 /* ─────────────────────────────────────────────────────────

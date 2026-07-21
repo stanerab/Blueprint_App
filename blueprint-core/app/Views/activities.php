@@ -494,7 +494,8 @@
         case 'ward_transfer':           $icon = 'bi-arrow-left-right'; $isBootstrap = true; break;
         case 'core10_updated':          $icon = 'bi-clipboard2-check'; $isBootstrap = true; break;        case 'group_session_created':   $icon = 'bi-people-fill';    $isBootstrap = true; break;
         case 'group_session_scheduled': $icon = 'bi-calendar-event'; $isBootstrap = true; break;
-        case 'group_session_deleted':   $icon = '×'; break;
+       case 'group_session_deleted':   $icon = '×'; break;
+        case 'group_session_updated':   $icon = 'bi-pencil'; $isBootstrap = true; break;
         case 'report_generated':        $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
         case 'report_drilldown_viewed': $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
         case 'report_csv_exported':     $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;

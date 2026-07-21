@@ -3149,11 +3149,58 @@ select:invalid {
                 <div class="detail-group"><label>Notes</label><div class="detail-value notes-content" id="groupSessionDetailNotes">—</div></div>
                 <div class="detail-group"><label>Attendance</label><div id="groupSessionDetailAttendance" class="detail-value">—</div></div>
             </div>
-            <div class="modal-actions">
+           <div class="modal-actions">
                 <button onclick="closeGroupSessionDetailsModal()" class="btn-secondary">Close</button>
+                <button onclick="openEditGroupSessionModal()" class="btn-primary" id="editGroupSessionBtn"><i class="bi bi-pencil"></i> Edit Session</button>
             </div>
         </div>
     </div>
+
+    <!-- EDIT GROUP SESSION MODAL -->
+<div id="editGroupSessionModal" class="modal" style="z-index:1200;">
+    <div class="modal-content gs-modal-container">
+        <div class="modal-header">
+            <h2><i class="bi bi-pencil"></i> Edit Group Session</h2>
+            <button class="modal-close" onclick="closeEditGroupSessionModal()">✕</button>
+        </div>
+        <form id="editGroupSessionForm" onsubmit="submitEditGroupSession(event)" novalidate>
+            <input type="hidden" id="editGroupSessionId">
+
+       <div class="gs-form-row">
+                <div class="form-group">
+                    <label>Group Type</label>
+                    <input type="text" id="editGroupType" class="gs-input" placeholder="e.g. CFT, DBT, Art Therapy" required>
+                </div>
+                <div class="form-group">
+                    <label>Date & Time</label>
+                    <input type="datetime-local" id="editGroupDatetime" class="gs-input" required>
+                    <small style="color:#64748b;font-size:0.75rem;margin-top:0.25rem;display:block;">
+                        <i class="bi bi-info-circle"></i> Showing original scheduled time. Only update if the actual session time differed.
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Group Session Notes</label>
+                <textarea id="editGroupNotes" rows="3" class="gs-textarea" placeholder="Update session notes..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Attendance</label>
+                <div id="editGroupAttendanceTable" class="gs-attendance-table-wrapper">
+                    <div class="gs-loading">Loading attendance...</div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" onclick="closeEditGroupSessionModal()" class="btn-secondary">Cancel</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- CHANGE WARD MODAL -->
 
     <!-- CHANGE WARD MODAL -->
 <div id="changeWardModal" class="modal" style="z-index:1100;">
@@ -4677,7 +4724,7 @@ const response = await fetch('<?= url('group-sessions/list-json') ?>');
             const sessionDate = new Date(s.session_date + 'T' + s.session_time);
             const formattedDate = sessionDate.toLocaleDateString('en-GB');
             const formattedTime = sessionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            console.log('GROUP SESSION DEBUG:', { id: s.id, status: s.status, date: s.session_date, time: s.session_time });
+
             html += `
                 <div class="group-session-card" data-id="${s.id}">
                     <div class="group-session-header">
@@ -4759,7 +4806,6 @@ const sessionMoment = new Date(sessionDate + 'T' + sessionTime);
 const now = new Date();
 const isScheduled = data.status === 'scheduled';
 const canComplete = isScheduled && sessionMoment <= now;
-console.log('DETAILS DEBUG:', { status: data.status, sessionMoment: sessionMoment.toString(), now: now.toString(), isScheduled, canComplete });
 
 if (isScheduled && !canComplete) {
     // Future scheduled session — show patient list without attendance
@@ -4849,6 +4895,9 @@ if (isScheduled && !canComplete) {
     attHtml += '</tbody></table>';
     document.getElementById('groupSessionDetailAttendance').innerHTML = `<div style="overflow-x:auto;">${attHtml}</div>`;
 }
+
+   // Store for edit modal
+        _editGroupSessionData = data;
 
         modal.style.display = 'flex';
         bringModalToFront('groupSessionDetailsModal');
@@ -4975,6 +5024,130 @@ function copyPatientNote() {
     }).catch(() => showMessage('Could not copy — please copy manually', true));
 }
 
+
+// ==================== EDIT GROUP SESSION ====================
+let _editGroupSessionData = null;
+
+function openEditGroupSessionModal() {
+    if (!_editGroupSessionData) return;
+    const data = _editGroupSessionData;
+
+    document.getElementById('editGroupSessionId').value = data.id;
+    document.getElementById('editGroupType').value = data.group_type || '';
+    document.getElementById('editGroupNotes').value = data.notes || '';
+
+    // Pre-fill datetime from session_date + session_time
+    const datetimeLocal = data.session_date + 'T' + (data.session_time || '00:00').substring(0, 5);
+    document.getElementById('editGroupDatetime').value = datetimeLocal;
+
+    // Build attendance table
+    const container = document.getElementById('editGroupAttendanceTable');
+    const wardColour = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
+    const attendance = data.attendance || [];
+
+    if (!attendance.length) {
+        container.innerHTML = '<p class="gs-placeholder">No patients in this session</p>';
+    } else {
+        let html = `
+            <table class="gs-register">
+                <thead>
+                    <tr>
+                        <th>Ward</th>
+                        <th>Room</th>
+                        <th>Patient</th>
+                        <th style="text-align:center;">Attended</th>
+                        <th style="text-align:center;">Declined</th>
+                        <th style="text-align:center;">DNA</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        attendance.forEach(a => {
+            const colour = wardColour[a.ward] || '#94a3b8';
+            const isAttended = a.attended == 1;
+            const isDeclined = a.declined == 1;
+            const isDna      = a.dna == 1;
+
+            html += `
+                <tr data-patient-id="${a.patient_id}">
+                    <td><span class="gs-ward-badge" style="background:${colour};">${escapeHtml(a.ward)}</span></td>
+                    <td>Bed ${a.room_number}</td>
+                    <td><strong>${escapeHtml(a.patient_initials)}</strong></td>
+                    <td class="gs-radio-cell"><input type="radio" name="edit_att_${a.patient_id}" value="attended" ${isAttended ? 'checked' : ''}></td>
+                    <td class="gs-radio-cell"><input type="radio" name="edit_att_${a.patient_id}" value="declined" ${isDeclined ? 'checked' : ''}></td>
+                    <td class="gs-radio-cell"><input type="radio" name="edit_att_${a.patient_id}" value="dna"      ${isDna      ? 'checked' : ''}></td>
+                    <td><input type="text" class="gs-notes-input" name="edit_notes_${a.patient_id}" value="${escapeHtml(a.notes || '')}" placeholder="Optional note"></td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    document.getElementById('editGroupSessionModal').style.display = 'flex';
+    bringModalToFront('editGroupSessionModal');
+}
+
+function closeEditGroupSessionModal() {
+    document.getElementById('editGroupSessionModal').style.display = 'none';
+}
+
+async function submitEditGroupSession(event) {
+    event.preventDefault();
+
+    const id       = document.getElementById('editGroupSessionId').value;
+    const type     = document.getElementById('editGroupType').value.trim();
+    const datetime = document.getElementById('editGroupDatetime').value;
+    const notes    = document.getElementById('editGroupNotes').value.trim();
+
+    if (!type)     { showMessage('Group type is required', true); return; }
+    if (!datetime) { showMessage('Date and time are required', true); return; }
+
+    const rows = document.querySelectorAll('#editGroupAttendanceTable tbody tr[data-patient-id]');
+    const attendance = [];
+    rows.forEach(row => {
+        const patientId   = row.getAttribute('data-patient-id');
+        const checkedRadio = row.querySelector(`input[name="edit_att_${patientId}"]:checked`);
+        const notesInput  = row.querySelector(`input[name="edit_notes_${patientId}"]`);
+        attendance.push({
+            patient_id: patientId,
+            status:     checkedRadio ? checkedRadio.value : 'not_set',
+            notes:      notesInput ? notesInput.value : ''
+        });
+    });
+
+    const formData = new FormData();
+    formData.append('csrf_token', '<?= csrf_token() ?>');
+    formData.append('id',         id);
+    formData.append('group_type', type);
+    formData.append('datetime',   datetime);
+    formData.append('notes',      notes);
+    formData.append('attendance', JSON.stringify(attendance));
+
+    try {
+        const response = await fetch('<?= url('group-sessions/update') ?>', {
+            method: 'POST',
+            body:   formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('Group session updated successfully');
+            closeEditGroupSessionModal();
+
+            // Refresh the details modal in place — no page reload
+            if (typeof CalendarWidget !== 'undefined') CalendarWidget.refresh();
+            await viewGroupSessionDetails(parseInt(document.getElementById('editGroupSessionId').value));
+        } else {
+            showMessage(data.error || 'Failed to update group session', true);
+        }
+    } catch (err) {
+        showMessage('Network error', true);
+    }
+}
 
 // ==================== WARD TRANSFER ====================
 function openChangeWardModal() {

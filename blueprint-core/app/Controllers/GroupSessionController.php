@@ -34,11 +34,11 @@ class GroupSessionController
                 exit;
             }
 
-         $dt          = new \DateTime($rawDatetime);
+     $dt          = new \DateTime($rawDatetime);
          $sessionDate = $dt->format('Y-m-d');
          $sessionTime = $dt->format('H:i:s');
-         $today       = (new \DateTime())->format('Y-m-d');
-         $status      = ($sessionDate > $today) ? 'scheduled' : 'completed';
+         $now         = new \DateTime();
+         $status      = ($dt > $now) ? 'scheduled' : 'completed';
 
             $ward = null;
             if ($wardSnapshot !== '') {
@@ -97,6 +97,111 @@ exit;
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     exit;
 }
+    }
+
+
+// ── update() ─────────────────────────────────────────────
+    public function update()
+    {
+        header('Content-Type: application/json');
+        ini_set('display_errors', 0);
+
+        if (empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+            echo json_encode(['success' => false, 'error' => 'Invalid request']);
+            exit;
+        }
+
+        try {
+            $id         = (int)($_POST['id'] ?? 0);
+            $groupType  = trim($_POST['group_type'] ?? '');
+            $rawDatetime = trim($_POST['datetime']   ?? '');
+            $notes      = trim($_POST['notes']       ?? '');
+            $attendance = json_decode($_POST['attendance'] ?? '[]', true) ?: [];
+
+            if (!$id || !$groupType || !$rawDatetime) {
+                echo json_encode(['success' => false, 'error' => 'Missing required fields']);
+                exit;
+            }
+
+            $dt          = new \DateTime($rawDatetime);
+            $sessionDate = $dt->format('Y-m-d');
+            $sessionTime = $dt->format('H:i:s');
+            $now         = new \DateTime();
+            $status      = ($dt > $now) ? 'scheduled' : 'completed';
+
+            $db = Database::getInstance();
+
+            // Update session
+            $db->prepare(
+                'UPDATE group_sessions
+                 SET group_type = ?, session_date = ?, session_time = ?, notes = ?, status = ?
+                 WHERE id = ?'
+            )->execute([$groupType, $sessionDate, $sessionTime, $notes, $status, $id]);
+
+            // Update attendance records
+            foreach ($attendance as $att) {
+                $patientId = (int)($att['patient_id'] ?? 0);
+                if (!$patientId) continue;
+
+                $attStatus = $att['status'] ?? 'not_set';
+                $attNotes  = trim($att['notes'] ?? '');
+
+                $stmt = $db->prepare(
+                    'SELECT id FROM group_session_attendance
+                     WHERE group_session_id = ? AND patient_id = ?'
+                );
+                $stmt->execute([$id, $patientId]);
+                $existing = $stmt->fetch(\PDO::FETCH_OBJ);
+
+                if ($existing) {
+                    $db->prepare(
+                        'UPDATE group_session_attendance
+                         SET attended = ?, declined = ?, dna = ?, notes = ?
+                         WHERE id = ?'
+                    )->execute([
+                        ($attStatus === 'attended') ? 1 : 0,
+                        ($attStatus === 'declined') ? 1 : 0,
+                        ($attStatus === 'dna')      ? 1 : 0,
+                        $attNotes,
+                        $existing->id
+                    ]);
+                } else {
+                    $db->prepare(
+                        'INSERT INTO group_session_attendance
+                         (group_session_id, patient_id, attended, declined, dna, notes)
+                         VALUES (?, ?, ?, ?, ?, ?)'
+                    )->execute([
+                        $id, $patientId,
+                        ($attStatus === 'attended') ? 1 : 0,
+                        ($attStatus === 'declined') ? 1 : 0,
+                        ($attStatus === 'dna')      ? 1 : 0,
+                        $attNotes
+                    ]);
+                }
+            }
+
+            // Activity log
+            $userId      = $_SESSION['user_id'] ?? 0;
+            $userName    = $_SESSION['username'] ?? 'Unknown';
+            $description = "Updated group session '{$groupType}'";
+
+            $stmt = $db->prepare('SELECT ward, ward_snapshot FROM group_sessions WHERE id = ?');
+            $stmt->execute([$id]);
+            $session = $stmt->fetch(\PDO::FETCH_OBJ);
+            $logWard = $session->ward ?? $session->ward_snapshot ?? null;
+
+            $db->prepare(
+                'INSERT INTO activity_logs (user_id, user_name, action_type, description, ward)
+                 VALUES (?, ?, ?, ?, ?)'
+            )->execute([$userId, $userName, 'group_session_updated', $description, $logWard]);
+
+            echo json_encode(['success' => true]);
+            exit;
+
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            exit;
+        }
     }
 
     // ── todayJson() ──────────────────────────────────────────

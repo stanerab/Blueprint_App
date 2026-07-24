@@ -4063,15 +4063,45 @@
                         if (roomEl) roomEl.textContent = 'Room ' + newRoom;
                     });
 
-                  // Invalidate session cache so calendar day modal shows updated room
-                    if (typeof sessionCache !== 'undefined') {
-                        Object.keys(sessionCache).forEach(k => delete sessionCache[k]);
+           // Clear cache and re-fetch via CalendarWidget
+                    for (const k in window.sessionCache) delete window.sessionCache[k];
+                    if (typeof window._calFetchSessions === 'function') {
+                        const calKey = window._calMonthKey();
+                        window._calFetchSessions(calKey, function() {
+                            const calDayModal = document.getElementById('calDayModal');
+                            if (calDayModal && calDayModal.style.display === 'flex' && CalendarWidget.currentDayDate) {
+                                CalendarWidget.dayClick(CalendarWidget.currentDayDate);
+                            }
+                        });
                     }
+
+                    // If calendar day modal is open, close and reopen it with fresh data
+                    const calDayModal = document.getElementById('calDayModal');
+                    if (calDayModal && calDayModal.style.display === 'flex') {
+                        const currentDate = CalendarWidget.currentDayDate;
+                        if (currentDate) {
+                            setTimeout(() => {
+                                CalendarWidget.dayClick(currentDate);
+                            }, 300);
+                        }
+                    }
+
+                 // Directly update room numbers in open calendar day modal
+                    document.querySelectorAll('#calDayList .day-session-item').forEach(item => {
+                        const itemPatientId = item.getAttribute('data-patient-id');
+                        if (itemPatientId && itemPatientId.toString() === patientId.toString()) {
+                            const roomSpan = item.querySelector('.session-room');
+                            if (roomSpan) {
+                                roomSpan.textContent = 'Rm ' + newRoom;
+                            }
+                        }
+                    });
                 }        
                 else showMessage(data.error || 'Failed to change room', true);
             } catch (err) { showMessage('Network error', true); console.error(err); }
         }
 
+        
         // ==================== DISCHARGE PATIENT (updated to pre-fill date) ====================
         function openDischargeModal() {
             const patientId = currentViewPatientId || currentSelectedPatientId;
@@ -5528,7 +5558,9 @@
         const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
         let year = new Date().getFullYear();
         let month = new Date().getMonth();
-    let sessionCache = {};
+  window.sessionCache = {};
+  window._calFetchSessions = function(key, cb) { fetchSessions(key, cb); };
+        window._calMonthKey = function() { return monthKey(); };
     let groupCache = {};
     let activeFilters = ['all'];
         function getWardClass(ward) {
@@ -5543,8 +5575,8 @@
         function monthKey() { return `${year}-${String(month+1).padStart(2,'0')}`; }
 
         // Fetch individual sessions (existing)
-        function fetchSessions(key, cb) {
-            if (sessionCache[key]) { cb(sessionCache[key]); return; }
+      function fetchSessions(key, cb) {
+            if (window.sessionCache[key]) { cb(window.sessionCache[key]); return; }
             fetch('<?= url('sessions/get-all-json') ?>')
                 .then(r => r.json())
                 .then(data => {
@@ -5563,8 +5595,8 @@
                         if (!byMonth[m]) byMonth[m] = [];
                         byMonth[m].push(s);
                     });
-                    for (let m in byMonth) sessionCache[m] = byMonth[m];
-                    cb(sessionCache[key] || []);
+                   for (let m in byMonth) window.sessionCache[m] = byMonth[m];
+                    cb(window.sessionCache[key] || []);
                 })
                 .catch(err => { console.error('Calendar fetch error:', err); cb([]); });
         }
@@ -5659,17 +5691,17 @@
             grid.innerHTML = html;
         }
 
-        function load() {
-            const key = monthKey();
-            const grid = document.getElementById('calGrid');
-            if (grid) grid.innerHTML = '<div class="bp-cal-loading">Loading calendar...</div>';
-            Promise.all([
-                new Promise(resolve => fetchSessions(key, resolve)),
-                new Promise(resolve => fetchGroupSessions(key, resolve))
-            ]).then(([indiv, group]) => {
-                render(indiv, group);
-            });
-        }
+            function load() {
+                const key = monthKey();
+                const grid = document.getElementById('calGrid');
+                if (grid) grid.innerHTML = '<div class="bp-cal-loading">Loading calendar...</div>';
+                Promise.all([
+                    new Promise(resolve => fetchSessions(key, resolve)),
+                    new Promise(resolve => fetchGroupSessions(key, resolve))
+                ]).then(([indiv, group]) => {
+                    render(indiv, group);
+                });
+            }
 
         // Fetch group sessions for a specific date (used in day modal)
         async function fetchGroupSessionsForDate(date) {
@@ -5715,7 +5747,8 @@
         }
         load();
     },
-            dayClick: async function(dateStr) {
+          dayClick: async function(dateStr) {
+                CalendarWidget.currentDayDate = dateStr;
                 // Individual sessions from cache
                 const key = monthKey();
                 const indivSessions = (sessionCache[key] || []).filter(s => s.datetime.startsWith(dateStr));
@@ -5737,11 +5770,11 @@
                         html += '<h4 style="margin:0 0 0.5rem 0; font-size:0.85rem; color:#1e293b;">Individual Sessions</h4>';
                         indivSessions.forEach(s => {
                             const wardClass = getWardClass(s.ward);
-                            html += `<div class="day-session-item" onclick="event.stopPropagation(); CalendarWidget.openSession(${s.id}, ${s.patient_id}, '${s.initials}')">
+html += `<div class="day-session-item" data-patient-id="${s.patient_id}" onclick="event.stopPropagation(); CalendarWidget.openSession(${s.id}, ${s.patient_id}, '${s.initials}')">
                                 <span class="session-initials">${escapeHtml(s.initials)}</span>
                                 <span class="session-time">${s.datetime.substring(11,16)}</span>
                                 <span class="session-ward ${wardClass}">${escapeHtml(s.ward)}</span>
-                             <span class="session-room">Rm ${s.patient_room || '—'}</span>
+                           <span class="session-room">Rm ${s.room_number || s.patient_room || s.current_room || '—'}</span>
                                 <span class="session-arrow">→</span>
                             </div>`;
                         });
@@ -5758,10 +5791,10 @@
             }).join('');
 
         html += `<div class="day-session-item gs-item" onclick="event.stopPropagation(); CalendarWidget.openGroupSession(${gs.id})">
-        <span class="session-initials">👥</span>
-    <span class="session-room" style="font-weight:600;">${escapeHtml(gs.title)}</span>
+       <span class="session-initials"><i class="bi bi-people-fill"></i></span>
+     <span class="session-time">${gs.time.substring(0,5)}</span>
         <span>${wardBadges}</span>
-        <span class="session-time">${gs.time.substring(0,5)}</span>
+   <span class="session-room" style="font-weight:600;">${escapeHtml(gs.title)}</span>
         <span class="session-arrow">→</span>
     </div>`;
         });

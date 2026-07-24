@@ -249,7 +249,7 @@ class SessionController
         $result = Session::archive($id);
 
         if ($result) {
-            // ✅ LOG: Session archived (clean description - no ward, no datetime)
+            //  LOG: Session archived (clean description - no ward, no datetime)
             $patientInitials = $session->patient_initials ?? $session->initials ?? 'Unknown';
 
             ActivityLog::create([
@@ -396,7 +396,7 @@ class SessionController
             $result = Session::restore($id);
 
             if ($result) {
-                // ✅ LOG: Session restored (clean description - no ward, no datetime)
+                //  LOG: Session restored (clean description - no ward, no datetime)
                 if ($session) {
                     ActivityLog::create([
                         'action_type' => 'session_restored',
@@ -540,33 +540,64 @@ class SessionController
                $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
+// ==================== BY WARD AND MONTH (Calendar) ====================
+    public function byWardMonth()
+    {
+        header('Content-Type: application/json');
+        while (ob_get_level()) ob_end_clean();
+
+        $ward  = $_GET['ward']  ?? null;
+        $year  = (int)($_GET['year']  ?? date('Y'));
+        $month = (int)($_GET['month'] ?? date('m'));
+
+        if (!$ward) {
+            echo json_encode([]);
+            exit;
+        }
+
+        $db = Database::getInstance();
+        $stmt = $db->prepare("
+            SELECT s.id, s.patient_id, s.datetime, s.status,
+                   s.notes, s.carenotes_completed,
+                   s.tracker_completed, s.tasks_completed,
+                   p.initials, p.ward, p.room_number AS patient_room
+            FROM sessions s
+            JOIN patients p ON s.patient_id = p.id
+            WHERE s.ward = ?
+            AND YEAR(s.datetime) = ?
+            AND MONTH(s.datetime) = ?
+            AND s.is_archived = 0
+            ORDER BY s.datetime ASC
+        ");
+        $stmt->execute([$ward, $year, $month]);
+        $sessions = $stmt->fetchAll(\PDO::FETCH_OBJ);
+     echo json_encode($sessions);
+        exit;
+    }
+
     /**
      * Helper to send clean JSON responses (no redirects, no extra output)
      */
     protected function jsonResponse($data, $errorMessage = null, $statusCode = 200)
     {
-        // Clean all output buffers
         while (ob_get_level()) {
             ob_end_clean();
         }
-        
+
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=utf-8');
-        
+
         if (is_array($data) && isset($data['success']) === false && $errorMessage === null) {
-            // Assume $data is the response data (for getAllJson, getByPatientJson)
             echo json_encode($data);
         } elseif (is_bool($data)) {
-            // Standard success/failure response
             echo json_encode([
                 'success' => $data,
                 'error' => $errorMessage
             ]);
         } else {
-            // Custom response
             echo json_encode($data);
         }
-        
+
         exit;
     }
 }

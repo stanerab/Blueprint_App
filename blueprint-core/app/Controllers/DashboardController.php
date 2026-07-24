@@ -36,17 +36,19 @@ class DashboardController
         $totalSessions = count($sessions);
 
 
-       // ==================== TODAY'S SESSIONS (FINAL FIX) ====================
+       // ==================== TODAY'S SESSIONS ====================
 $db = Database::getInstance();
 
 $todayStart = date('Y-m-d 00:00:00');
 $todayEnd   = date('Y-m-d 23:59:59');
 
 $stmt = $db->prepare("
-    SELECT s.*,
-           p.initials as patient_initials,
+    SELECT s.id, s.patient_id, s.datetime, s.status, s.notes,
+           s.carenotes_completed, s.tracker_completed, s.tasks_completed,
+           s.is_archived, s.created_by,
+           p.initials AS patient_initials,
            p.ward,
-           p.room_number
+          p.room_number AS patient_room
     FROM sessions s
     INNER JOIN patients p ON s.patient_id = p.id
     WHERE s.is_archived = 0

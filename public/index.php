@@ -102,6 +102,7 @@ $router->add('POST', '/sessions/delete', 'SessionController@delete');
 $router->add('POST', '/sessions/restore', 'SessionController@restore');
 $router->add('POST', '/sessions/update', 'SessionController@update');
 $router->add('GET', '/sessions/get-by-patient', 'SessionController@getByPatientJson');
+$router->add('GET', '/sessions/by-ward-month', 'SessionController@byWardMonth');
 $router->add('GET', '/patients/get-by-ward', 'PatientController@getByWard');
 $router->add('POST', '/group-sessions/store', 'GroupSessionController@store');
 $router->add('GET', '/group-sessions/list-json', 'GroupSessionController@listJson');

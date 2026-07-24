@@ -25,6 +25,8 @@ class Session
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
+    
+
 public static function find($id)
 {
     $db = \App\Config\Database::getInstance();
@@ -277,10 +279,12 @@ $result = $stmt->execute([
     public static function getTodaysByWard($ward)
     {
         $db = Database::getInstance();
-        $stmt = $db->prepare("
-            SELECT s.*, u.username as created_by_username 
+       $stmt = $db->prepare("
+            SELECT s.*, u.username as created_by_username,
+                   p.room_number AS room_number
             FROM sessions s 
-            LEFT JOIN users u ON s.created_by = u.id 
+            LEFT JOIN users u ON s.created_by = u.id
+            LEFT JOIN patients p ON s.patient_id = p.id
             WHERE s.ward = ? 
             AND DATE(s.datetime) = CURDATE() 
             AND s.is_archived = 0
@@ -299,10 +303,15 @@ $result = $stmt->execute([
     public static function getByPatient($patientId, $limit = null)
     {
         $db = Database::getInstance();
-        $query = "
-            SELECT s.*, u.username as created_by_username 
+    $query = "
+            SELECT s.id, s.patient_id, s.datetime, s.status, s.notes,
+                   s.carenotes_completed, s.tracker_completed, s.tasks_completed,
+                   s.is_archived, s.created_by, s.ward,
+                   u.username AS created_by_username,
+                   p.room_number AS room_number
             FROM sessions s 
-            LEFT JOIN users u ON s.created_by = u.id 
+            LEFT JOIN users u ON s.created_by = u.id
+            LEFT JOIN patients p ON s.patient_id = p.id
             WHERE s.patient_id = ? AND s.is_archived = 0 
             ORDER BY s.datetime DESC
         ";

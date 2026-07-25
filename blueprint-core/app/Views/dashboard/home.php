@@ -3747,7 +3747,16 @@
             modal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             resetPatientDropdown();
             if (prefilledDate) { dtInput.value = prefilledDate + 'T09:00'; }
-            else { const now = new Date(); const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const day = String(now.getDate()).padStart(2, '0'); const hours = String(now.getHours()).padStart(2, '0'); dtInput.value = `${year}-${month}-${day}T${hours}:00`; }
+else {
+    const now = new Date();
+    const ukParts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/London',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(now);
+    const get = type => ukParts.find(p => p.type === type).value;
+    dtInput.value = `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+}
             if (ward) { wardSelect.value = ward; wardSelect.setCustomValidity(''); wardSelect.dispatchEvent(new Event('change')); modal.style.display = 'flex'; }
             else if (currentSelectedPatientId && !prefilledDate) {
                 fetch('<?= url('patients/get-summary') ?>?id=' + currentSelectedPatientId)
@@ -4942,7 +4951,7 @@
         // Session date is today — show attendance form to complete it
         let attHtml = `
             <div style="background:#ede9fe;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;color:#6d28d9;">
-                <i class="bi bi-calendar-check"></i> This session is scheduled for today. Mark attendance and complete it.
+                <i class="bi bi-calendar-check"></i> This is a scheduled session. Please mark attendance and complete it.
             </div>
             <table class="gs-register" id="completeAttendanceTable">
                 <thead>
@@ -5522,7 +5531,7 @@
 
                 // Show tab with count badge
                 tabBtn.style.display = '';
-                tabBtn.textContent = `Transfer History (${data.length})`;
+                tabBtn.textContent = `Transfer Ward History (${data.length})`;
 
                 const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
 

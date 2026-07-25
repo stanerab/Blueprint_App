@@ -312,6 +312,30 @@ $result = $stmt->execute([$toWard, $roomNumber, $patientId]);
     $this->jsonResponse(true, 'Patient transferred to ' . $toWard . ' successfully');
 }
 
+public function roomHistoryJson()
+    {
+        header('Content-Type: application/json');
+        $patientId = (int)($_GET['id'] ?? 0);
+        if (!$patientId) { echo json_encode([]); exit; }
+
+        $db = Database::getInstance();
+       $stmt = $db->prepare("
+            SELECT 
+                prh.from_room,
+                prh.to_room,
+                prh.changed_at,
+                prh.reason,
+                COALESCE(u.full_name, u.username, 'Unknown') AS changed_by
+            FROM patient_room_history prh
+            LEFT JOIN users u ON u.id = prh.changed_by
+            WHERE prh.patient_id = ?
+            ORDER BY prh.changed_at DESC
+        ");
+        $stmt->execute([$patientId]);
+        echo json_encode($stmt->fetchAll(\PDO::FETCH_ASSOC));
+        exit;
+    }
+
 public function wardHistoryJson()
 {
     $patientId = (int)($_GET['id'] ?? 0);
@@ -537,7 +561,19 @@ $patient->ward .
         $stmt = $db->prepare("UPDATE patients SET room_number = ? WHERE id = ?");
         $result = $stmt->execute([$newRoom, $patientId]);
 
-        if ($result) {
+       if ($result) {
+            // Log to room history table
+           $db->prepare("
+                INSERT INTO patient_room_history (patient_id, from_room, to_room, changed_by, reason)
+                VALUES (?, ?, ?, ?, ?)
+            ")->execute([
+                $patientId,
+                $patient->room_number,
+                $newRoom,
+                $_SESSION['user_id'] ?? null,
+                $reason ?: null
+            ]);
+
             ActivityLog::create([
                 'action_type' => 'room_changed',
                 'description' => 'Changed room for patient ' . $patient->initials . ' from Room ' . $patient->room_number . ' to Room ' . $newRoom . ' in ' . $patient->ward . ' ward' . ($reason ? ' - Reason: ' . $reason : ''),

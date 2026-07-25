@@ -2990,9 +2990,12 @@
                     <button class="tab-btn" onclick="switchTab('discharge')" id="dischargeTabBtn">
                         Discharge Notes
                     </button>
-                    <button class="tab-btn" onclick="switchTab('transfer')" id="transferTabBtn" style="display:none;">
-        Transfer History
-    </button>
+                 <button class="tab-btn" onclick="switchTab('transfer')" id="transferTabBtn" style="display:none;">
+                        Transfer History
+                    </button>
+                  <button class="tab-btn" onclick="switchTab('roomHistory')" id="roomHistoryTabBtn" style="display:none;">
+                        Room History <span id="roomHistoryCount"></span>
+                    </button>
                 </div>
     <div id="sessionsTab" class="tab-pane active">
         <div id="sessionsList" class="sessions-list" style="overflow-x:auto;">
@@ -3014,6 +3017,12 @@
                 <div id="transferTab" class="tab-pane">
         <div id="transferHistory" class="sessions-list" style="overflow-x:auto;">
             <div class="loading">Loading transfer history...</div>
+        </div>
+    </div>
+
+  <div id="roomHistoryTab" class="tab-pane">
+        <div id="roomHistoryContent" class="sessions-list" style="overflow-x:auto;">
+            <div class="loading">Loading room history...</div>
         </div>
     </div>
 
@@ -3454,6 +3463,7 @@
         loadAdmissionNotes(patientId);
         loadDischargeNotes(patientId);
         loadWardTransferHistory(patientId);
+      loadRoomHistory(patientId);
         switchTab('sessions');
 
         // Show Change Ward button only for Manor/Lakeside
@@ -3617,14 +3627,18 @@
             const sessionsBtn = document.getElementById('sessionsTabBtn');
             const admissionBtn = document.getElementById('admissionTabBtn');
             const dischargeBtn = document.getElementById('dischargeTabBtn');
-        [sessionsTab, admissionTab, dischargeTab, document.getElementById('transferTab')].forEach(t => { if(t) t.classList.remove('active'); });
-        [sessionsBtn, admissionBtn, dischargeBtn, document.getElementById('transferTabBtn')].forEach(b => { if(b) b.classList.remove('active'); });
+       [sessionsTab, admissionTab, dischargeTab, document.getElementById('transferTab'), document.getElementById('roomHistoryTab')].forEach(t => { if(t) t.classList.remove('active'); });
+        [sessionsBtn, admissionBtn, dischargeBtn, document.getElementById('transferTabBtn'), document.getElementById('roomHistoryTabBtn')].forEach(b => { if(b) b.classList.remove('active'); });
             if (tab === 'sessions')  { sessionsTab.classList.add('active');  sessionsBtn.classList.add('active'); }
     else if (tab === 'admission') { admissionTab.classList.add('active'); admissionBtn.classList.add('active'); }
     else if (tab === 'discharge') { dischargeTab.classList.add('active'); dischargeBtn.classList.add('active'); }
     else if (tab === 'transfer')  {
                 document.getElementById('transferTab').classList.add('active');
                 document.getElementById('transferTabBtn').classList.add('active');
+            }
+    else if (tab === 'roomHistory') {
+                document.getElementById('roomHistoryTab').classList.add('active');
+                document.getElementById('roomHistoryTabBtn').classList.add('active');
             }
         }
 
@@ -5414,6 +5428,7 @@ else {
                     setTimeout(() => {
                         loadPatientSummary(currentViewPatientId);
                         loadWardTransferHistory(currentViewPatientId);
+                        loadRoomHistory(currentViewPatientId);
                     }, 150);
                 }
 
@@ -5513,6 +5528,51 @@ else {
             showMessage('Network error', true);
         }
     }
+
+    function loadRoomHistory(patientId) {
+                const container = document.getElementById('roomHistoryContent');
+                container.innerHTML = '<div class="loading">Loading room history...</div>';
+
+            fetch('<?= url('patients/room-history') ?>?id=' + patientId)
+                .then(r => r.json())
+                .then(data => {
+                    const btn = document.getElementById('roomHistoryTabBtn');
+
+                    if (!data.length) {
+                        btn.style.display = 'none';
+                        container.innerHTML = '<div class="no-notes">No room change history for this patient</div>';
+                        return;
+                    }
+
+                   btn.style.display = '';
+                    const countSpan = document.getElementById('roomHistoryCount');
+                    if (countSpan) countSpan.textContent = `(${data.length})`;
+
+                    let html = '<table class="sessions-table" style="min-width:600px;"><thead><tr><th>Date</th><th>From</th><th>To</th><th>Changed By</th><th>Reason</th></tr></thead><tbody>';
+
+                    data.forEach(row => {
+                        const changedAt = new Date(row.changed_at.replace(' ', 'T') + 'Z');
+                        const dateStr = changedAt.toLocaleDateString('en-GB') + ' ' +
+                                        changedAt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+                        html += `<tr>
+                            <td style="white-space:nowrap;">${dateStr}</td>
+                            <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:#e2e8f0;color:#475569;">Room ${row.from_room ?? '—'}</span></td>
+                            <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:#1e3a8a;color:white;">Room ${row.to_room}</span></td>
+                            <td>${escapeHtml(row.changed_by)}</td>
+                            <td style="color:#64748b;font-style:${row.reason ? 'normal' : 'italic'};">${row.reason ? escapeHtml(row.reason) : 'No reason given'}</td>
+                        </tr>`;
+                    });
+
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Room history error:', err);
+                    container.innerHTML = '<div class="error">Error loading room history</div>';
+                });
+        }
+
 
     function loadWardTransferHistory(patientId) {
         const container = document.getElementById('transferHistory');

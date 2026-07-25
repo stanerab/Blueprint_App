@@ -160,6 +160,7 @@ $router->add('GET', '/sessions/archived', 'SessionController@archived');
 $router->add('GET', '/wards/{ward}', 'WardController@show');
 $router->add('POST', '/patients/transfer-ward', 'PatientController@transferWard');
 $router->add('GET',  '/patients/ward-history',  'PatientController@wardHistoryJson');
+$router->add('GET', '/patients/room-history', 'PatientController@roomHistoryJson');
 
 
 // Password reset routes

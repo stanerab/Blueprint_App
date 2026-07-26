@@ -3463,8 +3463,8 @@
         loadAdmissionNotes(patientId);
         loadDischargeNotes(patientId);
         loadWardTransferHistory(patientId);
-      loadRoomHistory(patientId);
-        switchTab('sessions');
+    console.log('Calling loadRoomHistory with patientId:', patientId);
+                    loadRoomHistory(patientId);
 
         // Show Change Ward button only for Manor/Lakeside
         fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
@@ -4040,21 +4040,22 @@ else {
 
         // ==================== CHANGE ROOM ====================
         function closeChangeRoomModal() { document.getElementById('changeRoomModal').style.display = 'none'; }
-        async function submitChangeRoom(event) {
+      async function submitChangeRoom(event) {
             event.preventDefault();
             const form = document.getElementById('changeRoomForm');
             const formData = new FormData(form);
             try {
                 const response = await fetch('<?= url('patients/change-room') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 const data = await response.json();
-                if (data.success) {
+              if (data.success) {
                     showMessage(data.message || 'Room updated successfully');
                     closeChangeRoomModal();
-
-                    // Refresh patient summary in modal
                     if (currentViewPatientId) {
-                        setTimeout(() => loadPatientSummary(currentViewPatientId), 150);
+                        loadPatientSummary(currentViewPatientId);
+                        loadWardTransferHistory(currentViewPatientId);
+                        loadRoomHistory(currentViewPatientId);
                     }
+                    switchTab('roomHistory');
 
                     // Update patient dropdown option label live
                     const newRoom = formData.get('room_number');
@@ -5423,14 +5424,14 @@ else {
         if (data.success) {
                 showMessage(data.message || 'Patient transferred successfully');
                 closeChangeWardModal();
-
-                if (currentViewPatientId) {
-                    setTimeout(() => {
-                        loadPatientSummary(currentViewPatientId);
-                        loadWardTransferHistory(currentViewPatientId);
-                        loadRoomHistory(currentViewPatientId);
-                    }, 150);
-                }
+const roomPatientId = document.getElementById('changeRoomPatientId').value;
+               setTimeout(() => {
+                    loadPatientSummary(roomPatientId);
+                    loadWardTransferHistory(roomPatientId);
+                    loadRoomHistory(roomPatientId);
+                    // Switch to room history tab to show updated entry
+                    switchTab('roomHistory');
+                }, 500);
 
                 // Move patient option to correct ward optgroup in dropdown
                 const patientId  = document.getElementById('changeWardPatientId').value;

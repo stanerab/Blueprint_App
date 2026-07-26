@@ -131,7 +131,8 @@ $grouped = $grouped ?? [
                 <button id="sessionsTabBtn" class="tab-btn active" onclick="switchTab('sessions')">Sessions</button>
                 <button id="admissionTabBtn" class="tab-btn" onclick="switchTab('admission')">Admission Notes</button>
                 <button id="dischargeTabBtn" class="tab-btn" onclick="switchTab('discharge')">Discharge Notes</button>
-                <button id="transferTabBtn" class="tab-btn" onclick="switchTab('transfer')" style="display:none;">Transfer History</button>
+              <button id="transferTabBtn" class="tab-btn" onclick="switchTab('transfer')" style="display:none;">Transfer History</button>
+                <button id="roomHistoryTabBtn" class="tab-btn" onclick="switchTab('roomHistory')" style="display:none;">Room History</button>
             </div>
             <div id="sessionsTab" class="tab-content active">
                 <div id="sessionsList"><div class="loading">Loading sessions...</div></div>
@@ -142,10 +143,17 @@ $grouped = $grouped ?? [
             <div id="dischargeTab" class="tab-content">
                 <div id="dischargeNotes"><div class="loading">Loading discharge notes...</div></div>
             </div>
-            <div id="transferTab" class="tab-content">
+         <div id="transferTab" class="tab-content">
     <div id="transferHistory" style="overflow-x:auto;">
         <div class="loading">Loading transfer history...</div>
     </div>
+</div>
+
+<div id="roomHistoryTab" class="tab-content">
+    <div id="roomHistoryContent" style="overflow-x:auto;">
+        <div class="loading">Loading room history...</div>
+    </div>
+</div>
 </div>
         </div>
     </div>
@@ -686,7 +694,8 @@ function viewPatientDetails(patientId, patientName) {
     loadAllSessions(patientId);
     loadAdmissionNotes(patientId);
     loadDischargeNotes(patientId);
-    loadWardTransferHistory(patientId);
+  loadWardTransferHistory(patientId);
+    loadRoomHistory(patientId);
 
     switchTab('sessions');
 }
@@ -694,6 +703,45 @@ function viewPatientDetails(patientId, patientName) {
 function closePatientDetailsModal() {
     document.getElementById('patientDetailsModal').style.display = 'none';
 }
+
+function loadRoomHistory(patientId) {
+    const container = document.getElementById('roomHistoryContent');
+    container.innerHTML = '<div class="loading">Loading room history...</div>';
+
+    fetch(`/Blueprint/public/patients/room-history?id=${patientId}`)
+        .then(r => r.json())
+        .then(data => {
+            const btn = document.getElementById('roomHistoryTabBtn');
+            if (!data.length) {
+                btn.style.display = 'none';
+                container.innerHTML = '<div class="no-notes">No room change history for this patient</div>';
+                return;
+            }
+            btn.style.display = '';
+            btn.textContent = `Room History (${data.length})`;
+
+            let html = '<table class="sessions-table" style="min-width:600px;"><thead><tr><th>Date</th><th>From</th><th>To</th><th>Changed By</th><th>Reason</th></tr></thead><tbody>';
+            data.forEach(row => {
+                const changedAt = new Date(row.changed_at.replace(' ', 'T') + 'Z');
+                const dateStr = changedAt.toLocaleDateString('en-GB') + ' ' +
+                                changedAt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                html += `<tr>
+                    <td style="white-space:nowrap;">${dateStr}</td>
+                    <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:#e2e8f0;color:#475569;">Room ${row.from_room ?? '—'}</span></td>
+                    <td><span style="display:inline-block;padding:2px 10px;border-radius:2rem;font-size:0.72rem;font-weight:600;background:#1e3a8a;color:white;">Room ${row.to_room}</span></td>
+                    <td>${row.changed_by}</td>
+                    <td style="color:#64748b;font-style:${row.reason ? 'normal' : 'italic'};">${row.reason ? row.reason : 'No reason given'}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            console.error('Room history error:', err);
+            container.innerHTML = '<div class="error">Error loading room history</div>';
+        });
+}
+
 
 function loadWardTransferHistory(patientId) {
     const container = document.getElementById('transferHistory');
@@ -976,22 +1024,25 @@ function loadDischargeNotes(patientId) {
 }
 
 function switchTab(tab) {
-    const sessionsTab  = document.getElementById('sessionsTab');
-    const admissionTab = document.getElementById('admissionTab');
-    const dischargeTab = document.getElementById('dischargeTab');
-    const transferTab  = document.getElementById('transferTab');
-    const sessionsBtn  = document.getElementById('sessionsTabBtn');
-    const admissionBtn = document.getElementById('admissionTabBtn');
-    const dischargeBtn = document.getElementById('dischargeTabBtn');
-    const transferBtn  = document.getElementById('transferTabBtn');
+    const sessionsTab    = document.getElementById('sessionsTab');
+    const admissionTab   = document.getElementById('admissionTab');
+    const dischargeTab   = document.getElementById('dischargeTab');
+    const transferTab    = document.getElementById('transferTab');
+    const roomHistoryTab = document.getElementById('roomHistoryTab');
+    const sessionsBtn    = document.getElementById('sessionsTabBtn');
+    const admissionBtn   = document.getElementById('admissionTabBtn');
+    const dischargeBtn   = document.getElementById('dischargeTabBtn');
+    const transferBtn    = document.getElementById('transferTabBtn');
+    const roomHistoryBtn = document.getElementById('roomHistoryTabBtn');
 
-    [sessionsTab, admissionTab, dischargeTab, transferTab].forEach(t => { if(t) t.classList.remove('active'); });
-    [sessionsBtn, admissionBtn, dischargeBtn, transferBtn].forEach(b => { if(b) b.classList.remove('active'); });
+    [sessionsTab, admissionTab, dischargeTab, transferTab, roomHistoryTab].forEach(t => { if(t) t.classList.remove('active'); });
+    [sessionsBtn, admissionBtn, dischargeBtn, transferBtn, roomHistoryBtn].forEach(b => { if(b) b.classList.remove('active'); });
 
-    if (tab === 'sessions')       { sessionsTab.classList.add('active');  sessionsBtn.classList.add('active'); }
-    else if (tab === 'admission') { admissionTab.classList.add('active'); admissionBtn.classList.add('active'); }
-    else if (tab === 'discharge') { dischargeTab.classList.add('active'); dischargeBtn.classList.add('active'); }
-    else if (tab === 'transfer')  { transferTab.classList.add('active');  transferBtn.classList.add('active'); }
+    if (tab === 'sessions')         { sessionsTab.classList.add('active');    sessionsBtn.classList.add('active'); }
+    else if (tab === 'admission')   { admissionTab.classList.add('active');   admissionBtn.classList.add('active'); }
+    else if (tab === 'discharge')   { dischargeTab.classList.add('active');   dischargeBtn.classList.add('active'); }
+    else if (tab === 'transfer')    { transferTab.classList.add('active');    transferBtn.classList.add('active'); }
+    else if (tab === 'roomHistory') { roomHistoryTab.classList.add('active'); roomHistoryBtn.classList.add('active'); }
 }
 
 // ========== DELETE PATIENT ==========

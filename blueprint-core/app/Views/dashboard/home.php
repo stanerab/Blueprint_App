@@ -5471,7 +5471,7 @@ else {
                         }
                     });
                 } catch(e) { console.warn('Single session update skipped:', e); }
-                setTimeout(() => {
+               setTimeout(() => {
                     if (currentViewPatientId) {
                         loadPatientSummary(transferPatientId);
                         loadWardTransferHistory(transferPatientId);
@@ -5479,6 +5479,10 @@ else {
                         switchTab('transfer');
                     }
                 }, 500);
+
+                // Refresh calendar to show updated ward colours
+                for (const k in window.sessionCache) delete window.sessionCache[k];
+                if (typeof CalendarWidget !== 'undefined') CalendarWidget.refresh();
 
                 // Move patient option to correct ward optgroup in dropdown
                 const patientId  = document.getElementById('changeWardPatientId').value;

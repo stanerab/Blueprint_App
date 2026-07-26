@@ -3384,6 +3384,8 @@
                     option.textContent = text;
                     roomSelect.appendChild(option);
                 }
+                // Clear previous reason
+                document.querySelector('#changeRoomForm textarea[name="reason"]').value = '';
                 document.getElementById('changeRoomModal').style.display = 'flex';
                 bringModalToFront('changeRoomModal');
             } catch (err) { showMessage('Error loading patient data', true); }
@@ -3463,7 +3465,6 @@
         loadAdmissionNotes(patientId);
         loadDischargeNotes(patientId);
         loadWardTransferHistory(patientId);
-    console.log('Calling loadRoomHistory with patientId:', patientId);
                     loadRoomHistory(patientId);
 
         // Show Change Ward button only for Manor/Lakeside
@@ -3936,7 +3937,7 @@ else {
             document.getElementById('sessionDetailPatient').innerHTML = `<strong>${escapeHtml(patientName)}</strong>`;
             document.getElementById('sessionDetailDatetime').innerText = formattedDatetime;
             document.getElementById('sessionDetailWard').innerText = session.ward || '—';
-       document.getElementById('sessionDetailRoom').innerText = session.current_room || session.room_number || '—';
+    document.getElementById('sessionDetailRoom').innerText = session.room_number || session.current_room || session.patient_room || '—';
             
             let componentsHtml = '';
             const components = [
@@ -4047,25 +4048,40 @@ else {
             try {
                 const response = await fetch('<?= url('patients/change-room') ?>', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 const data = await response.json();
-              if (data.success) {
+            if (data.success) {
                     showMessage(data.message || 'Room updated successfully');
                     closeChangeRoomModal();
                     if (currentViewPatientId) {
                         loadPatientSummary(currentViewPatientId);
                         loadWardTransferHistory(currentViewPatientId);
                         loadRoomHistory(currentViewPatientId);
+                        switchTab('roomHistory');
                     }
-                    switchTab('roomHistory');
 
                     // Update patient dropdown option label live
                     const newRoom = formData.get('room_number');
                     const patientId = document.getElementById('changeRoomPatientId').value;
-                    const opt = document.querySelector(`#patientSelect option[value="${patientId}"]`);
+                 // Update patient dropdown option label and re-sort by room number
+                    const select = document.getElementById('patientSelect');
+                    const opt = select ? select.querySelector(`option[value="${patientId}"]`) : null;
                     if (opt && newRoom) {
                         const initialsMatch = opt.textContent.match(/–\s*([A-Z]+)$/);
                         const initials = initialsMatch ? initialsMatch[1] : opt.textContent;
                         opt.textContent = `Room ${newRoom} – ${initials}`;
-                        opt.setAttribute('value', patientId);
+                        opt.setAttribute('data-room', parseInt(newRoom));
+
+                        // Re-sort options within each optgroup by room number
+                        if (select) {
+                            Array.from(select.querySelectorAll('optgroup')).forEach(group => {
+                                const options = Array.from(group.querySelectorAll('option'));
+                                options.sort((a, b) => {
+                                    const roomA = parseInt(a.getAttribute('data-room') || a.textContent.match(/\d+/)?.[0] || 0);
+                                    const roomB = parseInt(b.getAttribute('data-room') || b.textContent.match(/\d+/)?.[0] || 0);
+                                    return roomA - roomB;
+                                });
+                                options.forEach(o => group.appendChild(o));
+                            });
+                        }
                     }
     // Update allActivePatients room number
                     const ap = allActivePatients.find(p => p.id == patientId);
@@ -5421,16 +5437,47 @@ else {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
             const data = await response.json();
-        if (data.success) {
+       if (data.success) {
                 showMessage(data.message || 'Patient transferred successfully');
                 closeChangeWardModal();
-const roomPatientId = document.getElementById('changeRoomPatientId').value;
-               setTimeout(() => {
-                    loadPatientSummary(roomPatientId);
-                    loadWardTransferHistory(roomPatientId);
-                    loadRoomHistory(roomPatientId);
-                    // Switch to room history tab to show updated entry
-                    switchTab('roomHistory');
+             const transferPatientId = document.getElementById('changeWardPatientId').value;
+        try {
+                    const transferNewRoom = formData.get('room_number');
+                  if (currentSingleSession && currentSingleSession.patient_id == transferPatientId) {
+                        currentSingleSession.ward = toWard;
+                        if (transferNewRoom) {
+                            currentSingleSession.room_number = transferNewRoom;
+                            currentSingleSession.current_room = transferNewRoom;
+                            currentSingleSession.patient_room = transferNewRoom;
+                        }
+                        const patientName = currentSingleSession.initials || currentSingleSession.patient_initials || '';
+                        if (document.getElementById('singleSessionModal').style.display === 'flex') {
+                            displaySingleSession(currentSingleSession, patientName);
+                        }
+                    }
+
+                    // Also update session cards so reopening the modal reads fresh data
+                    document.querySelectorAll(`.session-card[data-patient-id="${transferPatientId}"]`).forEach(card => {
+                        card.dataset.sessionWard = toWard;
+                        if (transferNewRoom) {
+                            card.dataset.sessionRoom = transferNewRoom;
+                            card.dataset.currentRoom = transferNewRoom;
+                        }
+                        card.setAttribute('data-ward', toWard.toLowerCase());
+                        const wardSpan = card.querySelector('.session-ward');
+                        if (wardSpan) {
+                            wardSpan.className = `session-ward ward-${toWard.toLowerCase()}`;
+                            wardSpan.textContent = toWard;
+                        }
+                    });
+                } catch(e) { console.warn('Single session update skipped:', e); }
+                setTimeout(() => {
+                    if (currentViewPatientId) {
+                        loadPatientSummary(transferPatientId);
+                        loadWardTransferHistory(transferPatientId);
+                        loadRoomHistory(transferPatientId);
+                        switchTab('transfer');
+                    }
                 }, 500);
 
                 // Move patient option to correct ward optgroup in dropdown
@@ -5453,6 +5500,14 @@ const roomPatientId = document.getElementById('changeRoomPatientId').value;
                         .find(g => g.label === `${toWard} Ward`);
                     if (targetGroup) {
                         targetGroup.appendChild(opt);
+                        // Re-sort by room number
+                        const options = Array.from(targetGroup.querySelectorAll('option'));
+                        options.sort((a, b) => {
+                            const roomA = parseInt(a.getAttribute('data-room') || a.textContent.match(/\d+/)?.[0] || 0);
+                            const roomB = parseInt(b.getAttribute('data-room') || b.textContent.match(/\d+/)?.[0] || 0);
+                            return roomA - roomB;
+                        });
+                        options.forEach(o => targetGroup.appendChild(o));
                     } else {
                         // Optgroup doesn't exist yet (ward had no patients) — create it
                         const newGroup = document.createElement('optgroup');

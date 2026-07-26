@@ -303,8 +303,7 @@ $result = $stmt->execute([$toWard, $roomNumber, $patientId]);
     // Audit log
     ActivityLog::create([
         'action_type' => 'ward_transfer',
-        'description' => 'Transferred patient ' . $patient->initials . ' from ' . $fromWard . ' to ' . $toWard . ($reason ? ' — ' . $reason : ''),
-        'patient_id'  => $patientId,
+        'description' => 'Transferred patient ' . $patient->initials . ' from ' . $fromWard . ' to ' . $toWard . ($reason ? ' - Reason: ' . $reason : ''),        'patient_id'  => $patientId,
         'session_id'  => null,
         'ward'        => $toWard
     ]);

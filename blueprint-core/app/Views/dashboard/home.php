@@ -2795,7 +2795,7 @@
         </div>
     </div>
 
-    <!-- SESSION MODAL -->
+    <!-- 1:1 SESSION MODAL -->
     <div id="sessionModal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h2><i class="bi bi-calendar-plus"></i> Add Session</h2><button class="modal-close" onclick="closeSessionModal()">✕</button></div>

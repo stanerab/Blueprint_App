@@ -131,7 +131,7 @@ $grouped = $grouped ?? [
                 <button id="sessionsTabBtn" class="tab-btn active" onclick="switchTab('sessions')">Sessions</button>
                 <button id="admissionTabBtn" class="tab-btn" onclick="switchTab('admission')">Admission Notes</button>
                 <button id="dischargeTabBtn" class="tab-btn" onclick="switchTab('discharge')">Discharge Notes</button>
-              <button id="transferTabBtn" class="tab-btn" onclick="switchTab('transfer')" style="display:none;">Transfer History</button>
+              <button id="transferTabBtn" class="tab-btn" onclick="switchTab('transfer')" style="display:none;">Ward History</button>
                 <button id="roomHistoryTabBtn" class="tab-btn" onclick="switchTab('roomHistory')" style="display:none;">Room History</button>
             </div>
             <div id="sessionsTab" class="tab-content active">
@@ -485,6 +485,12 @@ $grouped = $grouped ?? [
     max-height: 85vh;
     overflow-y: auto;
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
 }
 
 .modal-header {
@@ -708,7 +714,7 @@ function loadRoomHistory(patientId) {
     const container = document.getElementById('roomHistoryContent');
     container.innerHTML = '<div class="loading">Loading room history...</div>';
 
-    fetch(`/Blueprint/public/patients/room-history?id=${patientId}`)
+    fetch(`<?= url('patients/room-history') ?>?id=${patientId}`)
         .then(r => r.json())
         .then(data => {
             const btn = document.getElementById('roomHistoryTabBtn');
@@ -759,7 +765,7 @@ function loadWardTransferHistory(patientId) {
             }
 
             tabBtn.style.display = '';
-            tabBtn.textContent = `Transfer History (${data.length})`;
+            tabBtn.textContent = `Ward History (${data.length})`;
 
             const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
 
@@ -945,7 +951,7 @@ function loadAllSessions(patientId) {
                     <td class="status-icon">${s.carenotes_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
                     <td class="status-icon">${s.tracker_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
                     <td class="status-icon">${s.tasks_completed ? '<span class="component-badge completed">✓ Completed</span>' : '<span class="component-badge pending">✗ Not Completed</span>'}</td>
-                    <td>${s.notes ? `<button onclick="openNoteModal(${s.id})" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;color:#2563eb;cursor:pointer;white-space:nowrap;">View</button>` : '<span style="font-size:0.75rem;color:#94a3b8;font-style:italic;">None documented</span>'}</td>
+                    <td>${s.notes ? `<button onclick="openNoteModal(${s.id})" style="font-size:0.7rem;padding:2px 8px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;color:#2563eb;cursor:pointer;white-space:nowrap;">View</button>` : '<span style="font-size:0.75rem;color:#94a3b8;font-style:italic;">No notes recorded</span>'}</td>
                 </tr>`;
             });
 

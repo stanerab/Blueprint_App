@@ -5651,7 +5651,7 @@ else {
 
                 // Show tab with count badge
                 tabBtn.style.display = '';
-                tabBtn.textContent = `Transfer Ward History (${data.length})`;
+                tabBtn.textContent = `Ward History (${data.length})`;
 
                 const wardColours = { Hope: '#eab308', Lakeside: '#22c55e', Manor: '#3b82f6' };
 

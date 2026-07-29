@@ -2795,7 +2795,7 @@
         </div>
     </div>
 
-    <!-- 1:1 SESSION MODAL -->
+    <!-- SESSION MODAL -->
     <div id="sessionModal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h2><i class="bi bi-calendar-plus"></i> Add Session</h2><button class="modal-close" onclick="closeSessionModal()">✕</button></div>
@@ -4271,7 +4271,13 @@ else {
             try {
                 const response = await fetch('<?= url('patients/update-core10') ?>', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ patient_id: patientId, core10_admission: completed, csrf_token: '<?= csrf_token() ?>' }) });
                 const data = await response.json();
-                if (data.success) { showMessage('CORE-10 admission status updated'); core10EditMode = false; loadPatientSummary(patientId); const editBtn = document.getElementById('editCore10Btn'); if (editBtn) editBtn.style.display = 'inline-block'; }
+if (data.success) {
+                    showMessage('CORE-10 admission status updated');
+                    core10EditMode = false;
+                    const coreSpan = document.getElementById('viewPatientAdmissionCore');
+if (coreSpan) coreSpan.innerHTML = `<span class="badge ${completed ? 'badge-success' : 'badge-warning'}">${completed ? 'Completed' : 'Pending'}</span>`;
+                    const editBtn = document.getElementById('editCore10Btn');
+                    if (editBtn) editBtn.style.display = 'inline-block';                }
                 else showMessage(data.error || 'Failed to update CORE-10', true);
             } catch (err) { showMessage('Network error', true); console.error(err); }
         }
@@ -4345,13 +4351,13 @@ else {
                     })
                 });
                 const data = await response.json();
-                if (data.success) {
+              if (data.success) {
                     showMessage('CORE-10 discharge status updated');
                     dischargeCore10EditMode = false;
-                    loadPatientSummary(patientId);
+                    const coreSpan = document.getElementById('viewPatientDischargeCore');
+if (coreSpan) coreSpan.innerHTML = `<span class="badge ${completed ? 'badge-success' : 'badge-warning'}">${completed ? 'Completed' : 'Pending'}</span>`;
                     const editBtn = document.getElementById('editDischargeCore10Btn');
-                    if (editBtn) editBtn.style.display = 'inline-block';
-                } else {
+                    if (editBtn) editBtn.style.display = 'inline-block';                } else {
                     showMessage(data.error || 'Failed to update discharge CORE-10', true);
                 }
             } catch (err) {

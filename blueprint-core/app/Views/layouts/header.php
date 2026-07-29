@@ -271,7 +271,16 @@
                                 <?= ucwords($_SESSION['role'] ?? 'user'); ?>
                             </span>
                         </li>
+                       <li><hr class="dropdown-divider"></li>
+                        <?php if (!empty($_SESSION['is_admin'])): ?>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2"
+                               href="<?= url('admin/users') ?>">
+                                <i class="bi bi-people"></i> User Management
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
+                        <?php endif; ?>
                         <li>
                             <a class="dropdown-item text-danger d-flex align-items-center gap-2"
                                href="<?= url('logout'); ?>">

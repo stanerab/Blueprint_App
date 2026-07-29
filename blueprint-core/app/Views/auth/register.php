@@ -92,7 +92,7 @@
             </div>
             
             <div class="form-footer">
-                <a href="<?php echo url('login'); ?>">Already have an account? Login</a>
+                <a href="<?php echo url('admin/users') ?>"><i class="bi bi-arrow-left"></i> Back to User Management</a>
             </div>
         </form>
     </div>

@@ -160,6 +160,12 @@ $router->add('GET', '/sessions/archived', 'SessionController@archived');
 $router->add('GET', '/wards/{ward}', 'WardController@show');
 $router->add('POST', '/patients/transfer-ward', 'PatientController@transferWard');
 $router->add('GET',  '/patients/ward-history',  'PatientController@wardHistoryJson');
+// Admin routes
+$router->add('GET',  '/admin/users',        'AdminController@users');
+$router->add('POST', '/admin/toggle-active', 'AdminController@toggleActive');
+$router->add('POST', '/admin/toggle-admin',  'AdminController@toggleAdmin');
+$router->add('POST', '/admin/delete-user',   'AdminController@deleteUser');
+$router->add('POST', '/admin/edit-user',     'AdminController@editUser');
 $router->add('GET', '/patients/room-history', 'PatientController@roomHistoryJson');
 
 

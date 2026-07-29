@@ -48,7 +48,9 @@
                 </div>
                 
                 <div class="form-footer">
-                    <a href="<?php echo url('register'); ?>">Create new account</a>
+                   <?php if (!empty($_SESSION['is_admin'])): ?>
+                <a href="<?php echo url('register'); ?>"><i class="bi bi-person-plus"></i> Create account</a>
+                <?php endif; ?>
                 <a href="<?php echo url('forgot-password'); ?>">Forgot password?</a> 
                 </div>
             </form>

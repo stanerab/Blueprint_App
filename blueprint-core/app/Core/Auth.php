@@ -5,29 +5,39 @@ use App\Models\User;
 
 class Auth
 {
-    public static function attempt($username, $password)
+   public static function attempt($username, $password)
     {
-        // Find user by username or email
         $user = User::findByUsername($username);
         
         if ($user) {
-            // Verify password
+            // Check account is active
+            if (isset($user->is_active) && !$user->is_active) {
+                return 'disabled';
+            }
+
             if (password_verify($password, $user->password_hash)) {
-                $_SESSION['user_id'] = $user->id;
-                $_SESSION['username'] = $user->username;
-                $_SESSION['full_name'] = $user->full_name;
-                $_SESSION['role'] = $user->role;
-                $_SESSION['logged_in'] = true;
+                $_SESSION['user_id']      = $user->id;
+                $_SESSION['username']     = $user->username;
+                $_SESSION['full_name']    = $user->full_name;
+                $_SESSION['role']         = $user->role;
+                $_SESSION['is_admin']     = (bool)($user->is_admin ?? false);
+                $_SESSION['logged_in']    = true;
                 $_SESSION['last_activity'] = time();
                 
-                // Update last login
                 $user->updateLastLogin();
-                
                 return true;
             }
         }
         
         return false;
+    }
+
+    public static function requireAdmin()
+    {
+        self::requireLogin();
+        if (empty($_SESSION['is_admin'])) {
+            redirect('dashboard');
+        }
     }
     
     public static function check()

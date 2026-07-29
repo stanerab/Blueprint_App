@@ -44,8 +44,13 @@ class AuthController
         view('auth.register');
     }
     
-    public function register()
+   public function register()
     {
+        Auth::requireLogin();
+        if (empty($_SESSION['is_admin'])) {
+            redirect('dashboard');
+            return;
+        }
         $errors = [];
         
         if (empty($_POST['username'])) {

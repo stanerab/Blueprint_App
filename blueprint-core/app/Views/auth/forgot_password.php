@@ -198,11 +198,6 @@
 <div class="login-container">
     <div class="login-box">
 
-        <div class="logo">
-            <h1>Blueprint</h1>
-            <p class="tagline">Clinical Management System</p>
-        </div>
-
         <h2>Reset Your Password</h2>
         <p class="login-subtitle">Enter your email address and we'll send you a reset link.</p>
 

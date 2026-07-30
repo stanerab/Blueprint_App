@@ -118,7 +118,8 @@ public function register()
                             'patient_id'  => null,
                             'ward'        => null
                         ]);
-                        $success = "Invitation sent to {$email} successfully. The link expires in 48 hours.";
+                     header('Location: ' . url('admin/users/list?created=1'));
+                        exit;;
                     } else {
                         $errors[] = 'Failed to send invitation email. Please try again.';
                     }

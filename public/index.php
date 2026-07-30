@@ -164,6 +164,7 @@ $router->add('POST', '/patients/transfer-ward', 'PatientController@transferWard'
 $router->add('GET',  '/patients/ward-history',  'PatientController@wardHistoryJson');
 // Admin routes
 $router->add('GET',  '/admin/users',        'AdminController@users');
+$router->add('GET',  '/admin/users/list',   'AdminController@usersList');
 $router->add('POST', '/admin/toggle-active', 'AdminController@toggleActive');
 $router->add('POST', '/admin/toggle-admin',  'AdminController@toggleAdmin');
 $router->add('POST', '/admin/delete-user',   'AdminController@deleteUser');

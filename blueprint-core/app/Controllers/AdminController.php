@@ -15,8 +15,14 @@ class AdminController
         $this->db = Database::getInstance();
     }
 
-    // ==================== USER LIST ====================
+  // ==================== ADMIN LANDING ====================
     public function users()
+    {
+        view('admin/users');
+    }
+
+    // ==================== USER LIST ====================
+    public function usersList()
     {
         $stmt = $this->db->prepare("
             SELECT id, username, email, full_name, role, is_admin, is_active, created_at, last_login
@@ -25,7 +31,7 @@ class AdminController
         ");
         $stmt->execute();
         $users = $stmt->fetchAll(\PDO::FETCH_OBJ);
-        view('admin/users', ['users' => $users]);
+        view('admin/users-list', ['users' => $users]);
     }
 
     // ==================== TOGGLE ACTIVE ====================

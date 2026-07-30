@@ -458,6 +458,20 @@
 
 <!-- ACTIVITIES TIMELINE -->
 <div class="activities-full">
+
+    <?php if (!empty($_SESSION['is_admin'])): ?>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <?php foreach(['all' => 'All Actions', 'clinical' => 'Clinical', 'admin' => 'Admin'] as $key => $label): ?>
+            <button
+                onclick="filterByCategory('<?= $key ?>')"
+                id="cat-btn-<?= $key ?>"
+                style="padding:0.35rem 1rem;border-radius:2rem;font-size:0.78rem;font-weight:600;cursor:pointer;border:1px solid #e2e8f0;background:white;color:#475569;transition:all 0.2s;">
+                <?= $label ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
     <?php if(!empty($activities)): ?>
        <div class="activities-timeline">
             <?php 
@@ -473,7 +487,7 @@
                     <?= $createdAtLondon->format('l, d F Y') ?>
                 </div>
             <?php endif; ?>
-                <div class="activity-full-item">
+                <div class="activity-full-item" data-action-type="<?= htmlspecialchars($activity->action_type ?? '') ?>">
                     <div class="activity-time"><?= $createdAtLondon->format('H:i') ?></div>
               <div class="activity-icon-large">
     <?php
@@ -498,7 +512,11 @@
         case 'group_session_updated':   $icon = 'bi-pencil'; $isBootstrap = true; break;
         case 'report_generated':        $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
         case 'report_drilldown_viewed': $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
-        case 'report_csv_exported':     $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
+       case 'report_csv_exported':     $icon = 'bi-bar-chart-line'; $isBootstrap = true; break;
+        case 'user_invited':            $icon = 'bi-envelope';        $isBootstrap = true; break;
+        case 'user_registered':         $icon = 'bi-person-check';    $isBootstrap = true; break;
+        case 'user_updated':            $icon = 'bi-person-gear';     $isBootstrap = true; break;
+        case 'user_deleted':            $icon = 'bi-person-x';        $isBootstrap = true; break;
     }
     if ($isBootstrap) {
         echo '<i class="bi ' . $icon . '"></i>';
@@ -544,3 +562,49 @@
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+    // ==================== CATEGORY FILTER ====================
+    const adminActions = ['user_invited', 'user_registered', 'user_updated', 'user_deleted'];
+
+    function filterByCategory(category) {
+        ['all', 'clinical', 'admin'].forEach(k => {
+            const btn = document.getElementById('cat-btn-' + k);
+            if (btn) {
+                btn.style.background  = k === category ? '#1e3a8a' : 'white';
+                btn.style.color       = k === category ? 'white'   : '#475569';
+                btn.style.borderColor = k === category ? '#1e3a8a' : '#e2e8f0';
+            }
+        });
+
+        document.querySelectorAll('.activity-full-item').forEach(item => {
+            const actionType = item.getAttribute('data-action-type') || '';
+            const isAdmin    = adminActions.includes(actionType);
+            if (category === 'all')      item.style.display = '';
+            else if (category === 'admin')    item.style.display = isAdmin  ? '' : 'none';
+            else                              item.style.display = isAdmin  ? 'none' : '';
+        });
+
+        // Hide empty date headers
+        document.querySelectorAll('.timeline-date').forEach(header => {
+            let next = header.nextElementSibling;
+            let hasVisible = false;
+            while (next && !next.classList.contains('timeline-date')) {
+                if (next.classList.contains('activity-full-item') && next.style.display !== 'none') {
+                    hasVisible = true;
+                    break;
+                }
+                next = next.nextElementSibling;
+            }
+            header.style.display = hasVisible ? '' : 'none';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        <?php if (!empty($_SESSION['is_admin'])): ?>
+            filterByCategory('all');
+        <?php else: ?>
+            filterByCategory('clinical');
+        <?php endif; ?>
+    });
+</script>

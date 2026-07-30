@@ -88,8 +88,7 @@
     }
 
     .input-wrap { position: relative; }
-
-    .input-wrap i {
+.input-wrap i {
         position: absolute;
         left: 0.85rem;
         top: 50%;
@@ -99,9 +98,20 @@
         pointer-events: none;
     }
 
-    .input-wrap input {
+    .input-wrap .toggle-pwd {
+        left: auto;
+        right: 0.85rem;
+        pointer-events: all;
+        cursor: pointer;
+        font-size: 0.9rem;
+        z-index: 2;
+    }
+
+    .input-wrap .toggle-pwd:hover { color: #1e3a8a; }
+
+  .input-wrap input {
         width: 100%;
-        padding: 0.65rem 0.9rem 0.65rem 2.4rem;
+        padding: 0.65rem 2.4rem 0.65rem 2.4rem;
         border: 1.5px solid #e2e8f0;
         border-radius: 0.6rem;
         font-size: 0.88rem;
@@ -235,12 +245,13 @@
             <input type="hidden" name="email" value="<?= htmlspecialchars($email) ?>">
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
-            <div class="form-group">
+           <div class="form-group">
                 <label for="password">New Password</label>
                 <div class="input-wrap">
                     <i class="bi bi-lock"></i>
                     <input type="password" id="password" name="password"
                         placeholder="Min. 8 characters, one number, one special character">
+                    <i class="bi bi-eye toggle-pwd" id="togglePassword"></i>
                 </div>
                 <div style="margin-top:0.5rem;">
                     <div id="req-length"  class="pwd-req">✗ At least 8 characters</div>
@@ -255,6 +266,7 @@
                     <i class="bi bi-lock-fill"></i>
                     <input type="password" id="confirm_password" name="confirm_password"
                         placeholder="Confirm your password">
+                    <i class="bi bi-eye toggle-pwd" id="toggleConfirm"></i>
                 </div>
             </div>
 

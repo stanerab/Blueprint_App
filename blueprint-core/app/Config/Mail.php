@@ -1,19 +1,55 @@
 <?php
 namespace App\Config;
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 class Mail
 {
     public static function getConfig()
     {
-        // Load from environment variables or config file
         return [
-            'host' => getenv('SMTP_HOST') ?: 'smtp.gmail.com',
-            'port' => getenv('SMTP_PORT') ?: 587,
-            'username' => getenv('SMTP_USERNAME') ?: '',
-            'password' => getenv('SMTP_PASSWORD') ?: '',
-            'encryption' => getenv('SMTP_ENCRYPTION') ?: 'tls',
-            'from_email' => getenv('MAIL_FROM_EMAIL') ?: 'noreply@' . $_SERVER['HTTP_HOST'],
-            'from_name' => getenv('MAIL_FROM_NAME') ?: 'Blueprint App'
+            'host'       => $_ENV['SMTP_HOST']       ?? 'smtp.hostinger.com',
+            'port'       => $_ENV['SMTP_PORT']       ?? 587,
+            'username'   => $_ENV['SMTP_USERNAME']   ?? '',
+            'password'   => $_ENV['SMTP_PASSWORD']   ?? '',
+            'encryption' => $_ENV['SMTP_ENCRYPTION'] ?? 'tls',
+            'from_email' => $_ENV['MAIL_FROM_EMAIL'] ?? 'noreply@blueprintcaretech.com',
+            'from_name'  => $_ENV['MAIL_FROM_NAME']  ?? 'Blueprint Clinical System',
         ];
+    }
+
+    public static function send(string $toEmail, string $toName, string $subject, string $htmlBody): bool
+    {
+        $config = self::getConfig();
+
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = $config['host'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $config['username'];
+            $mail->Password   = $config['password'];
+            $mail->SMTPSecure = $config['encryption'] === 'ssl'
+                ? PHPMailer::ENCRYPTION_SMTPS
+                : PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = (int)$config['port'];
+
+            $mail->setFrom($config['from_email'], $config['from_name']);
+            $mail->addAddress($toEmail, $toName);
+
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $htmlBody;
+            $mail->AltBody = strip_tags($htmlBody);
+
+            $mail->send();
+            return true;
+
+        } catch (Exception $e) {
+            error_log('Blueprint Mailer error: ' . $mail->ErrorInfo);
+            return false;
+        }
     }
 }

@@ -77,7 +77,7 @@
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" 
-                       placeholder="Choose a password (min. 6 characters)">
+                      placeholder="Min. 8 characters, one number, one special character">
             </div>
             
             <div class="form-group">

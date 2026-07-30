@@ -13,6 +13,18 @@
         display: flex;
         flex-direction: column;
     }
+
+    .pwd-req {
+        color: #dc2626;
+        transition: color 0.2s;
+        margin-bottom: 0.2rem;
+    }
+    .pwd-req.met {
+        color: #065f46;
+    }
+    .pwd-req.met::first-letter {
+        content: '✓';
+    }
     
     /* The content wrapper grows to fill space */
     .content-wrapper {
@@ -69,8 +81,11 @@
                         <div class="mb-3">
                             <label for="password" class="form-label">New Password</label>
                             <input type="password" class="form-control" id="password" name="password" required minlength="6">
-                            <div class="form-text">Minimum 6 characters</div>
-                        </div>
+<div id="passwordStrength" style="margin-top:0.5rem;font-size:0.78rem;">
+                            <div id="req-length"  class="pwd-req">✗ At least 8 characters</div>
+                            <div id="req-number"  class="pwd-req">✗ At least one number</div>
+                            <div id="req-special" class="pwd-req">✗ At least one special character (!, @, #, $...)</div>
+                        </div>                        </div>
                         <div class="mb-3">
                             <label for="confirm_password" class="form-label">Confirm Password</label>
                             <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
@@ -85,3 +100,26 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('password').addEventListener('input', function() {
+        const val = this.value;
+
+        const lenOk     = val.length >= 8;
+        const numberOk  = /[0-9]/.test(val);
+        const specialOk = /[^a-zA-Z0-9]/.test(val);
+
+        const reqLength  = document.getElementById('req-length');
+        const reqNumber  = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
+
+        reqLength.className  = 'pwd-req' + (lenOk     ? ' met' : '');
+        reqNumber.className  = 'pwd-req' + (numberOk  ? ' met' : '');
+        reqSpecial.className = 'pwd-req' + (specialOk ? ' met' : '');
+
+        reqLength.textContent  = (lenOk     ? '✓' : '✗') + ' At least 8 characters';
+        reqNumber.textContent  = (numberOk  ? '✓' : '✗') + ' At least one number';
+        reqSpecial.textContent = (specialOk ? '✓' : '✗') + ' At least one special character (!, @, #, $...)';
+    });
+
+</script>

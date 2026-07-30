@@ -321,6 +321,11 @@
 </style>
 
 <div class="admin-page">
+    <?php if (isset($_GET['created'])): ?>
+        <div style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:0.6rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;">
+            <i class="bi bi-check-circle"></i> New account created successfully.
+        </div>
+    <?php endif; ?>
     <div class="admin-header">
         <div>
             <h1><i class="bi bi-people"></i> User Management</h1>

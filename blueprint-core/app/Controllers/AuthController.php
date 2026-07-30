@@ -37,11 +37,18 @@ class AuthController
 
     public function showRegister()
     {
+        // If logged in as admin, show register form
         if (Auth::check()) {
-            header('Location: ' . url('dashboard'));
-            exit;
+            if (empty($_SESSION['is_admin'])) {
+                header('Location: ' . url('dashboard'));
+                exit;
+            }
+            view('auth.register');
+            return;
         }
-        view('auth.register');
+        // Not logged in — redirect to login
+        header('Location: ' . url('login'));
+        exit;
     }
     
    public function register()
@@ -51,8 +58,10 @@ class AuthController
             redirect('dashboard');
             return;
         }
+
         $errors = [];
-        
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($_POST['username'])) {
             $errors[] = 'Username is required';
         }
@@ -61,8 +70,12 @@ class AuthController
             $errors[] = 'Valid email is required';
         }
         
-        if (empty($_POST['password']) || strlen($_POST['password']) < 6) {
-            $errors[] = 'Password must be at least 6 characters';
+       if (empty($_POST['password']) || strlen($_POST['password']) < 8) {
+            $errors[] = 'Password must be at least 8 characters';
+        } elseif (!preg_match('/[0-9]/', $_POST['password'])) {
+            $errors[] = 'Password must contain at least one number';
+        } elseif (!preg_match('/[^a-zA-Z0-9]/', $_POST['password'])) {
+            $errors[] = 'Password must contain at least one special character';
         }
         
         if ($_POST['password'] !== ($_POST['confirm_password'] ?? '')) {
@@ -75,13 +88,15 @@ class AuthController
         
         if (empty($errors)) {
             if (User::create($_POST)) {
-                header('Location: ' . url('login?registered=1'));
+             header('Location: ' . url('admin/users?created=1'));
                 exit;
             } else {
                 $errors[] = 'Registration failed. Username or email may already exist.';
             }
         }
         
+     } // end POST check
+
         view('auth.register', ['errors' => $errors]);
     }
 
@@ -112,19 +127,32 @@ class AuthController
         $user->reset_expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
         $user->save();
         
-        $resetLink = url("reset-password?token=" . urlencode($token) . "&email=" . urlencode($email));
-        
-        $subject = "Reset Your Password";
-        $message = "Click the link below to reset your password:\n\n" . $resetLink . "\n\nThis link expires in 1 hour.";
-        $headers = "From: noreply@" . $_SERVER['HTTP_HOST'] . "\r\n";
-        
-        // Using mail() – replace with PHPMailer if needed
-        $mailSent = mail($email, $subject, $message, $headers);
-        
+      $resetLink = url("reset-password?token=" . urlencode($token) . "&email=" . urlencode($email));
+
+        $htmlBody = "
+        <div style='font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:2rem;'>
+            <div style='background:#1e3a8a;padding:1.5rem;border-radius:0.75rem 0.75rem 0 0;text-align:center;'>
+                <h1 style='color:white;margin:0;font-size:1.4rem;'>Blueprint</h1>
+                <p style='color:rgba(255,255,255,0.8);margin:0.25rem 0 0;font-size:0.85rem;'>Clinical Management System</p>
+            </div>
+            <div style='background:white;border:1px solid #e2e8f0;border-top:none;padding:2rem;border-radius:0 0 0.75rem 0.75rem;'>
+                <h2 style='color:#1e293b;font-size:1.1rem;margin:0 0 1rem;'>Password Reset Request</h2>
+                <p style='color:#475569;font-size:0.9rem;line-height:1.6;'>We received a request to reset your Blueprint password. Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
+                <div style='text-align:center;margin:1.5rem 0;'>
+                    <a href='{$resetLink}' style='background:#1e3a8a;color:white;padding:0.75rem 2rem;border-radius:0.5rem;text-decoration:none;font-weight:600;font-size:0.9rem;display:inline-block;'>Reset My Password</a>
+                </div>
+                <p style='color:#94a3b8;font-size:0.78rem;line-height:1.6;'>If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
+                <hr style='border:none;border-top:1px solid #f1f5f9;margin:1.5rem 0;'>
+                <p style='color:#94a3b8;font-size:0.72rem;text-align:center;margin:0;'>Blueprint Clinical System &nbsp;·&nbsp; blueprintcaretech.com</p>
+            </div>
+        </div>";
+
+       $mailSent = \App\Config\Mail::send($email, $email, 'Reset Your Blueprint Password', $htmlBody);
+
         if ($mailSent) {
-            $_SESSION['success'] = 'A password reset link has been sent to your email.';
+            $_SESSION['success'] = 'A password reset link has been sent to ' . htmlspecialchars($email) . '. Please check your inbox.';
         } else {
-            $_SESSION['error'] = 'Failed to send email. Please try again later.';
+            $_SESSION['error'] = 'Failed to send email. Please check your email address or contact your administrator.';
         }
         
         header('Location: ' . url('forgot-password'));
@@ -171,8 +199,20 @@ class AuthController
             exit;
         }
         
-        if (strlen($password) < 6) {
-            $_SESSION['error'] = 'Password must be at least 6 characters.';
+       if (strlen($password) < 8) {
+            $_SESSION['error'] = 'Password must be at least 8 characters.';
+            header("Location: " . url("reset-password?token=$token&email=$email"));
+            exit;
+        }
+
+        if (!preg_match('/[0-9]/', $password)) {
+            $_SESSION['error'] = 'Password must contain at least one number.';
+            header("Location: " . url("reset-password?token=$token&email=$email"));
+            exit;
+        }
+
+        if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+            $_SESSION['error'] = 'Password must contain at least one special character.';
             header("Location: " . url("reset-password?token=$token&email=$email"));
             exit;
         }
@@ -184,7 +224,7 @@ class AuthController
             exit;
         }
         
-        $user->password = password_hash($password, PASSWORD_DEFAULT);
+       $user->password_hash = password_hash($password, PASSWORD_DEFAULT);
         $user->reset_token = null;
         $user->reset_expires = null;
         $user->save();

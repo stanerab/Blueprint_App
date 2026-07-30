@@ -1,7 +1,13 @@
 <?php $title = 'Accept Invitation'; ?>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accept Invitation — Blueprint</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
 
-<style>
     .app-footer, .site-footer, footer:not(.login-footer) { display: none !important; }
     html, body { height: 100%; margin: 0; padding: 0; background: #f0f4f8; }
 
@@ -140,6 +146,8 @@
     .pwd-req { color: #dc2626; transition: color 0.2s; margin-bottom: 0.2rem; font-size: 0.78rem; }
     .pwd-req.met { color: #065f46; }
 </style>
+</head>
+<body>
 
 <div class="invite-container">
     <div class="invite-box">
@@ -276,3 +284,5 @@ document.getElementById('password')?.addEventListener('input', function() {
     reqSpecial.textContent = (specialOk ? '✓' : '✗') + ' At least one special character';
 });
 </script>
+</body>
+</html>

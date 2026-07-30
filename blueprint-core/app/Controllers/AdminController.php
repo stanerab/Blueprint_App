@@ -95,7 +95,7 @@ class AdminController
             $userStmt->execute([$userId]);
             $user = $userStmt->fetch(\PDO::FETCH_OBJ);
             $name = $user->full_name ?? $user->username ?? 'Unknown';
-            $action = $isAdmin ? 'promoted to admin' : 'removed admin rights from';
+          $action = $isAdmin ? 'granted admin permission to' : 'removed admin permission from';
 
             ActivityLog::create([
                 'action_type' => 'user_updated',

@@ -142,20 +142,22 @@
     .badge-active { display: inline-block; padding: 2px 8px; border-radius: 2rem; font-size: 0.7rem; font-weight: 600; background: #d1fae5; color: #065f46; }
     .badge-inactive { display: inline-block; padding: 2px 8px; border-radius: 2rem; font-size: 0.7rem; font-weight: 600; background: #fee2e2; color: #991b1b; }
 
-    .action-btns { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+   .action-btns { display: flex; gap: 0.4rem; align-items: center; flex-wrap: nowrap; }
 
-    .btn-action {
+ .btn-action {
         display: inline-flex;
         align-items: center;
-        gap: 0.3rem;
-        padding: 0.3rem 0.7rem;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
         border-radius: 0.4rem;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 500;
         cursor: pointer;
         border: 1px solid;
         transition: all 0.15s;
         background: white;
+        white-space: nowrap;
+        height: 28px;
     }
 
     .btn-action.edit        { border-color: #e2e8f0; color: #475569; }
@@ -255,7 +257,7 @@
                                 <?= $u->is_active ? 'Active' : 'Inactive' ?>
                             </span>
                         </td>
-                        <td><?= $u->last_login ? date('d/m/Y H:i', strtotime($u->last_login)) : '—' ?></td>
+                        <td><?= $u->last_login ? date('d/m/Y', strtotime($u->last_login)) : '—' ?></td>
                         <td><?= date('d/m/Y', strtotime($u->created_at)) ?></td>
                         <td>
                             <?php if ($u->id != $_SESSION['user_id']): ?>

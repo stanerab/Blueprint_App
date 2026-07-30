@@ -281,12 +281,6 @@
             <i class="bi bi-arrow-left"></i> Back to Login
         </a>
 
-        <div class="login-footer-note">
-            <span><i class="bi bi-shield-lock"></i> Secure</span>
-            <span><i class="bi bi-file-earmark-lock"></i> GDPR compliant</span>
-            <span><i class="bi bi-eye-slash"></i> Data protected</span>
-        </div>
-
     </div>
 </div>
 

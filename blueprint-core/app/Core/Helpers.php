@@ -18,6 +18,20 @@ function view($view, $data = [])
         die("View file not found: {$viewPath}");
     }
 
+    // Auth pages render without layout
+    $noLayoutViews = [
+        'auth.login',
+        'auth.register',
+        'auth.accept-invite',
+        'auth.forgot-password',
+        'auth.reset-password',
+    ];
+
+    if (in_array($view, $noLayoutViews)) {
+        require $viewPath;
+        return;
+    }
+
     require APP_PATH . '/Views/layouts/header.php';
     require $viewPath;
     require APP_PATH . '/Views/layouts/footer.php';

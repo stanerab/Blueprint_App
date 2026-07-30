@@ -233,14 +233,36 @@ public function showAcceptInvite()
         // Mark invite as used
         $db->prepare("UPDATE user_invites SET used = 1 WHERE id = ?")->execute([$invite->id]);
 
+      // Get the newly created user ID
+        $db3 = \App\Config\Database::getInstance();
+        $newUser = $db3->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
+        $newUser->execute([$username]);
+        $newUserId = $newUser->fetchColumn();
+
         \App\Models\ActivityLog::create([
             'action_type' => 'user_registered',
-            'description' => "{$invite->full_name} accepted their invitation and created an account",
+            'description' => "{$fullName} accepted their invitation and created a Blueprint account (username: {$username})",
+            'user_id'     => $newUserId ?: null,
+            'user_name'   => $fullName,
             'patient_id'  => null,
             'ward'        => null
         ]);
 
-        $_SESSION['success'] = 'Your account has been created successfully. Please log in.';
+        // Notify admin by email
+        $db2  = \App\Config\Database::getInstance();
+        $admins = $db2->query("SELECT email, full_name FROM users WHERE is_admin = 1 AND is_active = 1")->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($admins as $admin) {
+            $htmlBody = "
+            <p>Hi {$admin->full_name},</p>
+            <p><strong>{$fullName}</strong> has accepted their Blueprint invitation and created an account.</p>
+            <p>Username: <strong>{$username}</strong><br>Email: <strong>{$email}</strong><br>Role: <strong>{$role}</strong></p>
+            <p>You can view and manage this account in the <a href='" . url('admin/users/list') . "'>User Management</a> page.</p>
+            <p>Blueprint Clinical System<br>blueprintcaretech.com</p>";
+
+            \App\Config\Mail::send($admin->email, $admin->full_name, "{$fullName} has joined Blueprint", $htmlBody);
+        }
+
+      $_SESSION['success'] = 'Your account has been created successfully. Please log in.';
         header('Location: ' . url('login?registered=1'));
         exit;
     }
@@ -374,9 +396,9 @@ public function showAcceptInvite()
         $user->reset_token = null;
         $user->reset_expires = null;
         $user->save();
-        
-        $_SESSION['success'] = 'Your password has been reset. Please log in.';
-        header('Location: ' . url('login'));
+
+      $_SESSION['success'] = 'Your password has been reset successfully. Please log in with your new password.';
+        header('Location: ' . url('login?reset=1'));
         exit;
     }
 }

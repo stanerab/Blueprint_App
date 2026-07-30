@@ -198,6 +198,11 @@
 <div class="login-container">
     <div class="login-box">
 
+     <div class="logo">
+            <h1>Blueprint</h1>
+            <p class="tagline">Clinical Management System</p>
+        </div>
+
         <h2>Reset Your Password</h2>
         <p class="login-subtitle">Enter your email address and we'll send you a reset link.</p>
 
@@ -237,12 +242,6 @@
         <a href="<?= url('login') ?>" class="back-link">
             <i class="bi bi-arrow-left"></i> Back to Login
         </a>
-
-        <div class="login-footer-note">
-            <span><i class="bi bi-shield-lock"></i> Secure</span>
-            <span><i class="bi bi-file-earmark-lock"></i> GDPR compliant</span>
-            <span><i class="bi bi-eye-slash"></i> Data protected</span>
-        </div>
 
     </div>
 </div>

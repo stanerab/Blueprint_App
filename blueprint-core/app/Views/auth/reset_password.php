@@ -309,4 +309,21 @@ document.getElementById('password').addEventListener('input', function() {
     reqNumber.textContent  = (numberOk  ? '✓' : '✗') + ' At least one number';
     reqSpecial.textContent = (specialOk ? '✓' : '✗') + ' At least one special character (!, @, #, $...)';
 });
+
+document.getElementById('togglePassword').addEventListener('click', function() {
+        const input = document.getElementById('password');
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        this.classList.toggle('bi-eye', !isPassword);
+        this.classList.toggle('bi-eye-slash', isPassword);
+    });
+
+    document.getElementById('toggleConfirm').addEventListener('click', function() {
+        const input = document.getElementById('confirm_password');
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        this.classList.toggle('bi-eye', !isPassword);
+        this.classList.toggle('bi-eye-slash', isPassword);
+    });
+
 </script>

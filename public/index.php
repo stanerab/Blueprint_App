@@ -76,8 +76,10 @@ $router->add('GET', '/', 'AuthController@showLogin');
 $router->add('GET', '/login', 'AuthController@showLogin');
 $router->add('POST', '/login', 'AuthController@login');
 $router->add('GET', '/logout', 'AuthController@logout');
-$router->add('GET', '/register', 'AuthController@showRegister');
-$router->add('POST', '/register', 'AuthController@register');
+$router->add('GET',  '/register',       'AuthController@showRegister');
+$router->add('POST', '/register',       'AuthController@register');
+$router->add('GET',  '/accept-invite',  'AuthController@showAcceptInvite');
+$router->add('POST', '/accept-invite',  'AuthController@acceptInvite');
 
 /* DASHBOARD */
 $router->add('GET', '/dashboard', 'DashboardController@index');

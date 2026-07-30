@@ -51,7 +51,7 @@ class AuthController
         exit;
     }
     
-   public function register()
+public function register()
     {
         Auth::requireLogin();
         if (empty($_SESSION['is_admin'])) {
@@ -59,47 +59,192 @@ class AuthController
             return;
         }
 
-        $errors = [];
+        $errors  = [];
+        $success = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (empty($_POST['username'])) {
-            $errors[] = 'Username is required';
-        }
-        
-        if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Valid email is required';
-        }
-        
-       if (empty($_POST['password']) || strlen($_POST['password']) < 8) {
-            $errors[] = 'Password must be at least 8 characters';
-        } elseif (!preg_match('/[0-9]/', $_POST['password'])) {
-            $errors[] = 'Password must contain at least one number';
-        } elseif (!preg_match('/[^a-zA-Z0-9]/', $_POST['password'])) {
-            $errors[] = 'Password must contain at least one special character';
-        }
-        
-        if ($_POST['password'] !== ($_POST['confirm_password'] ?? '')) {
-            $errors[] = 'Passwords do not match';
-        }
-        
-        if (empty($_POST['role']) || trim($_POST['role']) === '') {
-            $errors[] = 'Role is required';
-        }
-        
-        if (empty($errors)) {
-            if (User::create($_POST)) {
-             header('Location: ' . url('admin/users?created=1'));
-                exit;
-            } else {
-                $errors[] = 'Registration failed. Username or email may already exist.';
+            $fullName = trim($_POST['full_name'] ?? '');
+            $email    = trim($_POST['email']     ?? '');
+
+            if (empty($fullName)) $errors[] = 'Full name is required';
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'A valid email address is required';
+            }
+
+            if (empty($errors)) {
+                // Check email not already registered
+                $existing = User::findByEmail($email);
+                if ($existing) {
+                    $errors[] = 'An account with this email already exists';
+                } else {
+                    // Generate secure invite token
+                    $token       = bin2hex(random_bytes(32));
+                    $hashedToken = password_hash($token, PASSWORD_DEFAULT);
+                    $expiresAt   = date('Y-m-d H:i:s', strtotime('+48 hours'));
+
+                    $db = \App\Config\Database::getInstance();
+                    $db->prepare("
+                        INSERT INTO user_invites (email, full_name, token, expires_at, created_by)
+                        VALUES (?, ?, ?, ?, ?)
+                    ")->execute([$email, $fullName, $hashedToken, $expiresAt, $_SESSION['user_id']]);
+
+                    $inviteLink = url('accept-invite?token=' . urlencode($token) . '&email=' . urlencode($email));
+
+                    $htmlBody = "
+                    <div style='font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:2rem;'>
+                        <div style='background:#1e3a8a;padding:1.5rem;border-radius:0.75rem 0.75rem 0 0;text-align:center;'>
+                            <h1 style='color:white;margin:0;font-size:1.4rem;'>Blueprint</h1>
+                            <p style='color:rgba(255,255,255,0.8);margin:0.25rem 0 0;font-size:0.85rem;'>Clinical Management System</p>
+                        </div>
+                        <div style='background:white;border:1px solid #e2e8f0;border-top:none;padding:2rem;border-radius:0 0 0.75rem 0.75rem;'>
+                            <h2 style='color:#1e293b;font-size:1.1rem;margin:0 0 1rem;'>You've been invited to Blueprint</h2>
+                            <p style='color:#475569;font-size:0.9rem;line-height:1.6;'>Hi {$fullName},</p>
+                            <p style='color:#475569;font-size:0.9rem;line-height:1.6;'>You have been invited to join <strong>Blueprint Clinical Management System</strong>. Click the button below to set up your account.</p>
+                            <div style='text-align:center;margin:1.5rem 0;'>
+                                <a href='{$inviteLink}' style='background:#1e3a8a;color:white;padding:0.75rem 2rem;border-radius:0.5rem;text-decoration:none;font-weight:600;font-size:0.9rem;display:inline-block;'>Accept Invitation</a>
+                            </div>
+                            <p style='color:#94a3b8;font-size:0.78rem;line-height:1.6;'>This invitation expires in <strong>48 hours</strong>. If you did not expect this invitation, you can safely ignore this email.</p>
+                            <hr style='border:none;border-top:1px solid #f1f5f9;margin:1.5rem 0;'>
+                            <p style='color:#94a3b8;font-size:0.72rem;text-align:center;margin:0;'>Blueprint Clinical System &nbsp;·&nbsp; blueprintcaretech.com</p>
+                        </div>
+                    </div>";
+
+                    $sent = \App\Config\Mail::send($email, $fullName, 'You\'ve been invited to Blueprint', $htmlBody);
+
+                    if ($sent) {
+                        \App\Models\ActivityLog::create([
+                            'action_type' => 'user_invited',
+                            'description' => ($_SESSION['full_name'] ?? 'Admin') . " sent an invitation to {$fullName} ({$email})",
+                            'patient_id'  => null,
+                            'ward'        => null
+                        ]);
+                        $success = "Invitation sent to {$email} successfully. The link expires in 48 hours.";
+                    } else {
+                        $errors[] = 'Failed to send invitation email. Please try again.';
+                    }
+                }
             }
         }
-        
-     } // end POST check
 
-        view('auth.register', ['errors' => $errors]);
+        view('auth.register', ['errors' => $errors, 'success' => $success]);
     }
 
+public function showAcceptInvite()
+    {
+        $token = $_GET['token'] ?? '';
+        $email = urldecode($_GET['email'] ?? '');
+
+        if (!$token || !$email) {
+            view('auth.accept-invite', ['expired' => true]);
+            return;
+        }
+
+        $db   = \App\Config\Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM user_invites WHERE email = ? AND used = 0 AND expires_at > NOW() LIMIT 1");
+        $stmt->execute([$email]);
+        $invite = $stmt->fetch(\PDO::FETCH_OBJ);
+
+        if (!$invite || !password_verify($token, $invite->token)) {
+            view('auth.accept-invite', ['expired' => true]);
+            return;
+        }
+
+        view('auth.accept-invite', [
+            'token'    => $token,
+            'email'    => $email,
+            'fullName' => $invite->full_name,
+            'expired'  => false,
+            'error'    => null
+        ]);
+    }
+
+    public function acceptInvite()
+    {
+        $token    = $_POST['token']            ?? '';
+        $email    = $_POST['email']            ?? '';
+        $username = trim($_POST['username']    ?? '');
+        $role     = trim($_POST['role']        ?? '');
+        $password = $_POST['password']         ?? '';
+        $confirm  = $_POST['confirm_password'] ?? '';
+
+        $errors = [];
+
+        if (empty($username)) $errors[] = 'Username is required';
+        if (empty($role))     $errors[] = 'Role is required';
+
+        if (empty($password) || strlen($password) < 8) {
+            $errors[] = 'Password must be at least 8 characters';
+        } elseif (!preg_match('/[0-9]/', $password)) {
+            $errors[] = 'Password must contain at least one number';
+        } elseif (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+            $errors[] = 'Password must contain at least one special character';
+        }
+
+        if ($password !== $confirm) $errors[] = 'Passwords do not match';
+
+        $db     = \App\Config\Database::getInstance();
+        $stmt   = $db->prepare("SELECT * FROM user_invites WHERE email = ? AND used = 0 AND expires_at > NOW() LIMIT 1");
+        $stmt->execute([$email]);
+        $invite = $stmt->fetch(\PDO::FETCH_OBJ);
+
+        if (!$invite || !password_verify($token, $invite->token)) {
+            view('auth.accept-invite', ['expired' => true]);
+            return;
+        }
+
+        if (!empty($errors)) {
+            view('auth.accept-invite', [
+                'token'    => $token,
+                'email'    => $email,
+                'fullName' => $invite->full_name,
+                'expired'  => false,
+                'error'    => implode(' ', $errors)
+            ]);
+            return;
+        }
+
+        // Check username not taken
+        $checkStmt = $db->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
+        $checkStmt->execute([$username]);
+        if ($checkStmt->fetch()) {
+            view('auth.accept-invite', [
+                'token'    => $token,
+                'email'    => $email,
+                'fullName' => $invite->full_name,
+                'expired'  => false,
+                'error'    => 'That username is already taken. Please choose another.'
+            ]);
+            return;
+        }
+
+        // Create the user
+        $db->prepare("
+            INSERT INTO users (username, email, password_hash, full_name, role, is_active)
+            VALUES (?, ?, ?, ?, ?, 1)
+        ")->execute([
+            $username,
+            $email,
+            password_hash($password, PASSWORD_DEFAULT),
+            $invite->full_name,
+            $role
+        ]);
+
+        // Mark invite as used
+        $db->prepare("UPDATE user_invites SET used = 1 WHERE id = ?")->execute([$invite->id]);
+
+        \App\Models\ActivityLog::create([
+            'action_type' => 'user_registered',
+            'description' => "{$invite->full_name} accepted their invitation and created an account",
+            'patient_id'  => null,
+            'ward'        => null
+        ]);
+
+        $_SESSION['success'] = 'Your account has been created successfully. Please log in.';
+        header('Location: ' . url('login?registered=1'));
+        exit;
+    }
+
+    
     // ========== PASSWORD RESET METHODS ==========
 
     public function showForgotForm()

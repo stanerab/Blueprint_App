@@ -4156,9 +4156,25 @@ else {
                 dateInput.value = new Date().toISOString().slice(0, 10);
             }
 
-        document.querySelector('input[name="core10_discharge"]').checked =
-        document.getElementById('viewPatientDischargeCore').textContent.includes('Completed');
-            
+      // Reset all form fields to clean state
+            const dischargeForm = document.getElementById('dischargeForm');
+            if (dischargeForm) dischargeForm.reset();
+
+            // Re-apply today's date after reset
+            if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+
+            // Pre-fill CORE-10 based on current patient's actual status from DB
+            fetch('<?= url('patients/get-summary') ?>?id=' + patientId)
+                .then(r => r.json())
+                .then(data => {
+                    const checkbox = document.querySelector('input[name="core10_discharge"]');
+                    if (checkbox) checkbox.checked = data.core10_discharge ? true : false;
+                })
+                .catch(() => {
+                    const checkbox = document.querySelector('input[name="core10_discharge"]');
+                    if (checkbox) checkbox.checked = false;
+                });
+
             document.getElementById('dischargeModal').style.display = 'flex';
             bringModalToFront('dischargeModal');
         }

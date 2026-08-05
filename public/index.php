@@ -61,7 +61,17 @@ spl_autoload_register(function ($class) {
 */
 require_once APP_PATH . DIRECTORY_SEPARATOR . 'Core' . DIRECTORY_SEPARATOR . 'Helpers.php';
 require_once APP_PATH . DIRECTORY_SEPARATOR . 'Core' . DIRECTORY_SEPARATOR . 'Router.php';
-require_once dirname(__DIR__) . '/blueprint-core/vendor/autoload.php';
+// Support both local (vendor in project root) and live (vendor in blueprint-core)
+$autoloadPaths = [
+    dirname(__DIR__) . '/vendor/autoload.php',
+    dirname(__DIR__) . '/blueprint-core/vendor/autoload.php',
+];
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require_once $autoloadPath;
+        break;
+    }
+}
 
 $router = new App\Core\Router();
 

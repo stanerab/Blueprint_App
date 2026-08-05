@@ -197,8 +197,9 @@
 
 <div class="login-container">
     <div class="login-box">
-
-     <div class="logo">
+        
+<div class="logo">
+            <img src="https://www.blueprintcaretech.com/assets/images/favicon.png" alt="Blueprint" style="width:52px;height:52px;border-radius:12px;box-shadow:0 4px 12px rgba(30,58,138,0.3);margin-bottom:0.75rem;">
             <h1>Blueprint</h1>
             <p class="tagline">Clinical Management System</p>
         </div>

@@ -3317,9 +3317,8 @@
         .detail-group { display: flex; flex-direction: column; gap: 0.25rem; }
         .detail-group label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
         .detail-group .detail-value { font-size: 0.9rem; color: #1e293b; background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; }
-        .detail-group .notes-content { white-space: pre-wrap; line-height: 1.5; max-height: 200px; overflow-y: auto; }
-        .component-badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 500; margin-right: 0.5rem; margin-bottom: 0.25rem; }
-        .component-badge.completed { background: #d1fae5; color: #065f46; }
+        #sessionDetailComponents { display: flex; flex-wrap: wrap; gap: 0.25rem; padding: 0.4rem 0.5rem; align-items: center; }        .detail-group .notes-content { white-space: pre-wrap; line-height: 1.5; max-height: 200px; overflow-y: auto; }
+        .component-badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 500; margin-right: 0.25rem; margin-bottom: 0.25rem; white-space: nowrap; }        .component-badge.completed { background: #d1fae5; color: #065f46; }
         .component-badge.pending { background: #fee2e2; color: #991b1b; }
         </style>
         <script>

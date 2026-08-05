@@ -151,7 +151,9 @@
 
 <div class="invite-container">
     <div class="invite-box">
+
        <div class="invite-logo">
+            <img src="https://www.blueprintcaretech.com/assets/images/favicon.png" alt="Blueprint" style="width:52px;height:52px;border-radius:12px;box-shadow:0 4px 12px rgba(30,58,138,0.3);margin-bottom:0.75rem;">
             <h1>Blueprint</h1>
             <p>Clinical Management System</p>
         </div>

@@ -61,7 +61,7 @@ spl_autoload_register(function ($class) {
 */
 require_once APP_PATH . DIRECTORY_SEPARATOR . 'Core' . DIRECTORY_SEPARATOR . 'Helpers.php';
 require_once APP_PATH . DIRECTORY_SEPARATOR . 'Core' . DIRECTORY_SEPARATOR . 'Router.php';
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once dirname(__DIR__) . '/blueprint-core/vendor/autoload.php';
 
 $router = new App\Core\Router();
 
@@ -173,7 +173,7 @@ $router->add('GET', '/patients/room-history', 'PatientController@roomHistoryJson
 
 
 // Password reset routes
-$router->add('GET', '/forgot-password', 'AuthController@showForgotForm');
+$router->add('GET', '/forgot-password', 'AuthController@showForgotPassword');
 $router->add('POST', '/forgot-password', 'AuthController@sendResetLink');
 $router->add('GET', '/reset-password', 'AuthController@showResetForm');
 $router->add('POST', '/reset-password', 'AuthController@updatePassword');

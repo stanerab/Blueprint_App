@@ -112,37 +112,58 @@ class AdminController
     }
 
     // ==================== DELETE USER ====================
-    public function deleteUser()
+  public function deleteUser()
     {
         header('Content-Type: application/json');
-        $userId = (int)($_POST['user_id'] ?? 0);
 
-        if (!$userId) { echo json_encode(['success' => false, 'error' => 'Invalid user']); exit; }
+        try {
+            $userId = (int)($_POST['user_id'] ?? 0);
 
-        if ($userId === (int)$_SESSION['user_id']) {
-            echo json_encode(['success' => false, 'error' => 'You cannot delete your own account']);
-            exit;
+            if (!$userId) {
+                echo json_encode(['success' => false, 'error' => 'Invalid user']);
+                exit;
+            }
+
+            if ($userId === (int)$_SESSION['user_id']) {
+                echo json_encode(['success' => false, 'error' => 'You cannot delete your own account']);
+                exit;
+            }
+
+            $userStmt = $this->db->prepare("SELECT full_name, username FROM users WHERE id = ?");
+            $userStmt->execute([$userId]);
+            $user = $userStmt->fetch(\PDO::FETCH_OBJ);
+
+            if (!$user) {
+                echo json_encode(['success' => false, 'error' => 'User not found']);
+                exit;
+            }
+
+            $name = $user->full_name ?? $user->username ?? 'Unknown';
+
+            // Nullify any RESTRICT foreign keys before deleting
+            $this->db->prepare("UPDATE patient_ward_history SET changed_by = NULL WHERE changed_by = ?")->execute([$userId]);
+            $this->db->prepare("UPDATE patient_room_history SET changed_by = NULL WHERE changed_by = ?")->execute([$userId]);
+
+            $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
+            $result = $stmt->execute([$userId]);
+
+            if ($result) {
+                ActivityLog::create([
+                    'action_type' => 'user_deleted',
+                    'description' => ($_SESSION['full_name'] ?? 'Admin') . " deleted account for {$name}",
+                    'patient_id'  => null,
+                    'ward'        => null
+                ]);
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Failed to delete account']);
+            }
+
+        } catch (\PDOException $e) {
+            error_log('deleteUser error: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => 'Could not delete account — the user may have related records. Please deactivate instead.']);
         }
 
-        $userStmt = $this->db->prepare("SELECT full_name, username FROM users WHERE id = ?");
-        $userStmt->execute([$userId]);
-        $user = $userStmt->fetch(\PDO::FETCH_OBJ);
-        $name = $user->full_name ?? $user->username ?? 'Unknown';
-
-        $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
-        $result = $stmt->execute([$userId]);
-
-        if ($result) {
-            ActivityLog::create([
-                'action_type' => 'user_deleted',
-                'description' => ($_SESSION['full_name'] ?? 'Admin') . " deleted account for {$name}",
-                'patient_id'  => null,
-                'ward'        => null
-            ]);
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to delete account']);
-        }
         exit;
     }
 

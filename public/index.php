@@ -185,7 +185,7 @@ $router->add('GET', '/patients/room-history', 'PatientController@roomHistoryJson
 // Password reset routes
 $router->add('GET', '/forgot-password', 'AuthController@showForgotPassword');
 $router->add('POST', '/forgot-password', 'AuthController@sendResetLink');
-$router->add('GET', '/reset-password', 'AuthController@showResetForm');
+$router->add('GET', '/reset-password', 'AuthController@showResetPassword');
 $router->add('POST', '/reset-password', 'AuthController@updatePassword');
 
 $router->add('GET', '/sessions/get-all-json', 'SessionController@getAllJson');

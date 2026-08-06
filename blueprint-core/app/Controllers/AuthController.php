@@ -338,10 +338,10 @@ namespace App\Controllers;
         }
 
         // ==================== FORGOT PASSWORD ====================
-        public function showForgotPassword()
-        {
-            view('auth.forgot_password');
-        }
+       public function showForgotPassword()
+    {
+        view('auth.forgot_password');
+    }
 
         public function sendResetLink()
         {
@@ -428,7 +428,7 @@ namespace App\Controllers;
                 return;
             }
 
-            view('auth.reset-password', ['token' => $token, 'email' => $email]);
+           view('auth.reset_password', ['token' => $token, 'email' => $email]);
         }
 
         public function updatePassword()

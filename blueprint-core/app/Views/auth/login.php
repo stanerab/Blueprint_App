@@ -221,7 +221,7 @@
             <p class="tagline">Clinical Management System</p>
         </div>
 
-        <h2>Welcome back!</h2>
+        <h2>Welcome back</h2>
 
         <?php if (isset($error)): ?>
             <div class="alert alert-error"><i class="bi bi-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?></div>

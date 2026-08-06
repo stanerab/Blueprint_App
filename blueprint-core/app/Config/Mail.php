@@ -19,7 +19,7 @@ class Mail
         ];
     }
 
-    public static function send(string $toEmail, string $toName, string $subject, string $htmlBody): bool
+   public static function send(string $toEmail, string $toName, string $subject, string $htmlBody): bool
     {
         $config = self::getConfig();
 
@@ -39,6 +39,13 @@ class Mail
             $mail->setFrom($config['from_email'], $config['from_name']);
             $mail->addAddress($toEmail, $toName);
 
+            // Embed Blueprint logo as CID attachment
+            // Works in Outlook, Gmail, Apple Mail and mobile clients
+            $logoPath = self::getLogoPath();
+            if ($logoPath && file_exists($logoPath)) {
+                $mail->addEmbeddedImage($logoPath, 'blueprint-logo', 'blueprint-logo.png', 'base64', 'image/png');
+            }
+
             $mail->isHTML(true);
             $mail->Subject = $subject;
             $mail->Body    = $htmlBody;
@@ -51,5 +58,27 @@ class Mail
             error_log('Blueprint Mailer error: ' . $mail->ErrorInfo);
             return false;
         }
+    }
+
+    private static function getLogoPath(): ?string
+    {
+        // Try multiple paths to support both local and live environments
+        $possiblePaths = [
+            // Live — Hostinger
+            '/home/u469750643/domains/blueprintcaretech.com/public_html/assets/images/favicon.png',
+            // Local — XAMPP
+            'C:/xampp_new/htdocs/Blueprint/public/assets/images/favicon.png',
+            // Relative from Mail.php (App/Config/) — go up to project root
+            dirname(__DIR__, 2) . '/public/assets/images/favicon.png',
+            dirname(__DIR__, 3) . '/public_html/assets/images/favicon.png',
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 }

@@ -528,8 +528,8 @@
                     <div class="activity-details">
                         <div class="activity-desc"><?= htmlspecialchars($activity->description) ?></div>
                         <div class="activity-meta-full">
-                            <span class="activity-user">
-                                <?= htmlspecialchars($activity->full_name ?? $activity->username ?? 'System') ?>
+                          <span class="activity-user">
+                                <?= htmlspecialchars($activity->full_name ?? $activity->username ?? $activity->user_name ?? 'System') ?>
                             </span>
                             
                         <?php if(isset($activity->ward) && $activity->ward): ?>

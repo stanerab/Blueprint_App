@@ -108,8 +108,7 @@ namespace App\Controllers;
     <table width='560' cellpadding='0' cellspacing='0' style='background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>
       <tr>
         <td style='background:#1e3a8a;padding:1.5rem 2rem;text-align:center;'>
-          <img src='https://www.blueprintcaretech.com/assets/images/favicon.png' alt='Blueprint' width='40' height='40' style='display:inline-block;vertical-align:middle;margin-right:0.5rem;border-radius:8px;'>
-          <span style='color:white;font-size:1.3rem;font-weight:700;vertical-align:middle;'>Blueprint</span>
+<img src='cid:blueprint-logo' alt='Blueprint' width='40' height='40' style='display:inline-block;vertical-align:middle;margin-right:0.5rem;border-radius:8px;'>          <span style='color:white;font-size:1.3rem;font-weight:700;vertical-align:middle;'>Blueprint</span>
           <p style='color:rgba(255,255,255,0.75);font-size:0.75rem;margin:0.25rem 0 0;letter-spacing:0.08em;text-transform:uppercase;'>Clinical Management System</p>
         </td>
       </tr>
@@ -297,8 +296,7 @@ namespace App\Controllers;
     <table width='560' cellpadding='0' cellspacing='0' style='background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>
       <tr>
         <td style='background:#1e3a8a;padding:1.5rem 2rem;text-align:center;'>
-          <img src='https://www.blueprintcaretech.com/assets/images/favicon.png' alt='Blueprint' width='40' height='40' style='display:inline-block;vertical-align:middle;margin-right:0.5rem;border-radius:8px;'>
-          <span style='color:white;font-size:1.3rem;font-weight:700;vertical-align:middle;'>Blueprint</span>
+<img src='cid:blueprint-logo' alt='Blueprint' width='40' height='40' style='display:inline-block;vertical-align:middle;margin-right:0.5rem;border-radius:8px;'>          <span style='color:white;font-size:1.3rem;font-weight:700;vertical-align:middle;'>Blueprint</span>
           <p style='color:rgba(255,255,255,0.75);font-size:0.75rem;margin:0.25rem 0 0;letter-spacing:0.08em;text-transform:uppercase;'>Clinical Management System</p>
         </td>
       </tr>
@@ -372,8 +370,7 @@ namespace App\Controllers;
       <!-- Header -->
       <tr>
         <td style='background:#1e3a8a;padding:1.5rem 2rem;text-align:center;'>
-          <img src='https://www.blueprintcaretech.com/assets/images/favicon.png' alt='Blueprint' width='40' height='40' style='display:inline-block;vertical-align:middle;margin-right:0.5rem;border-radius:8px;'>
-          <span style='color:white;font-size:1.3rem;font-weight:700;vertical-align:middle;'>Blueprint</span>
+<img src='cid:blueprint-logo' alt='Blueprint' width='40' height='40' style='display:inline-block;vertical-align:middle;margin-right:0.5rem;border-radius:8px;'>          <span style='color:white;font-size:1.3rem;font-weight:700;vertical-align:middle;'>Blueprint</span>
           <p style='color:rgba(255,255,255,0.75);font-size:0.75rem;margin:0.25rem 0 0;letter-spacing:0.08em;text-transform:uppercase;'>Clinical Management System</p>
         </td>
       </tr>

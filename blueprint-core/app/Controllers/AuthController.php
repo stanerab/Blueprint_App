@@ -130,7 +130,7 @@ namespace App\Controllers;
       </tr>
       <tr>
         <td style='background:#f8fafc;padding:1rem 2rem;text-align:center;border-top:1px solid #e2e8f0;'>
-          <p style='margin:0;color:#94a3b8;font-size:0.72rem;'>Blueprint Clinical System &nbsp;·&nbsp; blueprintcaretech.com</p>
+          <p style='margin:0;color:#94a3b8;font-size:0.72rem;'>Blueprint Clinical System &nbsp;&middot;&nbsp; blueprintcaretech.com</p>
         </td>
       </tr>
     </table>
@@ -320,7 +320,7 @@ namespace App\Controllers;
       </tr>
       <tr>
         <td style='background:#f8fafc;padding:1rem 2rem;text-align:center;border-top:1px solid #e2e8f0;'>
-          <p style='margin:0;color:#94a3b8;font-size:0.72rem;'>Blueprint Clinical System &nbsp;·&nbsp; blueprintcaretech.com</p>
+          <p style='margin:0;color:#94a3b8;font-size:0.72rem;'>Blueprint Clinical System &nbsp;&middot;&nbsp; blueprintcaretech.com</p>
         </td>
       </tr>
     </table>
@@ -394,7 +394,7 @@ namespace App\Controllers;
       <!-- Footer -->
       <tr>
         <td style='background:#f8fafc;padding:1rem 2rem;text-align:center;border-top:1px solid #e2e8f0;'>
-          <p style='margin:0;color:#94a3b8;font-size:0.72rem;'>Blueprint Clinical System &nbsp;·&nbsp; blueprintcaretech.com</p>
+          <p style='margin:0;color:#94a3b8;font-size:0.72rem;'>Blueprint Clinical System &nbsp;&middot;&nbsp; blueprintcaretech.com</p>
         </td>
       </tr>
     </table>

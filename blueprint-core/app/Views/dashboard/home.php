@@ -4345,16 +4345,13 @@ if (coreSpan) coreSpan.innerHTML = `<span class="badge ${completed ? 'badge-succ
             }
         }
 
-    function cancelCore10DischargeEdit() {
+  function cancelCore10DischargeEdit() {
             dischargeCore10EditMode = false;
-            // Restore discharge span from current badge state
             const coreSpan = document.getElementById('viewPatientDischargeCore');
             const isCompleted = coreSpan && coreSpan.querySelector('.badge-success');
             if (coreSpan) coreSpan.innerHTML = `<span class="badge ${isCompleted ? 'badge-success' : 'badge-warning'}">${isCompleted ? 'Completed' : 'Pending'}</span>`;
             const editBtn = document.getElementById('editDischargeCore10Btn');
             if (editBtn) editBtn.style.display = 'inline-block';
-            const admissionEditBtn = document.getElementById('editCore10Btn');
-            if (admissionEditBtn) admissionEditBtn.style.display = 'inline-block';
         }
 
         async function saveCore10Discharge() {

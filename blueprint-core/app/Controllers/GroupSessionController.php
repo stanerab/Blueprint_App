@@ -48,12 +48,11 @@ class GroupSessionController
 
             $db   = Database::getInstance();
            $stmt = $db->prepare(
-    'INSERT INTO group_sessions
-        (group_type, session_date, session_time, ward, notes, status, ward_snapshot, created_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  'INSERT INTO group_sessions
+        (group_type, session_date, session_time, ward, notes, status, ward_snapshot, created_by, clinician_name)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
 );
-            $stmt->execute([$groupType, $sessionDate, $sessionTime, $ward, $notes, $status, $wardSnapshot, $_SESSION['user_id'] ?? 0]);
-            $groupSessionId = $db->lastInsertId();
+$stmt->execute([$groupType, $sessionDate, $sessionTime, $ward, $notes, $status, $wardSnapshot, $_SESSION['user_id'] ?? 0, $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown']);            $groupSessionId = $db->lastInsertId();
 
             if (!empty($attendance)) {
                 $attStmt = $db->prepare(

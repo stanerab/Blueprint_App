@@ -68,7 +68,7 @@ class SessionController
         $tracker   = isset($_POST['tracker'])   ? (int)$_POST['tracker'] : 0;
         $tasks     = isset($_POST['tasks'])     ? (int)$_POST['tasks'] : 0;
 
-      $data = [
+     $data = [
     'patient_id'          => $patientId,
     'ward'                => $patient->ward,
     'room_number'         => $patient->room_number,
@@ -79,6 +79,7 @@ class SessionController
     'tasks_completed'     => $tasks,
     'notes'               => trim($_POST['notes'] ?? ''),
     'status'              => $_POST['status'] ?? 'offered',
+    'clinician_name' => $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Unknown',
 ];
 
         $sessionId = Session::create($data);
@@ -320,7 +321,7 @@ class SessionController
         $result = Session::delete($id);
 
         if ($result) {
-            // ✅ LOG: Session deleted (clean description - no ward, no datetime)
+            //  LOG: Session deleted (clean description - no ward, no datetime)
             ActivityLog::create([
                 'action_type' => 'session_deleted',
                 'description' => 'Deleted session for patient ' . $patientInitials,

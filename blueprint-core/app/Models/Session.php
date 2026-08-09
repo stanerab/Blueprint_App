@@ -72,11 +72,11 @@ return $stmt->execute([
     
     // Debug log
     error_log("Session::create - CareNotes: $carenotes, Tracker: $tracker, Tasks: $tasks");
-    
+   
     $stmt = $db->prepare("
     INSERT INTO sessions (ward, room_number, initials, datetime, carenotes_completed, 
-                         tracker_completed, notes, tasks_completed, created_by, patient_id, status) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         tracker_completed, notes, tasks_completed, created_by, patient_id, status, clinician_name) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
 $result = $stmt->execute([
@@ -91,6 +91,7 @@ $result = $stmt->execute([
     $_SESSION['user_id'],
     $data['patient_id'] ?? null,
     $data['status'] ?? 'offered',
+    $_SESSION['full_name'] ?? $_SESSION['username'] ?? null,
 ]);
     
     if ($result) {

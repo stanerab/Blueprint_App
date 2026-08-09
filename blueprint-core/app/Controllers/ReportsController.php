@@ -109,7 +109,7 @@ class ReportsController
                 p.initials                                              AS patient_name,
                 s.ward                                                  AS ward,
                 DATE_FORMAT(s.datetime, '%d/%m/%Y %H:%i')              AS session_date,
-                COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
+                COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(s.clinician_name, ''), 'Not recorded') AS clinician,
                 COALESCE(NULLIF(TRIM(s.status), ''), 'offered')        AS status
             FROM sessions s
             LEFT JOIN patients p ON p.id = s.patient_id
@@ -245,7 +245,7 @@ class ReportsController
                 p.initials                                                          AS patient_name,
                 p.ward                                                              AS ward,
                 CONCAT(DATE_FORMAT(gs.session_date,'%d/%m/%Y'), ' ', DATE_FORMAT(gs.session_time,'%H:%i')) AS session_date,
-                COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
+                COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(gs.clinician_name, ''), 'Not recorded') AS clinician,
                 gs.group_type,
                 CASE
                     WHEN gsa.attended = 1 THEN 'Attended'
@@ -317,7 +317,7 @@ class ReportsController
                     p.initials                                              AS patient_name,
                     s.ward                                                  AS ward,
                     DATE_FORMAT(s.datetime, '%d/%m/%Y %H:%i')              AS session_date,
-                    COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
+                    COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(s.clinician_name, ''), 'Not recorded') AS clinician,
                     COALESCE(NULLIF(TRIM(s.status), ''), 'offered')        AS status
                 FROM sessions s
                 LEFT JOIN patients p ON p.id = s.patient_id
@@ -362,7 +362,7 @@ class ReportsController
                     p.initials                                              AS patient_name,
                     p.ward                                                  AS ward,
                     CONCAT(DATE_FORMAT(gs.session_date,'%d/%m/%Y'), ' ', DATE_FORMAT(gs.session_time,'%H:%i')) AS session_date,
-                    COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS clinician,
+                    COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(gs.clinician_name, ''), 'Not recorded') AS clinician,
                     gs.group_type,
                     CASE
                         WHEN gsa.attended = 1 THEN 'Attended'

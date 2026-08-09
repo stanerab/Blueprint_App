@@ -905,7 +905,7 @@ async function openDrilldown(type, ward, status, start, end, groupType = 'all') 
         const statusText = statusKey === 'dna' ? 'DNA' : statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
 
         html += `<tr>
-            <td><strong>${escapeHtml(row.patient_name || '—')}</strong></td>
+           <td><strong>${escapeHtml(row.patient_name || '—')}</strong>${row.discharge_date && row.discharge_date !== '0000-00-00' ? ' <span style="color:#94a3b8;font-weight:400;font-size:0.8em;">(Discharged)</span>' : ''}</td>
             <td>${wardClass ? `<span class="ward-badge ward-${wardClass}">${escapeHtml(row.ward)}</span>` : '—'}</td>
             <td>${dateStr}</td>
             <td>${escapeHtml(row.clinician || '—')}</td>

@@ -107,6 +107,8 @@ class ReportsController
         $sql = "
             SELECT
                 p.initials                                              AS patient_name,
+                p.initials                                              AS patient_name,
+p.discharge_date                                        AS discharge_date,
                 s.ward                                                  AS ward,
                 DATE_FORMAT(s.datetime, '%d/%m/%Y %H:%i')              AS session_date,
                 COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(s.clinician_name, ''), 'Not recorded') AS clinician,
@@ -243,6 +245,8 @@ class ReportsController
         $sql = "
             SELECT
                 p.initials                                                          AS patient_name,
+                p.initials                                                          AS patient_name,
+p.discharge_date                                                    AS discharge_date,
                 p.ward                                                              AS ward,
                 CONCAT(DATE_FORMAT(gs.session_date,'%d/%m/%Y'), ' ', DATE_FORMAT(gs.session_time,'%H:%i')) AS session_date,
                 COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(gs.clinician_name, ''), 'Not recorded') AS clinician,
@@ -315,6 +319,8 @@ class ReportsController
             $sql = "
                 SELECT
                     p.initials                                              AS patient_name,
+                    p.initials                                              AS patient_name,
+p.discharge_date                                        AS discharge_date,
                     s.ward                                                  AS ward,
                     DATE_FORMAT(s.datetime, '%d/%m/%Y %H:%i')              AS session_date,
                     COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(s.clinician_name, ''), 'Not recorded') AS clinician,
@@ -360,6 +366,8 @@ class ReportsController
             $sql = "
                 SELECT
                     p.initials                                              AS patient_name,
+                    p.initials                                              AS patient_name,
+p.discharge_date                                        AS discharge_date,
                     p.ward                                                  AS ward,
                     CONCAT(DATE_FORMAT(gs.session_date,'%d/%m/%Y'), ' ', DATE_FORMAT(gs.session_time,'%H:%i')) AS session_date,
                     COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), NULLIF(gs.clinician_name, ''), 'Not recorded') AS clinician,
@@ -421,9 +429,13 @@ class ReportsController
 
         fputcsv($out, $headers);
 
-        foreach ($rows as $row) {
-            fputcsv($out, array_values($row));
-        }
+       foreach ($rows as $row) {
+    if (!empty($row['discharge_date']) && $row['discharge_date'] !== '0000-00-00') {
+        $row['patient_name'] .= ' (Discharged)';
+    }
+    unset($row['discharge_date']);
+    fputcsv($out, array_values($row));
+}
 
         fclose($out);
         exit;

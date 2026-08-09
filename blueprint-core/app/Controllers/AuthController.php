@@ -377,7 +377,7 @@ namespace App\Controllers;
       <!-- Body -->
       <tr>
         <td style='padding:2rem;color:#1e293b;font-size:0.9rem;line-height:1.7;'>
-          <p style='margin:0 0 1rem;'>Hi,</p>
+         <p style='margin:0 0 1rem;'>Hi <strong>{$user->full_name}</strong>,</p>
           <p style='margin:0 0 1rem;'>We received a request to reset your <strong>Blueprint</strong> password. Click the button below to set a new password.</p>
           <table width='100%' cellpadding='0' cellspacing='0'>
             <tr>

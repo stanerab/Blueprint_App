@@ -4277,7 +4277,15 @@ else {
                 if (editBtn) editBtn.style.display = 'none';
             }
         }
-        function cancelCore10Edit() { core10EditMode = false; const patientId = currentViewPatientId; if (patientId) loadPatientSummary(patientId); const editBtn = document.getElementById('editCore10Btn'); if (editBtn) editBtn.style.display = 'inline-block'; }
+function cancelCore10Edit() {
+    core10EditMode = false;
+    const coreSpan = document.getElementById('viewPatientAdmissionCore');
+    const isCompleted = coreSpan && coreSpan.querySelector('.badge-success');
+    if (coreSpan) coreSpan.innerHTML = `<span class="badge ${isCompleted ? 'badge-success' : 'badge-warning'}">${isCompleted ? 'Completed' : 'Pending'}</span>`;
+    const editBtn = document.getElementById('editCore10Btn');
+    if (editBtn) editBtn.style.display = 'inline-block';
+}
+
         async function saveCore10Admission() {
             const patientId = currentViewPatientId;
             if (!patientId) return;
@@ -4337,12 +4345,16 @@ if (coreSpan) coreSpan.innerHTML = `<span class="badge ${completed ? 'badge-succ
             }
         }
 
-        function cancelCore10DischargeEdit() {
+    function cancelCore10DischargeEdit() {
             dischargeCore10EditMode = false;
-            const patientId = currentViewPatientId;
-            if (patientId) loadPatientSummary(patientId);
+            // Restore discharge span from current badge state
+            const coreSpan = document.getElementById('viewPatientDischargeCore');
+            const isCompleted = coreSpan && coreSpan.querySelector('.badge-success');
+            if (coreSpan) coreSpan.innerHTML = `<span class="badge ${isCompleted ? 'badge-success' : 'badge-warning'}">${isCompleted ? 'Completed' : 'Pending'}</span>`;
             const editBtn = document.getElementById('editDischargeCore10Btn');
             if (editBtn) editBtn.style.display = 'inline-block';
+            const admissionEditBtn = document.getElementById('editCore10Btn');
+            if (admissionEditBtn) admissionEditBtn.style.display = 'inline-block';
         }
 
         async function saveCore10Discharge() {

@@ -4,6 +4,7 @@ Blueprint is a clinical Session management web application designed to support p
 
 Built in collaboration with a clinical psychologist at a private mental health hospital, Blueprint has evolved through multiple rounds of real stakeholder testing and feedback from a ward-based management dashboard (v1.0) to a session-focused clinical workflow tool (v1.4).
 
+Blueprint has undergo multiple QA testing with internal stakeholder reporting bugs and updates which has now been fixed.
 
 
 **Live Demo:** https://blueprintcaretech.com

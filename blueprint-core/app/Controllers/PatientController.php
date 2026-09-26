@@ -294,11 +294,11 @@ $result = $stmt->execute([$toWard, $roomNumber, $patientId]);
     }
 
     // Record transfer history
-    $stmt = $db->prepare("
-        INSERT INTO patient_ward_history (patient_id, from_ward, to_ward, changed_by, transfer_reason, transferred_at)
-        VALUES (?, ?, ?, ?, ?, NOW())
-    ");
-    $stmt->execute([$patientId, $fromWard, $toWard, $_SESSION['user_id'], $reason ?: null]);
+ $stmt = $db->prepare("
+    INSERT INTO patient_ward_history (patient_id, from_ward, to_ward, changed_by, changed_by_name, transfer_reason, transferred_at)
+    VALUES (?, ?, ?, ?, ?, ?, NOW())
+");
+$stmt->execute([$patientId, $fromWard, $toWard, $_SESSION['user_id'], $_SESSION['full_name'] ?? $_SESSION['username'] ?? null, $reason ?: null]);
 
     // Audit log
     ActivityLog::create([
@@ -324,7 +324,7 @@ public function roomHistoryJson()
                 prh.to_room,
                 prh.changed_at,
                 prh.reason,
-                COALESCE(u.full_name, u.username, 'Unknown') AS changed_by
+                COALESCE(NULLIF(prh.changed_by_name, ''), u.full_name, u.username, 'Unknown') AS changed_by
             FROM patient_room_history prh
             LEFT JOIN users u ON u.id = prh.changed_by
             WHERE prh.patient_id = ?
@@ -351,7 +351,7 @@ public function wardHistoryJson()
             pwh.to_ward,
             pwh.transfer_reason,
             pwh.transferred_at,
-            COALESCE(NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS changed_by
+           COALESCE(NULLIF(pwh.changed_by_name, ''), NULLIF(u.full_name, ''), NULLIF(u.username, ''), 'Unknown') AS changed_by
         FROM patient_ward_history pwh
         LEFT JOIN users u ON u.id = pwh.changed_by AND pwh.changed_by > 0
         WHERE pwh.patient_id = ?
@@ -562,16 +562,17 @@ $patient->ward .
 
        if ($result) {
             // Log to room history table
-           $db->prepare("
-                INSERT INTO patient_room_history (patient_id, from_room, to_room, changed_by, reason)
-                VALUES (?, ?, ?, ?, ?)
-            ")->execute([
-                $patientId,
-                $patient->room_number,
-                $newRoom,
-                $_SESSION['user_id'] ?? null,
-                $reason ?: null
-            ]);
+         $db->prepare("
+    INSERT INTO patient_room_history (patient_id, from_room, to_room, changed_by, changed_by_name, reason)
+    VALUES (?, ?, ?, ?, ?, ?)
+")->execute([
+    $patientId,
+    $patient->room_number,
+    $newRoom,
+    $_SESSION['user_id'] ?? null,
+    $_SESSION['full_name'] ?? $_SESSION['username'] ?? null,
+    $reason ?: null
+]);
 
             ActivityLog::create([
                 'action_type' => 'room_changed',

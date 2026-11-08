@@ -2665,13 +2665,13 @@
                         <div class="empty-sessions">
                             <i class="bi bi-calendar-x"></i>
                             <p>No sessions scheduled for today<br><span class="subtle-text">You're all caught up</span></p>
-                            <button onclick="openSessionModal(null, null)" class="btn-add-session">+ Add a session</button>
+                            <button onclick="openSessionModal(null, null)" class="btn-add-session">+ Add 1:1 session</button>
                         </div>
                     <?php endif; ?>
                     <div id="filteredEmpty" class="empty-sessions" style="display:none;">
                         <i class="bi bi-funnel"></i>
                         <p>No sessions match the current filters</p>
-                        <button onclick="openSessionModal(null, null)" class="btn-add-session">+ Add a session</button>
+                        <button onclick="openSessionModal(null, null)" class="btn-add-session">+ Add 1:1 session</button>
                     </div>
                 </div>
 
@@ -2926,7 +2926,7 @@
                 <h2>Patient: <span id="viewPatientName"></span></h2>
                 <button class="modal-close" onclick="closePatientDetailsModal()">✕</button>
                 <div style="display:flex; gap:0.5rem; margin-left:auto; align-items:center;">
-                <button class="btn-primary" onclick="openSessionModalFromProfile()">+ Add Session</button>
+                <button class="btn-primary" onclick="openSessionModalFromProfile()">+ Add 1:1 Session</button>
                 <button class="btn-secondary" onclick="openChangeRoomModal()">Transfer Room</button>
                 <button class="btn-secondary" id="changeWardBtn" onclick="openChangeWardModal()" style="display:none;">Transfer Ward</button>
                 <button class="btn-danger" onclick="openDischargeModal()">Discharge Patient</button>
@@ -3302,11 +3302,11 @@
     </div>
     <div id="calDayList" style="min-height:60px;"></div>
 
-        <div class="modal-actions" style="margin:0 0.5rem 0.5rem;padding-top:1rem;border-top:1px solid var(--clinical-border);display:flex;gap:0.75rem;flex-shrink:0;position:sticky;bottom:0;background:white;z-index:10;">
-        <button onclick="document.getElementById('calDayModal').style.display='none'" style="padding:0.5rem 1.2rem;font-size:0.9rem;border-radius:2rem;border:1px solid #e2e8f0;background:#f1f5f9;cursor:pointer;font-weight:500;">Close</button>
-        <button id="calDayAddBtn" style="padding:0.5rem 1.2rem;font-size:0.9rem;border-radius:2rem;border:none;background:var(--clinical-blue);color:white;cursor:pointer;font-weight:500;white-space:nowrap;">+ Add Session</button>
-        <button id="calDayAddGroupBtn" style="padding:0.5rem 1.2rem;font-size:0.9rem;border-radius:2rem;border:1px solid #e2e8f0;background:#f1f5f9;cursor:pointer;font-weight:500;white-space:nowrap;">+ Add Group Session</button>
-    </div>
+       <div class="modal-actions" style="margin:0 0.5rem 0.5rem;padding-top:1rem;border-top:1px solid var(--clinical-border);display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem;flex-shrink:0;position:sticky;bottom:0;background:white;z-index:10;box-sizing:border-box;">
+    <button onclick="document.getElementById('calDayModal').style.display='none'" style="padding:0.5rem 0.9rem;font-size:0.85rem;border-radius:2rem;border:1px solid #e2e8f0;background:#f1f5f9;cursor:pointer;font-weight:500;white-space:nowrap;">Close</button>
+    <button id="calDayAddBtn" style="padding:0.5rem 0.9rem;font-size:0.85rem;border-radius:2rem;border:none;background:var(--clinical-blue);color:white;cursor:pointer;font-weight:500;white-space:nowrap;">+ Add 1:1 Session</button>
+    <button id="calDayAddGroupBtn" style="padding:0.5rem 0.9rem;font-size:0.85rem;border-radius:2rem;border:1px solid #e2e8f0;background:#f1f5f9;cursor:pointer;font-weight:500;white-space:nowrap;">+ Add Group Session</button>
+</div>
         </div>
     </div>
 

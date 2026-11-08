@@ -3912,8 +3912,9 @@ else {
                                 current_room: session.patient_room || session.room_number || '?',
                                 carenotes_completed: session.carenotes_completed,
                                 tracker_completed: session.tracker_completed,
-                                tasks_completed: session.tasks_completed,
-                                notes: session.notes || ''
+                                                                tasks_completed: session.tasks_completed,
+                                notes: session.notes || '',
+                                status: session.status || 'offered'
                             };
                             currentSingleSession = sessionData;
                             displaySingleSession(sessionData, patientName);
